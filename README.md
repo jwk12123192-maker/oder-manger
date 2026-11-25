@@ -5,7 +5,7 @@
 ## 사용 방법
 
 1. 아래 주소를 브라우저에서 엽니다.
-   - https://jwk12123192-maker.github.io/order-manager/
+   - https://jwk12123192-maker.github.io/oder-manger/
 2. 안드로이드 크롬: 우측 상단 메뉴(⋮) → **홈 화면에 추가** 를 누르면 앱 아이콘처럼 사용할 수 있습니다.
 3. 아이폰 사파리: 공유 버튼 → **홈 화면에 추가**.
 
