@@ -5,6 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#2563eb">
 <title>발주서 관리</title>
+<script>
+  /* 이미 잠금이 풀린 탭이면 첫 화면이 그려지기 전에 잠금 화면을 감춰 깜빡임을 막습니다. */
+  try {
+    if (sessionStorage.getItem('orderManager.unlock.v1') === '1') {
+      document.documentElement.className += ' is-unlocked';
+    }
+  } catch (e) {}
+</script>
 <style>
   :root{
     --bg:#f4f6fb;
@@ -515,9 +523,98 @@
     .btn{padding:0 12px;font-size:14px}
     .brand p{display:none}
   }
+
+  /* ---------- PIN 잠금 ---------- */
+  html:not(.is-unlocked) body{overflow:hidden}
+  /* 잠금 중에는 뒤쪽 앱 화면을 아예 그리지 않습니다(포커스·스크린리더 차단) */
+  html:not(.is-unlocked) body > *:not(.lock-screen){visibility:hidden}
+  html.is-unlocked .lock-screen{display:none !important}
+  .lock-screen{
+    position:fixed;inset:0;z-index:9999;
+    display:flex;align-items:center;justify-content:center;padding:24px;
+    background:
+      radial-gradient(1100px 560px at 50% -12%, #1e3a8a 0%, rgba(30,58,138,0) 62%),
+      linear-gradient(160deg,#0f172a 0%,#1e293b 48%,#0b1220 100%);
+    -webkit-user-select:none;user-select:none;
+  }
+  .lock-card{
+    width:100%;max-width:352px;text-align:center;color:#e2e8f0;
+    background:rgba(255,255,255,.05);
+    border:1px solid rgba(148,163,184,.18);
+    border-radius:22px;padding:26px 20px 20px;
+    box-shadow:0 30px 70px rgba(2,6,23,.55);
+  }
+  .lock-logo{
+    width:52px;height:52px;margin:0 auto 14px;border-radius:16px;
+    display:grid;place-items:center;font-size:23px;
+    background:linear-gradient(135deg,#2563eb,#0ea5e9);
+    box-shadow:0 10px 24px rgba(37,99,235,.35);
+  }
+  .lock-card h2{margin:0;font-size:19px;letter-spacing:-.02em;color:#f8fafc}
+  .lock-sub{margin:6px 0 18px;font-size:13px;color:#94a3b8}
+  .lock-dots{display:flex;justify-content:center;gap:14px;margin:0 0 4px;height:16px}
+  .lock-dots span{
+    width:14px;height:14px;border-radius:50%;
+    border:1.5px solid rgba(148,163,184,.55);background:transparent;
+    transition:background .12s,border-color .12s,transform .12s;
+  }
+  .lock-dots span.on{background:#60a5fa;border-color:#60a5fa;transform:scale(1.06)}
+  .lock-msg{min-height:18px;margin:10px 0 12px;font-size:12.5px;line-height:1.4;color:#fca5a5;font-weight:600}
+  .lock-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;outline:none}
+  .lock-pad button{
+    height:56px;border-radius:14px;cursor:pointer;
+    border:1px solid rgba(148,163,184,.22);
+    background:rgba(255,255,255,.06);color:#f1f5f9;
+    font-size:21px;font-weight:600;font-variant-numeric:tabular-nums;
+    transition:background .12s,transform .06s;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .lock-pad button:hover{background:rgba(255,255,255,.12)}
+  .lock-pad button:active{transform:scale(.97);background:rgba(96,165,250,.28)}
+  .lock-pad button.del{font-size:17px;color:#cbd5e1}
+  .lock-pad .pad-empty{visibility:hidden;pointer-events:none}
+  .lock-card.shake{animation:lockShake .34s cubic-bezier(.36,.07,.19,.97)}
+  @keyframes lockShake{
+    10%,90%{transform:translateX(-2px)}
+    20%,80%{transform:translateX(4px)}
+    30%,50%,70%{transform:translateX(-6px)}
+    40%,60%{transform:translateX(6px)}
+  }
+  @media (max-width:380px){
+    .lock-card{padding:22px 14px 16px}
+    .lock-pad button{height:50px;font-size:19px}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .lock-card.shake{animation:none}
+  }
 </style>
 </head>
 <body>
+
+<!-- 4자리 PIN 잠금. 잠금이 풀리기 전에는 아래 앱 화면과 저장된 발주서 데이터를 그리지 않습니다. -->
+<div class="lock-screen" id="lockScreen" role="dialog" aria-modal="true" aria-labelledby="lockTitle">
+  <div class="lock-card" id="lockCard">
+    <div class="lock-logo" aria-hidden="true">🔒</div>
+    <h2 id="lockTitle">발주서 관리</h2>
+    <p class="lock-sub">4자리 비밀번호를 입력해 주세요.</p>
+    <div class="lock-dots" id="lockDots" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+    <p class="lock-msg" id="lockMsg" role="alert" aria-live="polite"></p>
+    <div class="lock-pad" id="lockPad" tabindex="-1">
+      <button type="button" data-key="1">1</button>
+      <button type="button" data-key="2">2</button>
+      <button type="button" data-key="3">3</button>
+      <button type="button" data-key="4">4</button>
+      <button type="button" data-key="5">5</button>
+      <button type="button" data-key="6">6</button>
+      <button type="button" data-key="7">7</button>
+      <button type="button" data-key="8">8</button>
+      <button type="button" data-key="9">9</button>
+      <button type="button" class="del" data-key="del" aria-label="한 자리 지우기">⌫</button>
+      <button type="button" data-key="0">0</button>
+      <span class="pad-empty" aria-hidden="true"></span>
+    </div>
+  </div>
+</div>
 
 <header class="app-header">
   <div class="wrap header-inner">
@@ -532,6 +629,7 @@
       <button type="button" class="btn btn-ghost" id="btnScan">📷 사진 스캔</button>
       <button type="button" class="btn btn-primary" id="btnNew">＋ 새 발주</button>
       <button type="button" class="btn-icon" id="btnSettings" aria-label="설정" title="설정">⚙️</button>
+      <button type="button" class="btn-icon" id="btnLock" aria-label="화면 잠그기" title="화면 잠그기">🔒</button>
     </div>
   </div>
   <div class="wrap">
@@ -3326,6 +3424,230 @@ function parseOrderText(raw) {
   return res;
 }
 
+/* =========================================================================
+   PIN 잠금 (4자리)
+   - 비밀번호 원문은 코드에 두지 않고, 솔트를 붙인 SHA-256 해시로만 대조합니다.
+   - 해제 상태는 sessionStorage에만 기록되어, 같은 탭에서 새로고침해도 유지되고
+     탭을 닫거나 헤더의 🔒 버튼을 누르면 다시 잠깁니다.
+   ========================================================================= */
+const LOCK_SESSION_KEY = 'orderManager.unlock.v1';
+const LOCK_SALT = 'orderManager.pin.v1|';
+const LOCK_DIGEST = '612b1bdaca73fb5def970489e6d90d00d7817fbb83d7155d3df548bda7cd1b5b';
+const LOCK_LENGTH = 4;
+
+let lockEntry = '';
+let lockFails = 0;
+let lockBusy = false;
+let lockCoolUntil = 0;
+let appStarted = false;
+
+/* crypto.subtle을 쓸 수 없을 때(구형·비보안 컨텍스트) 쓰는 순수 JS SHA-256 */
+function sha256Fallback(ascii) {
+  function rr(v, a) { return (v >>> a) | (v << (32 - a)); }
+  var maxWord = Math.pow(2, 32), result = '', words = [];
+  var asciiBitLength = ascii.length * 8;
+  var hash = sha256Fallback.h = sha256Fallback.h || [];
+  var k = sha256Fallback.k = sha256Fallback.k || [];
+  var primeCounter = k.length;
+  var isComposite = {};
+  for (var candidate = 2; primeCounter < 64; candidate++) {
+    if (!isComposite[candidate]) {
+      for (var i = 0; i < 313; i += candidate) isComposite[i] = candidate;
+      hash[primeCounter] = (Math.pow(candidate, 0.5) * maxWord) | 0;
+      k[primeCounter++] = (Math.pow(candidate, 1 / 3) * maxWord) | 0;
+    }
+  }
+  ascii += '\x80';
+  while (ascii.length % 64 - 56) ascii += '\x00';
+  for (i = 0; i < ascii.length; i++) {
+    var code = ascii.charCodeAt(i);
+    if (code >> 8) return '';
+    words[i >> 2] |= code << (((3 - i) % 4) * 8);
+  }
+  words[words.length] = (asciiBitLength / maxWord) | 0;
+  words[words.length] = asciiBitLength;
+  for (var j = 0; j < words.length;) {
+    var w = words.slice(j, j += 16);
+    var oldHash = hash;
+    hash = hash.slice(0, 8);
+    for (i = 0; i < 64; i++) {
+      var w15 = w[i - 15], w2 = w[i - 2];
+      var a = hash[0], e = hash[4];
+      var temp1 = hash[7]
+        + (rr(e, 6) ^ rr(e, 11) ^ rr(e, 25))
+        + ((e & hash[5]) ^ ((~e) & hash[6]))
+        + k[i]
+        + (w[i] = i < 16 ? w[i] : (
+            w[i - 16]
+            + (rr(w15, 7) ^ rr(w15, 18) ^ (w15 >>> 3))
+            + w[i - 7]
+            + (rr(w2, 17) ^ rr(w2, 19) ^ (w2 >>> 10))
+          ) | 0);
+      var temp2 = (rr(a, 2) ^ rr(a, 13) ^ rr(a, 22))
+        + ((a & hash[1]) ^ (a & hash[2]) ^ (hash[1] & hash[2]));
+      hash = [(temp1 + temp2) | 0].concat(hash);
+      hash[4] = (hash[4] + temp1) | 0;
+    }
+    for (i = 0; i < 8; i++) hash[i] = (hash[i] + oldHash[i]) | 0;
+  }
+  for (i = 0; i < 8; i++) {
+    for (j = 3; j + 1; j--) {
+      var b = (hash[i] >> (j * 8)) & 255;
+      result += (b < 16 ? '0' : '') + b.toString(16);
+    }
+  }
+  return result;
+}
+
+async function sha256Hex(text) {
+  try {
+    if (window.crypto && window.crypto.subtle && window.crypto.subtle.digest) {
+      const bytes = new TextEncoder().encode(text);
+      const buf = await window.crypto.subtle.digest('SHA-256', bytes);
+      return Array.prototype.map.call(new Uint8Array(buf), function (b) {
+        return ('0' + b.toString(16)).slice(-2);
+      }).join('');
+    }
+  } catch (e) { /* 아래 폴백으로 */ }
+  return sha256Fallback(text);
+}
+
+async function lockCheck(pin) {
+  const hex = await sha256Hex(LOCK_SALT + pin);
+  return !!hex && hex === LOCK_DIGEST;
+}
+
+function lockDots() {
+  const dots = document.querySelectorAll('#lockDots span');
+  for (let i = 0; i < dots.length; i++) dots[i].classList.toggle('on', i < lockEntry.length);
+}
+
+function lockSay(msg) {
+  const el = $('lockMsg');
+  if (el) el.textContent = msg || '';
+}
+
+function lockShow(msg) {
+  lockEntry = '';
+  lockDots();
+  lockSay(msg || '');
+  document.documentElement.classList.remove('is-unlocked');
+  const el = $('lockScreen');
+  if (el) el.hidden = false;
+  setTimeout(function () { const p = $('lockPad'); if (p) p.focus(); }, 30);
+}
+
+function lockHide() {
+  const el = $('lockScreen');
+  if (el) el.hidden = true;
+  document.documentElement.classList.add('is-unlocked');
+  if (!document.querySelector('.modal-backdrop:not([hidden])')) document.body.style.overflow = '';
+}
+
+/* 앱 본체는 잠금이 풀린 뒤에 단 한 번 초기화합니다(잠금 전 데이터 렌더링 금지) */
+function startApp() {
+  if (appStarted) return;
+  appStarted = true;
+  init();
+}
+
+async function lockSubmit() {
+  if (lockBusy || lockEntry.length !== LOCK_LENGTH) return;
+  lockBusy = true;
+  let ok = false;
+  try { ok = await lockCheck(lockEntry); } catch (e) { ok = false; }
+  lockBusy = false;
+
+  if (ok) {
+    try { sessionStorage.setItem(LOCK_SESSION_KEY, '1'); } catch (e) {}
+    lockEntry = '';
+    lockDots();
+    lockSay('');
+    lockFails = 0;
+    lockHide();
+    startApp();
+    return;
+  }
+
+  lockFails++;
+  lockEntry = '';
+  lockDots();
+  const card = $('lockCard');
+  if (card) {
+    card.classList.remove('shake');
+    void card.offsetWidth;
+    card.classList.add('shake');
+  }
+  if (lockFails >= 5) {
+    lockCoolUntil = Date.now() + 2000;
+    lockSay('5번 틀렸습니다. 잠시 후 다시 시도해 주세요.');
+    setTimeout(function () { lockFails = 0; }, 2000);
+  } else {
+    lockSay('비밀번호가 맞지 않습니다. 다시 입력해 주세요.');
+  }
+}
+
+function lockPress(key) {
+  const screen = $('lockScreen');
+  if (!screen || screen.hidden || lockBusy) return;
+  if (Date.now() < lockCoolUntil) return;
+  if (key === 'del') {
+    lockEntry = lockEntry.slice(0, -1);
+    lockDots();
+    return;
+  }
+  if (!/^[0-9]$/.test(key) || lockEntry.length >= LOCK_LENGTH) return;
+  lockEntry += key;
+  lockDots();
+  if (lockEntry.length === LOCK_LENGTH) lockSubmit();
+}
+
+/* 헤더 🔒 버튼: 즉시 다시 잠그기 */
+function lockNow() {
+  Array.prototype.slice.call(document.querySelectorAll('.modal-backdrop:not([hidden])'))
+    .forEach(function (m) { closeModal(m); });
+  try { sessionStorage.removeItem(LOCK_SESSION_KEY); } catch (e) {}
+  lockFails = 0;
+  lockShow('');
+}
+
+function lockBind() {
+  const pad = $('lockPad');
+  if (pad) {
+    pad.addEventListener('click', function (e) {
+      const btn = e.target.closest('button[data-key]');
+      if (!btn) return;
+      lockPress(btn.getAttribute('data-key'));
+    });
+  }
+  document.addEventListener('keydown', function (e) {
+    const screen = $('lockScreen');
+    if (!screen || screen.hidden) return;
+    if (e.key >= '0' && e.key <= '9' && e.key.length === 1) {
+      lockPress(e.key);
+      e.preventDefault();
+    } else if (e.key === 'Backspace') {
+      lockPress('del');
+      e.preventDefault();
+    } else if (e.key === 'Enter') {
+      lockSubmit();
+      e.preventDefault();
+    }
+  });
+}
+
+function lockBoot() {
+  lockBind();
+  let unlocked = false;
+  try { unlocked = sessionStorage.getItem(LOCK_SESSION_KEY) === '1'; } catch (e) { unlocked = false; }
+  if (unlocked) {
+    lockHide();
+    startApp();
+  } else {
+    lockShow('');
+  }
+}
+
 /* =========================================================
    초기화 / 이벤트
    ========================================================= */
@@ -3357,6 +3679,7 @@ function init() {
     openModal('scanModal');
   });
   $('btnSettings').addEventListener('click', openSettings);
+  $('btnLock').addEventListener('click', lockNow);
   $('btnOpenSettingsFromScan').addEventListener('click', openSettings);
   $('syncPill').addEventListener('click', openSettings);
   $('btnSyncRefresh').addEventListener('click', () => syncFromServer({ manual: true }));
@@ -3616,7 +3939,7 @@ async function resetAll() {
   pushAll(true);
 }
 
-init();
+lockBoot();
 </script>
 </body>
 </html>
