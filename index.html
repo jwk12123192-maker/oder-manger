@@ -8,7 +8,7 @@
 <script>
   /* 이미 잠금이 풀린 탭이면 첫 화면이 그려지기 전에 잠금 화면을 감춰 깜빡임을 막습니다. */
   try {
-    if (sessionStorage.getItem('orderManager.unlock.v1') === '1') {
+    if (sessionStorage.getItem('orderManager.unlock.v2') === '1') {
       document.documentElement.className += ' is-unlocked';
     }
   } catch (e) {}
@@ -3430,9 +3430,9 @@ function parseOrderText(raw) {
    - 해제 상태는 sessionStorage에만 기록되어, 같은 탭에서 새로고침해도 유지되고
      탭을 닫거나 헤더의 🔒 버튼을 누르면 다시 잠깁니다.
    ========================================================================= */
-const LOCK_SESSION_KEY = 'orderManager.unlock.v1';
+const LOCK_SESSION_KEY = 'orderManager.unlock.v2';
 const LOCK_SALT = 'orderManager.pin.v1|';
-const LOCK_DIGEST = '612b1bdaca73fb5def970489e6d90d00d7817fbb83d7155d3df548bda7cd1b5b';
+const LOCK_DIGEST = '4c98e83bfb84e4d102a20dfbfd31ebca24512cc5ba3d555359ae63a69f7d1cda';
 const LOCK_LENGTH = 4;
 
 let lockEntry = '';
