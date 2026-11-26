@@ -699,15 +699,15 @@
     .lock-card.shake{animation:none}
   }
 
-  /* ---------- 인쇄: 견적서만 A4 한 장으로 ---------- */
+  /* ---------- 인쇄: 견적서 탭에서는 견적서만 A4 한 장으로 ---------- */
   #printArea{display:none}
   @media print{
     @page{size:A4 portrait;margin:0}
-    html,body{margin:0!important;padding:0!important;background:#fff!important}
-    body > *{display:none!important}
-    #printArea{display:block!important;margin:0;padding:0;page-break-inside:avoid;break-inside:avoid}
-    #printArea .q-sheet{box-shadow:none;page-break-after:avoid;break-after:avoid}
-    #printArea .q-sheet *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    html.print-quote,html.print-quote body{margin:0!important;padding:0!important;background:#fff!important}
+    html.print-quote body > *{display:none!important}
+    html.print-quote #printArea{display:block!important;margin:0;padding:0;page-break-inside:avoid;break-inside:avoid}
+    html.print-quote #printArea .q-sheet{box-shadow:none;page-break-after:avoid;break-after:avoid}
+    html.print-quote #printArea .q-sheet *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   }
 </style>
 </head>
@@ -4503,6 +4503,7 @@ function setTab(tab) {
   $('appTitle').textContent = isQuote ? '견적서 작성' : '발주서 관리';
   $('appLogo').textContent = isQuote ? '📄' : '📦';
   document.title = isQuote ? '견적서 작성 · 한열사' : '발주서 관리 · 한열사';
+  document.documentElement.classList.toggle('print-quote', isQuote);
   if (isQuote) refreshQuoteCompanies();
   requestAnimationFrame(function () {
     if (isQuote) { fitPaper(); fitPaymentLine(); }
