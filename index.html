@@ -686,7 +686,7 @@
     line-height:1.1;overflow:hidden;white-space:nowrap;
   }
   .po-sheet .po-table td.po-left{text-align:left}
-  .po-sheet .po-table td.po-num{text-align:right;padding-right:5pt}
+  .po-sheet .po-table td.po-num{text-align:center}
 
   #poPrintArea{display:none}
   @media print{
@@ -5889,7 +5889,7 @@ function poSheetHTML(po) {
   h += '<table class="po-table">';
   h += '<colgroup>' + PO_COLS.map(function (w) { return '<col style="width:' + w + 'pt">'; }).join('') + '</colgroup>';
   h += '<thead><tr style="height:18.8pt">';
-  ['No', '품 명   및  사 양', '규격', '수량', '단가', '비고'].forEach(function (l) { h += '<th>' + l + '</th>'; });
+  ['No', '품 명&nbsp;&nbsp;&nbsp;및&nbsp;&nbsp;사&nbsp;양', '규격', '수량', '단가', '비고'].forEach(function (l) { h += '<th>' + l + '</th>'; });
   h += '</tr></thead><tbody>';
   for (let i = 0; i < rowCount; i++) {
     const it = items[i];
