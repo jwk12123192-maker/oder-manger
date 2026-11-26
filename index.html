@@ -408,6 +408,12 @@
   .btn:disabled{opacity:.5;cursor:not-allowed}
   .btn:disabled:active{transform:none}
 
+  /* ---------- 카톡/문자 붙여넣기 ---------- */
+  .chat-samples{display:flex;flex-direction:column;gap:6px;margin-top:12px}
+  .chat-samples-label{font-size:11.5px;font-weight:700;color:var(--muted)}
+  .chat-samples .btn{justify-content:flex-start;text-align:left;white-space:normal;word-break:break-all;line-height:1.35;height:auto;padding:8px 12px;font-weight:500;color:#475569}
+  #chatText{min-height:170px;font-size:14.5px;line-height:1.55}
+
   /* ---------- scan ---------- */
   .scan-modes{display:flex;gap:6px;background:#eef2f7;padding:4px;border-radius:11px;margin-bottom:14px}
   .mode-tab{
@@ -750,6 +756,7 @@
     </div>
     <div class="header-actions">
       <button type="button" class="btn btn-ghost" id="btnScan">📷 사진 스캔</button>
+      <button type="button" class="btn btn-ghost" id="btnChat">💬 카톡/문자</button>
       <button type="button" class="btn btn-primary" id="btnNew">＋ 새 발주</button>
       <button type="button" class="btn-icon" id="btnSettings" aria-label="설정" title="설정">⚙️</button>
       <button type="button" class="btn-icon" id="btnLock" aria-label="화면 잠그기" title="화면 잠그기">🔒</button>
@@ -1038,6 +1045,42 @@
   </div>
 </div>
 
+<!-- ============ 카톡/문자 붙여넣기 ============ -->
+<div class="modal-backdrop" id="chatModal" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="chatTitle">
+    <div class="modal-head">
+      <h2 id="chatTitle">카톡/문자 붙여넣기</h2>
+      <button type="button" class="btn-icon js-close" aria-label="닫기">✕</button>
+    </div>
+
+    <p class="tiny muted" style="margin:0 0 10px">고객이 보낸 카톡·문자를 그대로 붙여넣으면 업체명·품명·모델명·규격·수량·납기를 나눠서 정리합니다. 여러 품목이 쉼표나 줄바꿈으로 이어져 있어도 한 번에 뽑아냅니다.</p>
+
+    <div class="field">
+      <label for="chatText">붙여넣을 내용</label>
+      <textarea id="chatText" rows="9" spellcheck="false" placeholder="예) (주)금호엔바이로 감압밸브 D06F 20A 20개, 25A 10개 납기 11/27"></textarea>
+    </div>
+
+    <div class="chat-samples">
+      <span class="chat-samples-label">예시</span>
+      <button type="button" class="btn btn-sm btn-ghost js-chat-sample" data-sample="노규훈 / 21H7KV120 4개 32000">노규훈 / 21H7KV120 4개 32000</button>
+      <button type="button" class="btn btn-sm btn-ghost js-chat-sample" data-sample="(주)금호엔바이로 감압밸브 D06F 20A 20개, 25A 10개 납기 11/27">(주)금호엔바이로 감압밸브 20A 20개, 25A 10개</button>
+      <button type="button" class="btn btn-sm btn-ghost js-chat-sample" data-sample="327900  5개주문합니다">327900  5개주문합니다</button>
+      <button type="button" class="btn btn-sm btn-ghost js-chat-sample" data-sample="한신기계공업  ha322 300개">한신기계공업  ha322 300개</button>
+      <button type="button" class="btn btn-sm btn-ghost js-chat-sample" data-sample="do5f 15a  4개">do5f 15a  4개</button>
+    </div>
+
+    <p class="scan-error" id="chatError" hidden></p>
+    <p class="tiny muted" style="margin:14px 0 0">붙여넣은 글은 기기 안에서만 처리되고 어디로도 보내지 않습니다.</p>
+
+    <div class="modal-actions">
+      <button type="button" class="btn btn-ghost" id="btnChatClear">지우기</button>
+      <span class="spacer"></span>
+      <button type="button" class="btn btn-ghost js-close">취소</button>
+      <button type="button" class="btn btn-primary" id="btnChatAnalyze">자동 분석</button>
+    </div>
+  </div>
+</div>
+
 <!-- ============ 사진 스캔 ============ -->
 <div class="modal-backdrop" id="scanModal" hidden>
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="scanTitle">
@@ -1140,6 +1183,7 @@
     <div class="modal-actions">
       <button type="button" class="btn btn-ghost js-close">취소</button>
       <span class="spacer"></span>
+      <button type="button" class="btn btn-ghost" id="btnBulkQuote">📄 견적서로 보내기</button>
       <button type="button" class="btn btn-primary" id="btnBulkSave">선택한 0건 모두 등록</button>
     </div>
   </div>
@@ -2707,8 +2751,11 @@ async function runScan(file) {
 /* =========================================================
    스캔 결과 — 다중 품목 일괄 등록
    ========================================================= */
-function openScanResult(parsed, rawText, rawLabel) {
+function openScanResult(parsed, rawText, rawLabel, src) {
   const p = parsed || {};
+  const fromChat = !!(src && src.from === 'chat');
+  const where = fromChat ? '붙여넣은 글' : '사진';
+  $('scanResultTitle').textContent = fromChat ? '붙여넣기 분석 결과' : '스캔 결과 확인';
   let items = Array.isArray(p.items) ? p.items.filter((x) => x && (x.item || x.quantity)) : [];
   const found = items.length;
   if (!items.length) items = [{ item: '', quantity: '', source: '' }];
@@ -2726,13 +2773,13 @@ function openScanResult(parsed, rawText, rawLabel) {
   const notice = $('scanResultNotice');
   if (found) {
     notice.className = 'notice';
-    notice.innerHTML = '사진에서 품목 <strong>' + found + '개</strong>를 찾았습니다. 내용을 확인하고, 등록할 항목만 체크한 뒤 한 번에 저장하세요.';
+    notice.innerHTML = where + '에서 품목 <strong>' + found + '개</strong>를 찾았습니다. 내용을 확인하고, 등록할 항목만 체크한 뒤 한 번에 저장하세요.';
   } else if (p.company || p.orderDate) {
     notice.className = 'notice notice-warn';
     notice.innerHTML = '품목 줄을 자동으로 찾지 못했습니다(업체명·날짜는 채워 두었습니다). 원문을 보며 품명을 직접 입력해 주세요.';
   } else {
     notice.className = 'notice notice-warn';
-    notice.innerHTML = '사진에서 내용을 거의 찾지 못했습니다. 원문을 참고해 직접 입력해 주세요.';
+    notice.innerHTML = where + '에서 내용을 거의 찾지 못했습니다. 원문을 참고해 직접 입력해 주세요.';
   }
   notice.hidden = false;
 
@@ -2759,6 +2806,7 @@ function addBulkRow(data) {
   const d = data || {};
   const row = document.createElement('div');
   row.className = 'bulk-row';
+  if (d.price) row.setAttribute('data-price', String(d.price));
   row.innerHTML =
     '<label class="bulk-check" title="이 품목 등록"><input type="checkbox" class="js-bulk-check" checked aria-label="이 품목 등록"></label>' +
     '<div class="bulk-row-main">' +
@@ -2771,6 +2819,7 @@ function addBulkRow(data) {
         '</div>' +
         '<button type="button" class="btn-icon js-bulk-remove" aria-label="이 품목 빼기" title="빼기">✕</button>' +
       '</div>' +
+      (d.price ? '<p class="src">단가 ' + esc(qWon(qInt(d.price))) + '원 (견적서로 보낼 때 쓰입니다)</p>' : '') +
       (d.source ? '<p class="src">원문: ' + esc(d.source) + '</p>' : '') +
     '</div>';
   $('bulkList').appendChild(row);
@@ -2867,9 +2916,11 @@ function saveScanResults() {
     const item = row.querySelector('.js-bulk-item').value.trim();
     let qty = normalizeQtyInput(row.querySelector('.js-bulk-qty').value);
     if (qty !== '') qty = String(Number(qty));
+    const price = row.getAttribute('data-price') || '';
+    const rowNote = price ? (note ? note + ' · 단가 ' + qWon(qInt(price)) + '원' : '단가 ' + qWon(qInt(price)) + '원') : note;
     added.push({
       id: uid(), company: company, orderDate: orderDate, item: item, quantity: qty,
-      dueDate: dueDate, completed: false, note: note, sample: false,
+      dueDate: dueDate, completed: false, note: rowNote, sample: false,
       createdAt: now, updatedAt: now
     });
   });
@@ -2881,6 +2932,102 @@ function saveScanResults() {
   render();
   toast(added.length === 1 ? '발주 1건을 등록했습니다.' : '선택한 ' + added.length + '건을 등록했습니다.');
   if (isSyncOn()) pushAll(true);
+}
+
+/* =========================================================
+   카톡/문자 붙여넣기
+   ========================================================= */
+function knownCompanyNames() {
+  const set = {};
+  state.items.forEach(function (it) { if (it.company) set[it.company] = 1; });
+  (state.quotes || []).forEach(function (q) { if (q.company) set[q.company] = 1; });
+  return Object.keys(set);
+}
+
+function showChatError(msg) {
+  const e = $('chatError');
+  e.textContent = msg;
+  e.hidden = false;
+}
+
+function openChatModal() {
+  const t = $('chatText');
+  t.value = '';
+  $('chatError').hidden = true;
+  $('chatError').textContent = '';
+  openModal('chatModal');
+  setTimeout(function () { t.focus(); }, 60);
+}
+
+function analyzeChatText() {
+  const raw = $('chatText').value;
+  if (!raw.trim()) {
+    showChatError('붙여넣을 내용을 입력해 주세요.');
+    return;
+  }
+  let parsed;
+  try {
+    parsed = parseChatText(raw, {
+      today: todayISO(),
+      myCompany: myCompanyName(),
+      knownCompanies: knownCompanyNames()
+    });
+  } catch (err) {
+    showChatError('글을 분석하지 못했습니다. 붙여넣은 내용을 조금 고쳐 다시 시도해 주세요.');
+    return;
+  }
+  if (!parsed.company && !parsed.dueDate && !parsed.items.length) {
+    showChatError('품목을 찾지 못했습니다. 품명·수량이 들어간 줄을 그대로 붙여넣어 주세요.');
+    return;
+  }
+  closeModal($('chatModal'));
+  openScanResult(parsed, raw.trim(), '붙여넣은 원문 보기', { from: 'chat' });
+}
+
+/* 분석한 품목을 견적서 작성 탭으로 넘긴다 */
+function quoteFromBulk() {
+  const company = $('bulkCompany').value.trim();
+  if (!company) {
+    showBulkError('업체명을 입력해 주세요.');
+    $('bulkCompany').focus();
+    return;
+  }
+  const rows = bulkRows().filter(function (row) {
+    return !!row.querySelector('.js-bulk-check').checked;
+  });
+  if (!rows.length) {
+    showBulkError('견적서로 보낼 품목을 1개 이상 체크해 주세요.');
+    return;
+  }
+
+  const items = [];
+  let missing = false;
+  rows.forEach(function (row) {
+    const t = row.querySelector('.js-bulk-item').value.trim();
+    if (!t) { missing = true; return; }
+    const parts = chatSplitNameSpec(t);
+    items.push(normalizeQuoteItem({
+      name: parts.name || t,
+      spec: parts.spec,
+      qty: normalizeQtyInput(row.querySelector('.js-bulk-qty').value),
+      price: row.getAttribute('data-price') || ''
+    }));
+  });
+  if (missing) {
+    showBulkError('체크한 품목의 품명을 입력해 주세요.');
+    return;
+  }
+
+  const q = newEmptyQuote();
+  q.company = company;
+  q.items = items;
+  const due = $('bulkDueDate').value;
+  if (due) q.delivery = fmtDate(due) + ' 납기';
+  state.quoteNoTouched = false;
+
+  closeModal($('scanResultModal'));
+  setTab('quote');
+  applyQuote(q, '분석한 내용으로 견적서를 채웠습니다. 단가를 확인하고 저장하세요.');
 }
 
 /* =========================================================
@@ -3677,6 +3824,631 @@ function parseOrderText(raw) {
 
   return res;
 }
+
+/* ==== CHAT-PARSE:START ==== */
+/* =========================================================================
+   카톡/문자 붙여넣기 — 한국 밸브·배관 자재 실무 맞춤 파서
+   apps/order-manager/chat-parse.js 와 같은 내용입니다(테스트: tests/chat-parse.test.js).
+   ========================================================================= */
+
+/* 품명에 자주 쓰이는 말 (상속 판단에도 씀) */
+const CHAT_PRODUCT_RE = /(밸브|파이프|엘보|플랜지|후렌지|니플|유니온|레듀샤|레듀서|캡|볼트|너트|가스켓|호스|펌프|모터|계량기|배관|이음|소켓|플러그|스트레이너|트랩|게이지|백관|강관|STS|SUS|BRASS|황동|주철|스텐|감압|체크|버터플라이|게이트|글로브|릴리프|커플링|클램프|행거|밴드|패킹|오링|후렉시블|신축|분기|소화|급수|난방)/i;
+/* 회사명에 자주 쓰이는 말 */
+const CHAT_COMPANY_WORD = /(상사|공업|산업|밸브|배관|테크|정밀|기계|전자|유통|종합|철강|금속|설비|무역|상회|기업|건설|엔지니어링|에너지|케미칼|화학|물산|공사|스틸|세라믹|플랜트|ENG|Co\.|Inc\.|Corp\.|Ltd\.)/i;
+
+const CHAT_CORP_MARK = /(?:\(주\)|（주）|㈜|주식회사|유한회사|합자회사)/;
+
+/* 업체명 뒤에서 끊어야 하는 말 */
+const CHAT_STOP_WORD = /^(?:납기|납품|납품일|출고|출고일|도착|인도|납입|발주|발주일|주문|주문일|수량|단가|금액|합계|총액|견적|견적서|요청|부탁|배송|배송지|입금|계좌|세금계산서|VAT|TEL|Tel|FAX|Fax|HP|H\.P|휴대폰|전화|이메일|E-?mail|주소|담당|담당자|까지|급함|급해|급하게|급히|문의|재고|확인|결제|현금|카드|착불|선불|오늘|금일|당일|내일|명일|모레|모래|글피|아침|오전|오후|저녁|퇴근|출근|주말|월요일|화요일|수요일|목요일|금요일|토요일|일요일)$/i;
+
+/* 업체명 꼬리에 자주 붙는 말 — 앞 명사구를 업체명으로 볼 근거 */
+const CHAT_COMPANY_END = /(공업|기업|상사|기계|테크|테크노|이엔지|E&G|이엔씨|산업|공사|상회|정밀|설비|무역|유통|종합|스틸|금속|철강|물산|엔지니어링|건설|전자|화학|케미칼|에너지|플랜트|코리아|인더스트리|상역|공영|기공)$/;
+
+/* 문장 끝 인사·요청 말 (수량 뒤에 붙는 "주문합니다" 같은 것) */
+const CHAT_TAIL_RE = /(?:주문\s*(?:합니다|해\s*주세요|해주세요|요청|드립니다|합니다|할게요|할께요|할래요)|발주\s*(?:합니다|해\s*주세요|해주세요|요청|드립니다|할게요|할께요|넣어\s*주세요|넣어주세요|넣어\s*주십시오)|부탁\s*(?:드립니다|드려요|합니다|해요|해\s*주세요|좀)|요청\s*(?:합니다|드립니다|드려요|해요)|주십시오|주십시요|주세요|주시기\s*바랍니다|주시면|바랍니다|바래요|바랍|감사합니다|감사|고맙습니다|수고하세요|수고하셨습니다|이상입니다|이상|입니다|합니다|드립니다|드려요|해주세요|해주시면|연락\s*주세요|연락바랍니다|확인\s*(?:부탁|바랍|해)|급하게|급히|좀)\s*[.!~,]*$/;
+
+const CHAT_NOISE_EXACT = /^(?:네|넵|넹|예|예스|아뇨|아니요|아니오|오케이|ok|OK|Ok|확인|확인요|부탁|부탁요|감사|감사요|수고|ㅇㅋ|ㅇㅇ|1)$/;
+const CHAT_NOISE_SUB = /(안녕|수고하|감사합|고맙|부탁드|주문합|발주합|요청합|문의|견적서|재고|계좌|입금|세금계산|이상입|그럼|혹시|급해|급함|연락|배송지|납품처|받는\s*분|보내는\s*분)/;
+
+/* 수량 단위 */
+const CHAT_UNIT_SRC = '개입|개|EA|ea|Ea|eA|대|조|세트|SET|set|Set|박스|BOX|box|Box|pcs|PCS|Pcs|매|장|롤|미터|kg|KG|Kg|포|병|봉';
+const CHAT_QTY_RE = new RegExp('(\\d{1,5}(?:,\\d{3})*(?:\\.\\d+)?)\\s*(?:' + CHAT_UNIT_SRC + ')');
+const CHAT_QTY_X_RE = /[x×X]\s*(\d{1,5}(?:,\d{3})*)/;
+
+const CHAT_PRICE_AT_RE = /@\s*(\d[\d,]{2,})/;
+const CHAT_PRICE_WON_RE = /(\d[\d,]{2,})\s*원/;
+const CHAT_PRICE_LABEL_RE = /(?:단가|금액|견적가|가격)\s*[:：]?\s*(\d[\d,]{2,})/;
+
+/* 날짜 */
+const CHAT_DUE_LABEL = /(납기|납품일?|출고일?|도착일?|인도일?|납입일?|희망\s*납기|마감)/;
+const CHAT_ORDER_LABEL = /(발주\s*(?:일|일자)|주문\s*(?:일|일자)|작성\s*일|접수\s*일)/;
+const CHAT_DATE_RE = /(20\d{2})\s*[.\-\/년]\s*(\d{1,2})\s*[.\-\/월]\s*(\d{1,2})\s*일?|(\d{1,2})\s*[\/.\-]\s*(\d{1,2})(?:\s*일)?|(\d{1,2})\s*월\s*(\d{1,2})\s*일?/g;
+const CHAT_REL_RE = /(글피|모레|모래|내일|명일|오늘|금일|당일)/g;
+const CHAT_REL_OFFSET = { '오늘': 0, '금일': 0, '당일': 0, '내일': 1, '명일': 1, '모레': 2, '모래': 2, '글피': 3 };
+/* 배관 규격 분수(1/2", 3/4B)를 날짜로 읽지 않기 위한 목록 */
+const CHAT_FRACTIONS = { '1/2': 1, '1/4': 1, '3/4': 1, '3/8': 1, '1/8': 1, '5/8': 1, '7/8': 1, '5/16': 1, '1/16': 1, '3/16': 1, '7/16': 1, '9/16': 1, '11/16': 1, '13/16': 1 };
+
+function chatPad2(n) { return String(n).padStart(2, '0'); }
+
+function chatISO(d) {
+  return d.getFullYear() + '-' + chatPad2(d.getMonth() + 1) + '-' + chatPad2(d.getDate());
+}
+
+function chatTodayISO() {
+  return chatISO(new Date());
+}
+
+function chatDayDiff(fromISO, toISO) {
+  const a = new Date(fromISO + 'T00:00:00');
+  const b = new Date(toISO + 'T00:00:00');
+  if (isNaN(a.getTime()) || isNaN(b.getTime())) return null;
+  return Math.round((b - a) / 86400000);
+}
+
+function chatNorm(t) {
+  let s = String(t == null ? '' : t)
+    .replace(/\u00a0/g, ' ')
+    .replace(/[\u200b-\u200d\ufeff]/g, '')
+    .replace(/[，､]/g, ',')
+    .replace(/．/g, '.')
+    .replace(/：/g, ':')
+    .replace(/\t/g, ' ')
+    .replace(/[ ]{2,}/g, ' ');
+  /* 전화번호는 날짜·수량·품목으로 읽지 않는다 */
+  s = s.replace(/(?:\+?82[-\s]?)?\b0\d{1,2}[-\s]?\d{3,4}[-\s]?\d{4}\b/g, ' ☎ ');
+  /* 1,234,567 처럼 콤마로 끊은 숫자는 붙여 둔다(품목 구분 콤마와 섞이지 않게) */
+  for (let i = 0; i < 3; i++) s = s.replace(/(\d),(?=\d{3})/g, '$1');
+  return s;
+}
+
+function chatTrimPunct(t) {
+  let s = String(t == null ? '' : t);
+  /* 1/2" 처럼 숫자 뒤 인치 표시는 규격이므로 지우지 않는다 */
+  const inch = /(\d)\s*["″]\s*$/.test(s);
+  if (inch) s = s.replace(/\s*["″]\s*$/, ' ″');
+  s = s
+    .replace(/^[\s\-–—:：·.,;；/|()\[\]{}<>~"'`＊*]+/, '')
+    .replace(/[\s\-–—:：·.,;；/|~'"`]+$/, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (inch) s = s.replace(/\s*″$/, '"');
+  return s;
+}
+
+function chatIsMyCompany(name, my) {
+  if (!my) return false;
+  const a = String(name || '').replace(/[\s()（）㈜\[\]]/g, '');
+  const b = String(my || '').replace(/[\s()（）㈜\[\]]/g, '');
+  return !!b && a.indexOf(b) !== -1;
+}
+
+function chatFindLiteral(text, name) {
+  if (!name) return '';
+  if (text.indexOf(name) !== -1) return name;
+  const pat = String(name).split('').map(function (ch) {
+    return ch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }).join('\\s*');
+  const m = String(text).match(new RegExp(pat));
+  return m ? m[0] : '';
+}
+
+function chatRemoveLiteral(text, raw, name) {
+  let t = String(text || '');
+  [raw, name].forEach(function (v) {
+    if (!v) return;
+    if (t.indexOf(v) !== -1) t = t.replace(v, ' ');
+  });
+  if (raw || name) {
+    const pat = String(name || raw).split('').map(function (ch) {
+      return ch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }).join('\\s*');
+    t = t.replace(new RegExp(pat), ' ');
+  }
+  return t;
+}
+
+/* 문장 끝 인사·요청 말을 떼어 낸다.  "5개주문합니다" → "5개", "3개 부탁드립니다" → "3개" */
+function chatStripTail(t) {
+  let s = String(t == null ? '' : t).replace(/\s+/g, ' ').trim();
+  s = s.replace(/^(?:네|예|넵|넹|아니요|아뇨|그럼|혹시|저기|여보세요|안녕하세요|수고하세요|감사합니다)[\s,.!~]*/i, '');
+  let prev;
+  let guard = 0;
+  do {
+    prev = s;
+    s = s.replace(CHAT_TAIL_RE, '').replace(/[.!~,]+$/, '').trim();
+    guard++;
+  } while (s !== prev && s && guard < 8);
+  return chatTrimPunct(s);
+}
+
+/* 업체명 후보로 볼 만한 짧은 이름인지 */
+function chatCandidateCompany(s) {
+  let t = chatTrimPunct(String(s == null ? '' : s));
+  t = t.replace(/^(?:업체명?|거래처명?|상호|회사명?|발주처|공급처)\s*[:：]?\s*/, '');
+  t = t.replace(/\s*(?:입니다|이에요|예요|이요|임|이오)$/, '');
+  t = t.replace(/\s*(?:님|과장|부장|대리|사원|주임|팀장|실장|차장|소장|이사|사장|대표|상무|전무|사모님)$/, '');
+  t = chatTrimPunct(t);
+  if (!t || t.length < 2 || t.length > 20) return '';
+  if (/\d/.test(t)) return '';
+  if (/[?!~,;:]/.test(t)) return '';
+  if (CHAT_PRODUCT_RE.test(t)) return '';
+  if (CHAT_STOP_WORD.test(t)) return '';
+  if (CHAT_NOISE_EXACT.test(t) || CHAT_NOISE_SUB.test(t) || /급하|급히/.test(t)) return '';
+  if (/^[가-힣]{2,10}$/.test(t)) return t;
+  if (CHAT_COMPANY_WORD.test(t) && /^[가-힣A-Za-z0-9&.\s()㈜]+$/.test(t)) return t;
+  if (/^(?:\(주\)|（주）|㈜)?\s*[A-Za-z]{2,}(?:\s+[A-Za-z]{2,})?$/.test(t)) return t;
+  return '';
+}
+
+const CHAT_LABEL_WORD = /(?:희망\s*납기|납품\s*일?|출고\s*일?|도착\s*일?|인도\s*일?|납입\s*일?|발주\s*일자?|주문\s*일자?|작성\s*일|접수\s*일|납기|마감|까지)/g;
+
+/* 날짜를 떼고 남은 "납기는", "까지" 같은 껍데기를 지운다 */
+function chatDropLabels(line) {
+  return String(line == null ? '' : line)
+    .replace(CHAT_LABEL_WORD, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function chatSplitSegments(line) {
+  return String(line || '')
+    .split(/\s*(?:[,，、;；]|\s\/\s|\s\|\s|\s+\/\s+|\s*>\s*)\s*/)
+    .map(function (s) { return s.trim(); })
+    .filter(Boolean);
+}
+
+/* ---------- 업체명 ---------- */
+function chatFindCompany(text, lines, opts) {
+  const my = (opts && opts.myCompany) || '';
+  const known = (opts && Array.isArray(opts.knownCompanies)) ? opts.knownCompanies.filter(Boolean) : [];
+
+  let m = text.match(/[\[【]\s*([^\]】]{2,40}?)\s*[\]】]/);
+  if (m) {
+    const nm = chatCandidateCompany(m[1]) || chatTrimPunct(m[1]);
+    if (nm && !chatIsMyCompany(nm, my)) return { name: nm, raw: m[0] };
+  }
+
+  m = text.match(/(?:업체명?|거래처명?|상호|회사명?|발주처|공급처)\s*[:：]\s*([^\n,]{2,40})/);
+  if (m) {
+    const nm = chatCandidateCompany(m[1]) || chatTrimPunct(m[1].replace(/\s*(?:TEL|FAX|전화|팩스).*$/i, ''));
+    if (nm && !chatIsMyCompany(nm, my)) return { name: nm, raw: m[0] };
+  }
+
+  const sorted = known.slice().sort(function (a, b) { return String(b).length - String(a).length; });
+  for (let i = 0; i < sorted.length; i++) {
+    const k = sorted[i];
+    if (chatIsMyCompany(k, my)) continue;
+    const hit = chatFindLiteral(text, k);
+    if (hit) return { name: k, raw: hit };
+  }
+
+  /* 한 줄 맨 앞의 한글 명사구가 업체명인 경우
+     예) "한신기계공업  ha322 300개", "노규훈 / 21H7KV120 4개" */
+  for (let li = 0; li < Math.min(lines.length, 3); li++) {
+    const lead = chatLeadingCompany(lines[li], my);
+    if (lead) return lead;
+  }
+
+  for (let li = 0; li < lines.length; li++) {
+    const line = lines[li];
+    const cm = line.match(CHAT_CORP_MARK);
+    if (!cm) continue;
+    const after = line.slice(cm.index + cm[0].length);
+    const tokens = after.split(/\s+/).filter(Boolean);
+    const keep = [];
+    for (let ti = 0; ti < tokens.length && keep.length < 3; ti++) {
+      const clean = chatTrimPunct(tokens[ti]);
+      if (!clean) continue;
+      if (/[\d]/.test(clean)) break;
+      if (CHAT_PRODUCT_RE.test(clean)) break;
+      if (CHAT_STOP_WORD.test(clean)) break;
+      if (CHAT_NOISE_SUB.test(clean)) break;
+      keep.push(clean);
+    }
+    if (!keep.length) continue;
+    const prefix = (cm[0] === '주식회사' || cm[0] === '유한회사' || cm[0] === '합자회사') ? cm[0] + ' ' : '(주)';
+    const nm = (prefix + keep.join(' ')).replace(/\s+/g, ' ').trim();
+    if (!nm || nm.length > 40 || chatIsMyCompany(nm, my)) continue;
+    const raw = chatTrimPunct(line.slice(cm.index, cm.index + cm[0].length + after.indexOf(keep[keep.length - 1]) + keep[keep.length - 1].length));
+    return { name: nm, raw: raw && raw.length >= cm[0].length ? raw : nm };
+  }
+
+  const upTo = Math.min(lines.length, 4);
+  for (let li = 0; li < upTo; li++) {
+    const segs = chatSplitSegments(lines[li]);
+    const take = Math.min(segs.length, 2);
+    for (let si = 0; si < take; si++) {
+      const nm = chatCandidateCompany(segs[si]);
+      if (nm && !chatIsMyCompany(nm, my)) {
+        const raw = chatFindLiteral(lines[li], nm) || nm;
+        return { name: nm, raw: raw };
+      }
+    }
+  }
+  return { name: '', raw: '' };
+}
+
+/* 줄 맨 앞의 한글 명사구를 업체명으로 본다.
+   - 품명 단어(감압밸브·체크밸브 등)가 먼저 오면 업체명이 아니다.
+   - 뒤에 영문/숫자 모델명이 따라오거나, 끝이 공업·기업·상사·기계·테크·이엔지 같은 회사 꼬리면 업체명. */
+function chatLeadingCompany(line, my) {
+  const s = String(line || '').replace(/\s+/g, ' ').trim();
+  if (!s) return null;
+  const tokens = s.split(' ');
+  const keep = [];
+  let restTokens = null;
+
+  for (let i = 0; i < tokens.length; i++) {
+    const tok = chatTrimPunct(tokens[i]);
+    if (!tok) continue;
+    if (/\d/.test(tok) || /[A-Za-z]/.test(tok)) { restTokens = tokens.slice(i); break; }
+    if (CHAT_PRODUCT_RE.test(tok)) break;
+    if (CHAT_STOP_WORD.test(tok)) break;
+    if (CHAT_NOISE_SUB.test(tok) || /급하|급히/.test(tok)) break;
+    keep.push(tok);
+    if (keep.length >= 3) break;
+  }
+  if (!keep.length) return null;
+
+  let name = chatTrimPunct(keep.join(' '));
+  name = chatTrimPunct(name.replace(/\s*(?:입니다|이에요|예요|이요|임|이오)$/, ''));
+  if (!name || name.length < 2 || name.length > 20) return null;
+  if (CHAT_PRODUCT_RE.test(name)) return null;
+  if (CHAT_STOP_WORD.test(name) || CHAT_NOISE_EXACT.test(name) || CHAT_NOISE_SUB.test(name)) return null;
+  if (chatIsMyCompany(name, my)) return null;
+
+  let modelLike = false;
+  if (restTokens && restTokens.length) {
+    restTokens.forEach(function (t) {
+      const c = chatTrimPunct(t);
+      if (!c) return;
+      if (/[A-Za-z]/.test(c) || /^\d{4,}$/.test(c)) modelLike = true;
+    });
+  }
+
+  const hasCorpTail = CHAT_COMPANY_END.test(name);
+  const koreanOnly = /^[가-힣]{2,10}$/.test(name);
+  if (!hasCorpTail && !(koreanOnly && modelLike)) return null;
+
+  const raw = chatFindLiteral(s, name) || name;
+  return { name: name, raw: raw };
+}
+
+/* ---------- 날짜 ---------- */
+function chatDateKind(line, index, end) {
+  const before = line.slice(Math.max(0, index - 16), index);
+  const after = line.slice(end, end + 10);
+  if (CHAT_DUE_LABEL.test(before) || CHAT_DUE_LABEL.test(after) ||
+      /^\s*(?:까지|까지요|까지임|까지입니다|까지\s*부탁)/.test(after)) return 'due';
+  if (CHAT_ORDER_LABEL.test(before) || CHAT_ORDER_LABEL.test(after)) return 'order';
+  return '';
+}
+
+function chatLabelStart(line, index) {
+  const before = line.slice(Math.max(0, index - 16), index);
+  const lm = before.match(/(?:희망\s*납기|납품\s*일?|납품일|납기|출고\s*일?|도착\s*일?|인도\s*일?|납입\s*일?|발주\s*일자?|발주일|주문\s*일자?|주문일|작성\s*일|접수\s*일|마감)\s*[:：]?\s*$/);
+  if (lm) return index - lm[0].length;
+  return index;
+}
+
+function chatIsoFor(y, mo, dd, todayISO, mode) {
+  if (mo < 1 || mo > 12 || dd < 1 || dd > 31) return '';
+  const base = parseInt(todayISO.slice(0, 4), 10);
+  if (y) {
+    const iso = y + '-' + chatPad2(mo) + '-' + chatPad2(dd);
+    return iso;
+  }
+  let year = base;
+  let iso = year + '-' + chatPad2(mo) + '-' + chatPad2(dd);
+  let diff = chatDayDiff(todayISO, iso);
+  if (diff === null) return '';
+  if (mode === 'order') {
+    if (diff > 7) { year -= 1; iso = year + '-' + chatPad2(mo) + '-' + chatPad2(dd); }
+  } else {
+    if (diff < -30) { year += 1; iso = year + '-' + chatPad2(mo) + '-' + chatPad2(dd); }
+  }
+  return iso;
+}
+
+function chatExtractDates(lines, todayISO) {
+  const hits = [];
+  const cleaned = [];
+
+  lines.forEach(function (line) {
+    const spans = [];
+    let m;
+
+    CHAT_DATE_RE.lastIndex = 0;
+    while ((m = CHAT_DATE_RE.exec(line))) {
+      const start = m.index;
+      let y = '', mo = 0, dd = 0;
+      if (m[1] !== undefined) {
+        y = m[1]; mo = parseInt(m[2], 10); dd = parseInt(m[3], 10);
+      } else if (m[4] !== undefined) {
+        mo = parseInt(m[4], 10); dd = parseInt(m[5], 10);
+        const after = line.slice(m.index + m[0].length);
+        if (/^["'″′]/.test(after) || /^[A-Za-z]/.test(after)) continue;
+        if (CHAT_FRACTIONS[mo + '/' + dd]) continue;
+        const pre = line.slice(0, m.index);
+        if (/[A-Za-z\/\-"]$/.test(pre)) continue;
+      } else {
+        mo = parseInt(m[6], 10); dd = parseInt(m[7], 10);
+      }
+      if (mo < 1 || mo > 12 || dd < 1 || dd > 31) continue;
+      const end = m.index + m[0].length;
+      const kind = chatDateKind(line, m.index, end);
+      hits.push({ y: y, mo: mo, dd: dd, kind: kind, index: m.index, order: hits.length });
+      spans.push([chatLabelStart(line, m.index), end]);
+    }
+
+    CHAT_REL_RE.lastIndex = 0;
+    while ((m = CHAT_REL_RE.exec(line))) {
+      const off = CHAT_REL_OFFSET[m[1]];
+      if (off === undefined) continue;
+      const end = m.index + m[0].length;
+      const kind = chatDateKind(line, m.index, end);
+      hits.push({ rel: off, kind: kind, index: m.index, order: hits.length });
+      spans.push([chatLabelStart(line, m.index), end]);
+    }
+
+    spans.sort(function (a, b) { return b[0] - a[0]; });
+    let out = line;
+    spans.forEach(function (sp) {
+      out = out.slice(0, sp[0]) + ' ' + out.slice(sp[1]);
+    });
+    cleaned.push(chatDropLabels(chatTrimPunct(out)));
+  });
+
+  const isoOf = function (h) {
+    if (h.rel !== undefined) {
+      const d = new Date(todayISO + 'T00:00:00');
+      d.setDate(d.getDate() + h.rel);
+      return chatISO(d);
+    }
+    return chatIsoFor(h.y, h.mo, h.dd, todayISO, h.kind === 'order' ? 'order' : 'due');
+  };
+
+  let orderCand = null, dueCand = null;
+  const loose = [];
+  hits.forEach(function (h) {
+    if (h.kind === 'order' && !orderCand) orderCand = h;
+    else if (h.kind === 'due' && !dueCand) dueCand = h;
+    else if (!h.kind) loose.push(h);
+  });
+  if (!dueCand) {
+    if (loose.length === 1) dueCand = loose[0];
+    else if (loose.length > 1) {
+      const first = loose[0];
+      if (!orderCand) { orderCand = first; dueCand = loose[loose.length - 1]; }
+      else if (loose[loose.length - 1] !== first) dueCand = loose[loose.length - 1];
+    }
+  } else if (!orderCand && loose.length) {
+    orderCand = loose[0];
+  }
+
+  return {
+    orderDate: orderCand ? isoOf(orderCand) : '',
+    dueDate: dueCand ? isoOf(dueCand) : '',
+    lines: cleaned
+  };
+}
+
+/* ---------- 품목 한 조각 ---------- */
+/* 규격 토큰: 20A · 1/2" · 3/4B · 40K · 1인치 · DN50 */
+function chatSpecMatches(text) {
+  const re = /(?:^|[\s(])(\d{1,3}\s?A(?![A-Za-z0-9])|\d{1,2}\s*\/\s*\d{1,2}\s*(?:"|″|인치|B(?![A-Za-z0-9]))?|\d{2}\s?K(?![A-Za-z0-9])|\d{1,2}(?:\.\d)?\s*(?:인치|inch|"|″)|DN\s?\d{2,3})/gi;
+  const out = [];
+  let m;
+  while ((m = re.exec(text))) {
+    out.push({ text: m[1].replace(/\s+/g, ' ').trim(), index: m.index + (m[0].length - m[1].length) });
+  }
+  return out;
+}
+
+/* 규격 글자는 통일: 15a → 15A, 40k → 40K */
+function chatNormSpec(s) {
+  return String(s || '')
+    .replace(/^(\d{1,3})\s?([ak])$/i, function (all, num, ch) { return num + ch.toUpperCase(); })
+    .trim();
+}
+
+function chatSplitNameSpec(text) {
+  const t = String(text == null ? '' : text).replace(/\s+/g, ' ').trim();
+  const specs = chatSpecMatches(t);
+  if (!specs.length) return { name: t, spec: '', text: t };
+
+  let name = '';
+  let norm = '';
+  let pos = 0;
+  specs.forEach(function (sp) {
+    name += t.slice(pos, sp.index) + ' ';
+    norm += t.slice(pos, sp.index) + chatNormSpec(sp.text) + ' ';
+    pos = sp.index + sp.text.length;
+  });
+  name = chatTrimPunct(name + t.slice(pos));
+  norm = (norm + t.slice(pos)).replace(/\s+/g, ' ').trim();
+  const spec = specs.map(function (s) { return chatNormSpec(s.text); }).join(' ').trim();
+  return { name: name, spec: spec, text: norm };
+}
+
+function chatCombine(parentName, spec) {
+  const p = String(parentName || '').replace(/\s+/g, ' ').trim();
+  const s = String(spec || '').replace(/\s+/g, ' ').trim();
+  if (!p) return s;
+  if (!s) return p;
+  if (s.indexOf(p) === 0) return s;
+  if (p.indexOf(s) !== -1) return p;
+  return (p + ' ' + s).slice(0, 120);
+}
+
+function chatBareNumbers(s) {
+  const out = [];
+  const re = /(\d[\d,]*)/g;
+  let m;
+  while ((m = re.exec(s))) {
+    const start = m.index;
+    const end = m.index + m[0].length;
+    const before = s[start - 1] || ' ';
+    const after = s[end] || ' ';
+    if (/[A-Za-z]/.test(before) || /[A-Za-z]/.test(after)) continue;
+    if (/[\/\-]/.test(before) || /[\/\-]/.test(after)) continue;
+    out.push({ raw: m[0], digits: m[0].replace(/,/g, ''), start: start, end: end });
+  }
+  return out;
+}
+
+function chatParseSegment(seg) {
+  let s = ' ' + String(seg || '').replace(/\s+/g, ' ').trim() + ' ';
+  const res = { price: '', qty: '', text: '', source: String(seg || '').trim() };
+  const spans = [];
+  const cut = function (start, end) { spans.push([start, end]); };
+
+  let m;
+  m = s.match(CHAT_PRICE_AT_RE);
+  if (m) { res.price = m[1].replace(/,/g, ''); cut(m.index, m.index + m[0].length); }
+  if (!res.price) {
+    m = s.match(CHAT_PRICE_LABEL_RE);
+    if (m) { res.price = m[1].replace(/,/g, ''); cut(m.index, m.index + m[0].length); }
+  }
+  if (!res.price) {
+    m = s.match(CHAT_PRICE_WON_RE);
+    if (m) { res.price = m[1].replace(/,/g, ''); cut(m.index, m.index + m[0].length); }
+  }
+
+  let qtySpan = null;
+  let qm = s.match(CHAT_QTY_RE);
+  if (qm) {
+    res.qty = qm[1].replace(/,/g, '');
+    qtySpan = [qm.index, qm.index + qm[0].length];
+    cut(qtySpan[0], qtySpan[1]);
+  } else {
+    qm = s.match(CHAT_QTY_X_RE);
+    if (qm) {
+      res.qty = qm[1].replace(/,/g, '');
+      qtySpan = [qm.index, qm.index + qm[0].length];
+      cut(qtySpan[0], qtySpan[1]);
+    }
+  }
+
+  if (!res.price) {
+    const nums = chatBareNumbers(s);
+    for (let i = 0; i < nums.length; i++) {
+      const n = nums[i];
+      const covered = spans.some(function (sp) { return n.start >= sp[0] && n.end <= sp[1]; });
+      if (covered) continue;
+      if (n.digits.length < 4) continue;
+      /* 수량 뒤에 홀로 붙은 숫자만 단가로 본다.
+         수량 앞쪽의 "327900" 같은 숫자는 품번/모델명이다. */
+      if (qtySpan && n.start >= qtySpan[1]) {
+        res.price = n.digits;
+        cut(n.start, n.end);
+        break;
+      }
+    }
+  }
+
+  spans.sort(function (a, b) { return b[0] - a[0]; });
+  let text = s;
+  spans.forEach(function (sp) { text = text.slice(0, sp[0]) + ' ' + text.slice(sp[1]); });
+
+  text = chatStripTail(text);
+  res.text = text;
+  return res;
+}
+
+function chatIsNoiseLine(line) {
+  const t = chatTrimPunct(line);
+  if (!t) return true;
+  if (/^[-=—_·~*#\s]+$/.test(t)) return true;
+  if (CHAT_NOISE_EXACT.test(t)) return true;
+  if (/^\[?(?:카카오톡|카톡|문자|SMS|MMS)\]?$/i.test(t)) return true;
+  if (/^(?:오전|오후)\s*\d{1,2}:\d{2}$/.test(t)) return true;
+  if (/^\d{4}년\s*\d{1,2}월\s*\d{1,2}일\s*(?:오전|오후)?\s*\d{0,2}:?\d{0,2}$/.test(t)) return true;
+  return false;
+}
+
+/* ---------- 본체 ---------- */
+function parseChatText(raw, options) {
+  const opts = options || {};
+  const todayISO = /^\d{4}-\d{2}-\d{2}$/.test(opts.today || '') ? opts.today : chatTodayISO();
+  const res = { company: '', orderDate: '', dueDate: '', note: '', items: [] };
+
+  const text = chatNorm(raw).replace(/\r/g, '');
+  const rawLines = text.split('\n').map(function (l) { return l.trim(); }).filter(Boolean);
+  if (!rawLines.length) return res;
+
+  const dated = chatExtractDates(rawLines, todayISO);
+  res.orderDate = dated.orderDate;
+  res.dueDate = dated.dueDate;
+  const lines = dated.lines;
+
+  const co = chatFindCompany(text, rawLines, opts);
+  res.company = co.name || '';
+
+  const myName = String(opts.myCompany || '').trim();
+  let body = lines;
+  if (co.raw || co.name) {
+    body = lines.map(function (l) { return chatTrimPunct(chatRemoveLiteral(l, co.raw, co.name)); });
+  }
+  if (myName) {
+    body = body.map(function (l) { return chatTrimPunct(chatRemoveLiteral(l, myName, myName)); });
+  }
+
+  let parent = null;
+  let pendingIdx = -1;
+  body.forEach(function (line) {
+    if (chatIsNoiseLine(line)) return;
+    chatSplitSegments(line).forEach(function (seg) {
+      const parsed = chatParseSegment(seg);
+      let text = parsed.text;
+      if (!text) return;
+      if (CHAT_NOISE_EXACT.test(text)) return;
+      if (!/\d/.test(text) && !CHAT_PRODUCT_RE.test(text)) return;
+      if (CHAT_NOISE_SUB.test(text) && text.length <= 12 && !CHAT_PRODUCT_RE.test(text) && !/\d/.test(text)) return;
+      if (CHAT_STOP_WORD.test(text)) return;
+
+      const parts = chatSplitNameSpec(text);
+      let name = parts.name;
+      let spec = parts.spec;
+      let itemText = parts.text || text;
+
+      let isInherited = false;
+      if (!name && parent) {
+        itemText = chatCombine(parent.name, spec || text);
+        name = parent.name;
+        isInherited = true;
+      } else if (name) {
+        parent = { name: name, spec: spec };
+      }
+
+      if (isInherited && pendingIdx >= 0 && res.items[pendingIdx]) {
+        res.items.splice(pendingIdx, 1);
+        pendingIdx = -1;
+      }
+      const pushIdx = res.items.length;
+      res.items.push({
+        item: itemText.slice(0, 120),
+        name: (name || itemText).slice(0, 80),
+        spec: spec.slice(0, 60),
+        quantity: parsed.qty,
+        price: parsed.price,
+        source: parsed.source
+      });
+      pendingIdx = (!isInherited && !spec && !parsed.qty && !parsed.price) ? pushIdx : -1;
+    });
+  });
+
+  const seen = {};
+  res.items = res.items.filter(function (it) {
+    const key = it.item + '|' + it.quantity;
+    if (seen[key]) return false;
+    seen[key] = 1;
+    return true;
+  });
+
+  return res;
+}
+/* ==== CHAT-PARSE:END ==== */
 
 /* =========================================================================
    PIN 잠금 (4자리)
@@ -4542,6 +5314,7 @@ function setTab(tab) {
   $('quoteView').hidden = !isQuote;
   $('ordersSyncBar').hidden = isQuote;
   $('btnScan').hidden = isQuote;
+  $('btnChat').hidden = isQuote;
   $('btnNew').hidden = isQuote;
   $('appTitle').textContent = isQuote ? '견적서 작성' : '발주서 관리';
   $('appLogo').textContent = isQuote ? '📄' : '📦';
@@ -4849,8 +5622,31 @@ function init() {
     b.addEventListener('click', () => switchScanMode(b.getAttribute('data-mode')));
   });
 
+  /* 카톡/문자 붙여넣기 */
+  $('btnChat').addEventListener('click', openChatModal);
+  $('btnChatAnalyze').addEventListener('click', analyzeChatText);
+  $('btnChatClear').addEventListener('click', function () {
+    $('chatText').value = '';
+    $('chatError').hidden = true;
+    $('chatText').focus();
+  });
+  document.querySelectorAll('.js-chat-sample').forEach(function (b) {
+    b.addEventListener('click', function () {
+      $('chatText').value = b.getAttribute('data-sample') || '';
+      $('chatError').hidden = true;
+      $('chatText').focus();
+    });
+  });
+  $('chatText').addEventListener('keydown', function (e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      e.preventDefault();
+      analyzeChatText();
+    }
+  });
+
   /* 스캔 결과 일괄 등록 */
   $('btnBulkSave').addEventListener('click', saveScanResults);
+  $('btnBulkQuote').addEventListener('click', quoteFromBulk);
   $('btnBulkAll').addEventListener('click', () => {
     bulkRows().forEach((r) => { r.querySelector('.js-bulk-check').checked = true; });
     refreshBulkUI();
