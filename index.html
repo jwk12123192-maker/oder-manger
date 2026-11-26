@@ -534,7 +534,7 @@
   .tabs-row{padding:0 0 10px}
   .app-tabs{display:inline-flex;gap:3px;background:#e9eef6;border-radius:12px;padding:3px}
   .app-tab{
-    border:0;background:transparent;padding:8px 18px;border-radius:10px;
+    border:0;background:transparent;padding:8px 14px;border-radius:10px;
     font-size:14px;font-weight:700;color:#475569;cursor:pointer;min-height:38px;
     display:inline-flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap;
   }
@@ -635,11 +635,66 @@
   @media (max-width:820px){
     .tabs-row{padding-bottom:8px}
     .app-tabs{display:flex;width:100%}
-    .app-tab{flex:1;padding:8px 10px;font-size:13.5px}
+    .app-tab{flex:1 1 0;min-width:0;padding:8px 5px;font-size:13px;gap:4px;overflow:hidden;text-overflow:ellipsis}
     .quote-layout{margin-top:12px}
     .qcard{padding:14px}
     .q-item-grid{grid-template-columns:1fr 1fr}
     .paper-view{padding:10px}
+  }
+
+  @media (max-width:430px){
+    .app-tab{font-size:12px;padding:8px 3px;gap:2px;letter-spacing:-.02em}
+  }
+
+  /* ---------- 발주서 작성 ---------- */
+  .po-view{padding-bottom:34px}
+  .po-layout{display:grid;grid-template-columns:1fr;gap:14px;margin:16px 0 0}
+  .po-form-col{display:flex;flex-direction:column;gap:14px;min-width:0}
+  .po-paper-col{min-width:0}
+  .po-item-grid{display:grid;grid-template-columns:1.1fr .75fr 1fr 1fr;gap:8px;margin-top:8px}
+  .po-note{margin:8px 2px 0;font-size:12px;line-height:1.5;color:#475569;font-weight:700}
+  @media (min-width:1080px){
+    .po-layout{grid-template-columns:minmax(400px,470px) minmax(0,1fr);gap:18px;align-items:start}
+  }
+  @media (max-width:820px){
+    .po-layout{margin-top:12px}
+  }
+  @media (max-width:560px){
+    .po-item-grid{grid-template-columns:1fr 1fr}
+  }
+
+  /* ---------- 한열사 발주서 A4 용지 ---------- */
+  .po-sheet{
+    width:210mm;height:297mm;background:#fff;position:relative;overflow:hidden;
+    color:#000;box-shadow:0 4px 18px rgba(15,23,42,.18);
+    font-family:"Gulim","굴림","Malgun Gothic","맑은 고딕","Apple SD Gothic Neo","Noto Sans KR",sans-serif;
+    font-size:11pt;line-height:1;-webkit-font-smoothing:antialiased;
+  }
+  .po-sheet .po-frame{
+    position:absolute;left:35.4pt;top:48.4pt;width:529.6pt;height:687pt;
+    border:3pt double #000;box-sizing:border-box;
+  }
+  .po-sheet .po-t{position:absolute;line-height:1;white-space:nowrap;word-break:keep-all;overflow:hidden;padding-bottom:2pt}
+  .po-sheet .po-fill{position:absolute;background:#000}
+  .po-sheet .po-table{
+    position:absolute;left:38.3pt;top:272.3pt;width:523.8pt;
+    border-collapse:collapse;table-layout:fixed;margin:0;background:#fff;
+  }
+  .po-sheet .po-table th,.po-sheet .po-table td{
+    border:1pt solid #000;padding:0 3pt;margin:0;background:transparent;
+    font-size:11pt;font-weight:400;color:#000;text-align:center;vertical-align:middle;
+    line-height:1.1;overflow:hidden;white-space:nowrap;
+  }
+  .po-sheet .po-table td.po-left{text-align:left}
+  .po-sheet .po-table td.po-num{text-align:right;padding-right:5pt}
+
+  #poPrintArea{display:none}
+  @media print{
+    html.print-po,html.print-po body{margin:0!important;padding:0!important;background:#fff!important}
+    html.print-po body > *{display:none!important}
+    html.print-po #poPrintArea{display:block!important;margin:0;padding:0;page-break-inside:avoid;break-inside:avoid}
+    html.print-po #poPrintArea .po-sheet{box-shadow:none;page-break-after:avoid;break-after:avoid}
+    html.print-po #poPrintArea .po-sheet *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   }
 
   /* ---------- PIN 잠금 ---------- */
@@ -765,6 +820,7 @@
   <div class="wrap tabs-row">
     <nav class="app-tabs" role="tablist" aria-label="화면 전환">
       <button type="button" class="app-tab is-active" id="tabOrders" data-tab="orders" role="tab" aria-selected="true">📋 발주서 관리</button>
+      <button type="button" class="app-tab" id="tabPo" data-tab="po" role="tab" aria-selected="false">📝 발주서 작성</button>
       <button type="button" class="app-tab" id="tabQuote" data-tab="quote" role="tab" aria-selected="false">📄 견적서 작성</button>
     </nav>
   </div>
@@ -990,6 +1046,129 @@
 <!-- 인쇄 전용 사본 (화면에는 보이지 않고 인쇄할 때만 쓰입니다) -->
 <div id="printArea" aria-hidden="true"><div class="q-sheet" id="printSheet"></div></div>
 <datalist id="quoteCompanyList"></datalist>
+
+<!-- ============ 발주서 작성 ============ -->
+<section class="wrap po-view" id="poView" hidden aria-label="발주서 작성">
+  <div class="po-layout">
+    <div class="po-form-col">
+
+      <div class="qcard">
+        <div class="qcard-head">
+          <h2>발주 정보</h2>
+          <span class="q-hint" id="poSaveHint"></span>
+        </div>
+        <div class="form-grid q-form-grid">
+          <div class="field">
+            <label for="poNo">NO. <span class="q-hint">(선택)</span></label>
+            <input id="poNo" type="text" autocomplete="off" spellcheck="false" placeholder="비워 두어도 됩니다">
+          </div>
+          <div class="field">
+            <label for="poDate">주문일자</label>
+            <input id="poDate" type="date">
+          </div>
+          <div class="field full">
+            <label for="poCompany">상호 (받는 업체) <span class="req">*</span></label>
+            <input id="poCompany" type="text" maxlength="60" autocomplete="organization" list="poCompanyList" placeholder="예: 효신전기">
+          </div>
+          <div class="field">
+            <label for="poReceiver">수신</label>
+            <input id="poReceiver" type="text" maxlength="40" autocomplete="off" placeholder="담당자님 귀하">
+          </div>
+          <div class="field">
+            <label for="poDelivery">납기</label>
+            <input id="poDelivery" type="text" maxlength="40" autocomplete="off" placeholder="예: 11/27">
+          </div>
+          <div class="field">
+            <label for="poPayment">결제방법</label>
+            <input id="poPayment" type="text" maxlength="30" autocomplete="off" placeholder="정기결제">
+          </div>
+          <div class="field">
+            <label for="poPlace">납기장소</label>
+            <input id="poPlace" type="text" maxlength="30" autocomplete="off" placeholder="당사">
+          </div>
+          <div class="field full">
+            <label for="poEmail">받는 분 이메일 <span class="q-hint">(선택)</span></label>
+            <input id="poEmail" type="email" inputmode="email" autocomplete="email" maxlength="120" placeholder="예: sale7@hanyoul.co.kr">
+          </div>
+        </div>
+      </div>
+
+      <div class="qcard">
+        <div class="qcard-head">
+          <h2>품목</h2>
+          <button type="button" class="btn btn-ghost btn-sm" id="btnPoAddItem">＋ 품목 추가</button>
+        </div>
+        <div class="q-items" id="poItems"></div>
+        <div class="q-totals">
+          <div class="q-sumrow q-grand"><span>일금 (VAT 별도)</span><b id="poSum">0</b></div>
+        </div>
+        <p class="po-note">단가를 비워 두면 발주서에는 <b>일금:￦</b>만 표시됩니다.</p>
+      </div>
+
+      <div class="qcard">
+        <div class="qcard-head">
+          <h2>담당자 · 연락처</h2>
+          <span class="q-hint">표 하단에 인쇄됩니다</span>
+        </div>
+        <div class="form-grid q-form-grid">
+          <div class="field">
+            <label for="poTel">T (전화)</label>
+            <input id="poTel" type="text" inputmode="tel" maxlength="20" autocomplete="off" placeholder="2634-4649">
+          </div>
+          <div class="field">
+            <label for="poFax">F (팩스)</label>
+            <input id="poFax" type="text" inputmode="tel" maxlength="20" autocomplete="off" placeholder="2631-7485">
+          </div>
+          <div class="field full">
+            <label for="poMgr">담당자</label>
+            <input id="poMgr" type="text" maxlength="30" autocomplete="off" placeholder="전원기 과장">
+          </div>
+        </div>
+      </div>
+
+      <div class="qcard">
+        <div class="qcard-head">
+          <h2>메일 문구</h2>
+          <span class="q-hint">담당자 이름에 맞춰 복사됩니다</span>
+        </div>
+        <pre class="q-mailtext" id="poMailText"></pre>
+        <div class="q-actions">
+          <button type="button" class="btn btn-primary" id="btnPoCopy">📋 메일 문구 복사</button>
+          <button type="button" class="btn btn-primary" id="btnPoMailApp">✉️ 메일 앱 열기</button>
+          <button type="button" class="btn btn-ghost" id="btnPoSave">💾 발주서 저장</button>
+          <button type="button" class="btn btn-ghost" id="btnPoNew">＋ 새 발주서</button>
+        </div>
+        <p class="q-mailhint">✉️ 메일 앱이 열리면 방금 저장한 PDF 파일을 첨부해 주세요!</p>
+      </div>
+
+      <div class="qcard">
+        <div class="qcard-head">
+          <h2>발주서 이력</h2>
+          <span class="q-hint" id="poHistoryCount"></span>
+        </div>
+        <div class="q-history" id="poHistory"></div>
+      </div>
+
+    </div>
+
+    <div class="po-paper-col">
+      <div class="paper-toolbar">
+        <span class="paper-label">📝 한열사 발주서 · A4</span>
+        <span class="spacer"></span>
+        <button type="button" class="btn btn-ghost btn-sm" id="btnPoZoom">확대</button>
+        <button type="button" class="btn btn-primary btn-sm" id="btnPoPrint">🖨 인쇄 · PDF 저장</button>
+      </div>
+      <div class="paper-view" id="poPaperView">
+        <div class="paper-scale" id="poPaperScale"><div class="po-sheet" id="poSheet"></div></div>
+      </div>
+      <p class="paper-hint">휴대폰에서는 인쇄를 누른 뒤 <b>‘PDF로 저장’</b>을 고르면 파일로 받을 수 있어요. 발주서 한 장으로 나갑니다.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 발주서 인쇄 전용 사본 (화면에는 보이지 않고 인쇄할 때만 쓰입니다) -->
+<div id="poPrintArea" aria-hidden="true"><div class="po-sheet" id="poPrintSheet"></div></div>
+<datalist id="poCompanyList"></datalist>
 
 <!-- ============ 발주 입력/수정 ============ -->
 <div class="modal-backdrop" id="editModal" hidden>
@@ -1297,6 +1476,9 @@ const STORE_DELETED = 'orderManager.deleted.v1';
 const STORE_QUOTES = 'orderManager.quotes.v1';
 const STORE_QUOTE_DRAFT = 'orderManager.quoteDraft.v1';
 const STORE_QUOTE_DEFAULTS = 'orderManager.quoteDefaults.v1';
+const STORE_POS = 'orderManager.purchaseOrders.v1';
+const STORE_PO_DRAFT = 'orderManager.purchaseOrderDraft.v1';
+const STORE_PO_DEFAULTS = 'orderManager.purchaseOrderDefaults.v1';
 const STORE_TAB = 'orderManager.tab.v1';
 const WEEK = ['일', '월', '화', '수', '목', '금', '토'];
 const DEFAULT_SETTINGS = { geminiKey: '', geminiModel: 'gemini-2.5-flash', sort: 'due', viewMode: 'group', syncUrl: '', myCompany: '한열사' };
@@ -1331,7 +1513,11 @@ const state = {
   quoteDefaults: { manager: '전원기 과장', managerPhone: '010-8972-3151' },
   quoteNoTouched: false,
   tab: 'orders',
-  paperZoom: false
+  paperZoom: false,
+  pos: [],
+  po: null,
+  poDefaults: { receiver: '담당자님 귀하', payment: '정기결제', place: '당사', mgr: '전원기 과장', tel: '2634-4649', fax: '2631-7485' },
+  poZoom: false
 };
 
 /* =========================================================
@@ -5303,26 +5489,35 @@ function fitPaper() {
 
 /* ---------- 상단 탭 ---------- */
 function setTab(tab) {
+  if (tab !== 'po' && tab !== 'quote') tab = 'orders';
+  const isOrders = tab === 'orders';
+  const isPo = tab === 'po';
   const isQuote = tab === 'quote';
-  state.tab = isQuote ? 'quote' : 'orders';
-  try { localStorage.setItem(STORE_TAB, state.tab); } catch (e) {}
-  $('tabOrders').classList.toggle('is-active', !isQuote);
+  state.tab = tab;
+  try { localStorage.setItem(STORE_TAB, tab); } catch (e) {}
+  $('tabOrders').classList.toggle('is-active', isOrders);
+  $('tabPo').classList.toggle('is-active', isPo);
   $('tabQuote').classList.toggle('is-active', isQuote);
-  $('tabOrders').setAttribute('aria-selected', String(!isQuote));
+  $('tabOrders').setAttribute('aria-selected', String(isOrders));
+  $('tabPo').setAttribute('aria-selected', String(isPo));
   $('tabQuote').setAttribute('aria-selected', String(isQuote));
-  $('ordersView').hidden = isQuote;
+  $('ordersView').hidden = !isOrders;
+  $('poView').hidden = !isPo;
   $('quoteView').hidden = !isQuote;
-  $('ordersSyncBar').hidden = isQuote;
-  $('btnScan').hidden = isQuote;
-  $('btnChat').hidden = isQuote;
-  $('btnNew').hidden = isQuote;
-  $('appTitle').textContent = isQuote ? '견적서 작성' : '발주서 관리';
-  $('appLogo').textContent = isQuote ? '📄' : '📦';
-  document.title = isQuote ? '견적서 작성 · 한열사' : '발주서 관리 · 한열사';
+  $('ordersSyncBar').hidden = !isOrders;
+  $('btnScan').hidden = !isOrders;
+  $('btnChat').hidden = !isOrders;
+  $('btnNew').hidden = !isOrders;
+  $('appTitle').textContent = isQuote ? '견적서 작성' : (isPo ? '발주서 작성' : '발주서 관리');
+  $('appLogo').textContent = isQuote ? '📄' : (isPo ? '📝' : '📦');
+  document.title = isQuote ? '견적서 작성 · 한열사' : (isPo ? '발주서 작성 · 한열사' : '발주서 관리 · 한열사');
   document.documentElement.classList.toggle('print-quote', isQuote);
+  document.documentElement.classList.toggle('print-po', isPo);
   if (isQuote) refreshQuoteCompanies();
+  if (isPo) refreshPoCompanies();
   requestAnimationFrame(function () {
     if (isQuote) { fitPaper(); fitPaymentLine(); }
+    if (isPo) fitPoPaper();
   });
   window.scrollTo({ top: 0, behavior: 'auto' });
 }
@@ -5438,6 +5633,693 @@ function onQuoteItemInput(e) {
     it[k] = input.value;
   }
   refreshQuoteTotals();
+}
+
+/* =========================================================
+   발주서 작성 (한열사 발주서 양식 · A4 한 장)
+   원본 발주서 PDF(효신전기 2024.02.14)의 좌표를 그대로 옮겼습니다.
+   A4 = 595.28 x 841.89pt, 테두리 35.4/48.4 ~ 565.0/735.4pt.
+   ========================================================= */
+const PVENDOR = {
+  name: '(주) 한 열 사',
+  addr: '서울시 구로구 구로본동 중앙유통상가 바동 1열 1108호',
+  ceo: '대표이사 : 최 정 이',
+  tel: 'TEL : (02) 2687 - 7171',
+  fax: 'FAX : (02) 2683 - 3151'
+};
+const PODEFAULTS = {
+  receiver: '담당자님 귀하',
+  payment: '정기결제',
+  place: '당사',
+  mgr: '전원기 과장',
+  tel: '2634-4649',
+  fax: '2631-7485'
+};
+const PO_GREET = '귀하의 일익 번창 하심을 기원합니다. 아래의 품목을 발주하오니,납기일 안에 조치 바랍니다.';
+const PO_ROWS = 21;        /* 품목 영역 줄 수 (이하여백 포함) */
+const PO_BODY_H = 393.7;   /* 품목 영역 전체 높이(pt) */
+const PO_FOOT_H = 24.8;    /* T/F 줄 높이(pt) */
+const PO_COLS = [19.5, 245.5, 59.9, 42.9, 39.3, 116.7];
+
+function poDateText(iso) {
+  const d = parseISO(iso) || new Date();
+  return d.getFullYear() + '.' + pad2(d.getMonth() + 1) + '.' + pad2(d.getDate());
+}
+
+function normalizePoItem(raw) {
+  const o = raw && typeof raw === 'object' ? raw : {};
+  return {
+    name: o.name == null ? '' : String(o.name),
+    spec: o.spec == null ? '' : String(o.spec),
+    qty: o.qty == null ? '' : String(o.qty).replace(/[^0-9]/g, ''),
+    price: o.price == null ? '' : String(o.price).replace(/[^0-9]/g, ''),
+    note: o.note == null ? '' : String(o.note)
+  };
+}
+
+function normalizePoRecord(raw) {
+  const o = raw && typeof raw === 'object' ? raw : {};
+  const items = Array.isArray(o.items) ? o.items.map(normalizePoItem) : [];
+  const date = /^\d{4}-\d{2}-\d{2}$/.test(o.date || '') ? o.date : todayISO();
+  return {
+    id: o.id ? String(o.id) : '',
+    date: date,
+    no: o.no == null ? '' : String(o.no),
+    company: o.company == null ? '' : String(o.company),
+    receiver: o.receiver == null ? PODEFAULTS.receiver : String(o.receiver),
+    delivery: o.delivery == null ? '' : String(o.delivery),
+    payment: o.payment == null ? PODEFAULTS.payment : String(o.payment),
+    place: o.place == null ? PODEFAULTS.place : String(o.place),
+    email: o.email == null ? '' : String(o.email),
+    tel: o.tel == null ? PODEFAULTS.tel : String(o.tel),
+    fax: o.fax == null ? PODEFAULTS.fax : String(o.fax),
+    mgr: o.mgr == null ? PODEFAULTS.mgr : String(o.mgr),
+    items: items.length ? items : [normalizePoItem({})],
+    savedAt: o.savedAt || '',
+    updatedAt: o.updatedAt || o.savedAt || ''
+  };
+}
+
+function newEmptyPo() {
+  const d = state.poDefaults || PODEFAULTS;
+  return normalizePoRecord({
+    date: todayISO(),
+    receiver: d.receiver || PODEFAULTS.receiver,
+    payment: PODEFAULTS.payment,
+    place: PODEFAULTS.place,
+    tel: d.tel == null ? PODEFAULTS.tel : d.tel,
+    fax: d.fax == null ? PODEFAULTS.fax : d.fax,
+    mgr: d.mgr == null ? PODEFAULTS.mgr : d.mgr,
+    items: [normalizePoItem({})]
+  });
+}
+
+function poItemFilled(it) {
+  return !!(it && (String(it.name || '').trim() || String(it.spec || '').trim() || it.qty || it.price || String(it.note || '').trim()));
+}
+
+function poRowsOf(po) {
+  const items = (po.items || []).slice();
+  while (items.length && !poItemFilled(items[items.length - 1])) items.pop();
+  return items;
+}
+
+function poTotals(po) {
+  let sum = 0, any = false;
+  (po.items || []).forEach(function (it) {
+    if (String(it.price) === '') return;
+    any = true;
+    sum += qInt(it.qty) * qInt(it.price);
+  });
+  return { sum: sum, any: any };
+}
+
+/* ---------------- 발주서 저장소 ---------------- */
+function loadPoStore() {
+  state.pos = [];
+  try {
+    const raw = localStorage.getItem(STORE_POS);
+    if (raw) {
+      const arr = JSON.parse(raw);
+      if (Array.isArray(arr)) state.pos = arr.map(normalizePoRecord);
+    }
+  } catch (e) { state.pos = []; }
+  state.poDefaults = {
+    receiver: PODEFAULTS.receiver,
+    payment: PODEFAULTS.payment,
+    place: PODEFAULTS.place,
+    mgr: PODEFAULTS.mgr,
+    tel: PODEFAULTS.tel,
+    fax: PODEFAULTS.fax
+  };
+  try {
+    const rawD = localStorage.getItem(STORE_PO_DEFAULTS);
+    if (rawD) {
+      const d = JSON.parse(rawD);
+      if (d && typeof d === 'object') {
+        ['mgr', 'tel', 'fax'].forEach(function (k) {
+          if (typeof d[k] === 'string') state.poDefaults[k] = d[k];
+        });
+      }
+    }
+  } catch (e) { /* 기본값 유지 */ }
+}
+
+function persistPos() {
+  try {
+    localStorage.setItem(STORE_POS, JSON.stringify(state.pos.slice(0, 300)));
+  } catch (e) {
+    toast('저장 공간을 사용할 수 없어 발주서 이력을 저장하지 못했습니다.');
+  }
+}
+
+let poDefaultsTimer = 0;
+function savePoDefaultsSoon() {
+  clearTimeout(poDefaultsTimer);
+  poDefaultsTimer = setTimeout(function () {
+    try {
+      localStorage.setItem(STORE_PO_DEFAULTS, JSON.stringify({
+        mgr: state.poDefaults.mgr,
+        tel: state.poDefaults.tel,
+        fax: state.poDefaults.fax
+      }));
+    } catch (e) { /* 무시 */ }
+  }, 500);
+}
+
+let poDraftTimer = 0;
+function schedulePoDraft() {
+  clearTimeout(poDraftTimer);
+  poDraftTimer = setTimeout(function () {
+    try {
+      localStorage.setItem(STORE_PO_DRAFT, JSON.stringify({ po: state.po }));
+    } catch (e) { /* 무시 */ }
+  }, 450);
+}
+
+function loadPoDraft() {
+  let po = null;
+  try {
+    const raw = localStorage.getItem(STORE_PO_DRAFT);
+    if (raw) {
+      const o = JSON.parse(raw);
+      if (o && o.po) po = normalizePoRecord(o.po);
+    }
+  } catch (e) { po = null; }
+  if (!po) {
+    state.po = newEmptyPo();
+  } else {
+    /* 저장하지 않은 초안이면 주문일자를 오늘로 맞춘다. */
+    if (!po.savedAt && po.date !== todayISO()) po.date = todayISO();
+    state.po = po;
+  }
+}
+
+/* ---------------- 발주서 A4 양식 ---------------- */
+function poT(x, y, size, text, extra) {
+  if (text === null || text === undefined || text === '') return '';
+  return '<div class="po-t" style="left:' + x + 'pt;top:' + y + 'pt;font-size:' + size + 'pt;' + (extra || '') + '">' + esc(text) + '</div>';
+}
+
+function poFill(left, top, width, height) {
+  return '<div class="po-fill" style="left:' + left + 'pt;top:' + top + 'pt;width:' + width + 'pt;height:' + height + 'pt"></div>';
+}
+
+function poRuleH(x, y, width) { return poFill(x, y - 0.55, width, 1.1); }
+function poRuleV(x, y, height) { return poFill(x - 0.55, y, 1.1, height); }
+
+function poSheetHTML(po) {
+  const items = poRowsOf(po);
+  const totals = poTotals(po);
+  const rowCount = Math.max(PO_ROWS, items.length + 1);
+  const rowH = PO_BODY_H / rowCount;
+  let h = '';
+
+  h += '<div class="po-frame"></div>';
+
+  /* 제목 */
+  h += poT(38.3, 57.0, 28, '발 주 서', 'width:523.8pt;text-align:center');
+  h += poRuleH(249.1, 83.9, 102.2);
+
+  /* NO. / 주문일자 */
+  h += poT(41.2, 107.4, 11, 'NO. :');
+  h += poT(80.5, 107.4, 11, po.no, 'max-width:170pt');
+  h += poT(409.7, 102.9, 11, '주문일자 :');
+  h += poT(469.3, 102.9, 11, poDateText(po.date));
+
+  /* 받는 쪽 */
+  h += poT(39.0, 124.7, 11, '상 호');
+  h += poT(78.1, 124.7, 11, po.company, 'max-width:155pt');
+  h += poT(39.0, 146.6, 11, '수 신:');
+  h += poT(78.1, 146.6, 11, po.receiver, 'max-width:155pt');
+  h += poT(39.0, 168.4, 11, '납 기:');
+  h += poT(78.1, 168.4, 11, po.delivery, 'max-width:155pt');
+  h += poT(39.0, 190.2, 11, '결제방법:');
+  h += poT(100.3, 190.2, 11, po.payment, 'max-width:133pt');
+  h += poT(39.0, 212.0, 11, '납기장소:');
+  h += poT(100.3, 212.0, 11, po.place, 'max-width:133pt');
+
+  /* 보내는 쪽 (고정) */
+  h += poT(237.4, 127.0, 30.1, PVENDOR.name, 'width:324.7pt;text-align:center;letter-spacing:4pt');
+  h += poT(237.4, 170.2, 11, PVENDOR.addr, 'width:324.7pt;text-align:center;font-family:Dotum,"돋움",sans-serif');
+  h += poT(237.4, 184.5, 11, PVENDOR.ceo, 'width:324.7pt;text-align:center');
+  h += poT(237.4, 197.4, 11, PVENDOR.tel, 'width:324.7pt;text-align:center');
+  h += poT(237.4, 210.4, 11, PVENDOR.fax, 'width:324.7pt;text-align:center');
+
+  /* 안내문 */
+  h += poT(38.3, 234.2, 10.1, PO_GREET, 'width:523.8pt;text-align:center');
+
+  /* 일금 */
+  h += poT(49.9, 255.7, 11, '일금:￦');
+  if (totals.any) {
+    h += '<div class="po-t" style="left:88pt;width:144pt;top:253.9pt;font-size:13pt;text-align:right;font-weight:700">' + poWonText(totals.sum) + '</div>';
+  }
+  h += poT(239.6, 255.7, 11, '(V.A.T 별도금액)');
+
+  /* 괘선 */
+  [[38.3, 118.9, 523.8], [38.3, 140.9, 199.6], [38.3, 162.7, 523.8],
+   [38.3, 184.5, 199.6], [38.3, 206.4, 199.6], [38.3, 228.2, 523.8],
+   [38.3, 250.0, 523.8], [38.3, 271.9, 523.8]].forEach(function (r) {
+    h += poRuleH(r[0], r[1], r[2]);
+  });
+  [[76.0, 118.9, 65.6], [98.2, 184.5, 43.7], [237.4, 118.9, 109.3], [237.4, 250.0, 21.9]]
+    .forEach(function (r) { h += poRuleV(r[0], r[1], r[2]); });
+
+  /* 품목 표 */
+  h += '<table class="po-table">';
+  h += '<colgroup>' + PO_COLS.map(function (w) { return '<col style="width:' + w + 'pt">'; }).join('') + '</colgroup>';
+  h += '<thead><tr style="height:18.8pt">';
+  ['No', '품 명   및  사 양', '규격', '수량', '단가', '비고'].forEach(function (l) { h += '<th>' + l + '</th>'; });
+  h += '</tr></thead><tbody>';
+  for (let i = 0; i < rowCount; i++) {
+    const it = items[i];
+    h += '<tr style="height:' + rowH.toFixed(2) + 'pt">';
+    if (it) {
+      h += '<td>' + (i + 1) + '</td>';
+      h += '<td>' + esc(it.name) + '</td>';
+      h += '<td>' + esc(it.spec) + '</td>';
+      h += '<td class="po-num">' + (it.qty !== '' ? qWon(qInt(it.qty)) : '') + '</td>';
+      h += '<td class="po-num">' + (it.price !== '' ? qWon(qInt(it.price)) : '') + '</td>';
+      h += '<td>' + esc(it.note) + '</td>';
+    } else if (i === items.length) {
+      h += '<td></td><td>이하여백</td><td></td><td></td><td></td><td></td>';
+    } else {
+      h += '<td></td><td></td><td></td><td></td><td></td><td></td>';
+    }
+    h += '</tr>';
+  }
+  h += '</tbody><tfoot>';
+  h += '<tr style="height:' + PO_FOOT_H + 'pt"><td></td><td>' + esc(po.tel ? 'T : ' + po.tel : '') + '</td><td></td><td></td><td></td><td></td></tr>';
+  h += '<tr style="height:' + PO_FOOT_H + 'pt"><td></td><td>' + esc(po.fax ? 'F : ' + po.fax : '') + '</td><td></td><td>담당자</td><td colspan="2" class="po-left" style="padding-left:6pt">' + esc(po.mgr) + '</td></tr>';
+  h += '</tfoot></table>';
+
+  return h;
+}
+
+function poWonText(n) {
+  return (Number(n) || 0).toLocaleString('en-US');
+}
+
+function renderPoSheet() {
+  if (!$('poSheet') || !state.po) return;
+  const html = poSheetHTML(state.po);
+  $('poSheet').innerHTML = html;
+  if ($('poPrintSheet')) $('poPrintSheet').innerHTML = html;
+}
+
+/* ---------------- 화면 ---------------- */
+function fillPoForm() {
+  const po = state.po;
+  $('poNo').value = po.no || '';
+  $('poDate').value = po.date || todayISO();
+  $('poCompany').value = po.company || '';
+  $('poReceiver').value = po.receiver || '';
+  $('poDelivery').value = po.delivery || '';
+  $('poPayment').value = po.payment || '';
+  $('poPlace').value = po.place || '';
+  $('poEmail').value = po.email || '';
+  $('poTel').value = po.tel || '';
+  $('poFax').value = po.fax || '';
+  $('poMgr').value = po.mgr || '';
+}
+
+function readPoForm() {
+  const po = state.po;
+  if (!po) return;
+  po.no = $('poNo').value.trim();
+  po.date = $('poDate').value || todayISO();
+  po.company = $('poCompany').value;
+  po.receiver = $('poReceiver').value;
+  po.delivery = $('poDelivery').value;
+  po.payment = $('poPayment').value;
+  po.place = $('poPlace').value;
+  po.email = $('poEmail').value.trim();
+  po.tel = $('poTel').value;
+  po.fax = $('poFax').value;
+  po.mgr = $('poMgr').value;
+}
+
+function renderPoItems() {
+  const box = $('poItems');
+  if (!box) return;
+  const items = state.po ? state.po.items : [];
+  box.innerHTML = items.map(function (it, i) {
+    return '<div class="q-item po-item" data-idx="' + i + '">' +
+      '<div class="q-item-head">' +
+        '<span class="q-no">' + (i + 1) + '</span>' +
+        '<input type="text" data-k="name" value="' + esc(it.name) + '" placeholder="품명 및 사양 (예: HDW043)" aria-label="' + (i + 1) + '번 품명" autocomplete="off">' +
+        '<button type="button" class="q-del js-po-item-del" aria-label="' + (i + 1) + '번 품목 삭제" title="이 품목 삭제">✕</button>' +
+      '</div>' +
+      '<div class="po-item-grid">' +
+        '<label class="q-mini"><span>규격</span><input type="text" data-k="spec" value="' + esc(it.spec) + '" placeholder="예: AC220V" autocomplete="off"></label>' +
+        '<label class="q-mini"><span>수량</span><input type="text" data-k="qty" inputmode="numeric" value="' + (it.qty ? qWon(qInt(it.qty)) : '') + '" placeholder="0"></label>' +
+        '<label class="q-mini"><span>단가</span><input type="text" data-k="price" inputmode="numeric" value="' + (it.price ? qWon(qInt(it.price)) : '') + '" placeholder="0"></label>' +
+        '<label class="q-mini"><span>비고</span><input type="text" data-k="note" value="' + esc(it.note) + '" placeholder="" autocomplete="off"></label>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function refreshPoTotals() {
+  if (!state.po) return;
+  const t = poTotals(state.po);
+  const sum = $('poSum');
+  if (sum) sum.textContent = t.any ? poWonText(t.sum) : '0';
+  updatePoMailText();
+  renderPoSheet();
+  schedulePoDraft();
+}
+
+function poStampText(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return '';
+  return (d.getMonth() + 1) + '.' + d.getDate() + ' ' + pad2(d.getHours()) + ':' + pad2(d.getMinutes());
+}
+
+function renderPoHistory() {
+  const box = $('poHistory');
+  if (!box) return;
+  const list = state.pos.slice().sort(function (a, b) {
+    return String(b.updatedAt || b.savedAt || '').localeCompare(String(a.updatedAt || a.savedAt || ''));
+  });
+  $('poHistoryCount').textContent = list.length ? list.length + '건' : '';
+  if (!list.length) {
+    box.innerHTML = '<p class="q-empty">아직 저장한 발주서가 없습니다. 위에서 작성하고 <b>발주서 저장</b>을 누르면 여기에 쌓입니다.</p>';
+    return;
+  }
+  box.innerHTML = list.map(function (po) {
+    const t = poTotals(po);
+    const cur = po.id && state.po && po.id === state.po.id;
+    return '<div class="q-hitem' + (cur ? ' is-current' : '') + '" data-pid="' + esc(po.id) + '">' +
+      '<div class="q-hmain"><b>' + esc(po.no || poDateText(po.date)) + '</b><span>' +
+        esc(po.company || '상호 없음') + ' · ' + esc(poDateText(po.date)) + (t.any ? ' · ' + poWonText(t.sum) + '원' : '') + '</span></div>' +
+      '<button type="button" class="btn btn-sm btn-ghost js-po-load">불러오기</button>' +
+      '<button type="button" class="btn btn-sm btn-ghost js-po-copyr">복사</button>' +
+      '<button type="button" class="btn-icon q-hdel js-po-del" aria-label="발주서 삭제" title="삭제">🗑</button>' +
+    '</div>';
+  }).join('');
+}
+
+function refreshPoCompanies() {
+  const set = {};
+  state.items.forEach(function (it) { if (it.company) set[it.company] = 1; });
+  state.quotes.forEach(function (q) { if (q.company) set[q.company] = 1; });
+  state.pos.forEach(function (p) { if (p.company) set[p.company] = 1; });
+  const list = Object.keys(set).sort(function (a, b) { return a.localeCompare(b, 'ko'); });
+  const dl = $('poCompanyList');
+  if (dl) dl.innerHTML = list.map(function (c) { return '<option value="' + esc(c) + '"></option>'; }).join('');
+}
+
+function setPoSaveHint() {
+  const hint = $('poSaveHint');
+  if (!hint) return;
+  const po = state.po;
+  hint.textContent = po && po.savedAt ? '저장됨 · ' + poStampText(po.savedAt) : '';
+}
+
+/* ---------------- 메일 문구 ---------------- */
+function poMailSubject(po) {
+  const date = poDateText(po.date);
+  const company = String(po.company || '').trim();
+  return '[한열사] 발주서 송부 건 (' + date + (company ? ' / ' + company : '') + ')';
+}
+
+function poMailBody(po) {
+  const mgr = String((po && po.mgr) || '').trim() || PODEFAULTS.mgr;
+  return '안녕하세요. 한열사 ' + mgr + '입니다.\n발주서 첨부하오니 확인 부탁드립니다.\n감사합니다.';
+}
+
+function updatePoMailText() {
+  const pre = $('poMailText');
+  if (pre && state.po) pre.textContent = poMailBody(state.po);
+}
+
+/* ---------------- 동작 ---------------- */
+function savePoRecord() {
+  readPoForm();
+  const po = state.po;
+  if (!po.company.trim()) { toast('상호(받는 업체)를 입력해 주세요.'); $('poCompany').focus(); return; }
+  const filled = po.items.filter(poItemFilled);
+  if (!filled.length) { toast('품목을 한 줄 이상 입력해 주세요.'); return; }
+  po.items = filled;
+  const now = new Date().toISOString();
+  po.updatedAt = now;
+  if (!po.id) po.id = uid();
+  if (!po.savedAt) po.savedAt = now;
+  const rec = normalizePoRecord(po);
+  const idx = state.pos.findIndex(function (x) { return x.id === rec.id; });
+  if (idx >= 0) state.pos[idx] = rec; else state.pos.unshift(rec);
+  persistPos();
+  schedulePoDraft();
+  renderPoItems();
+  refreshPoTotals();
+  renderPoHistory();
+  setPoSaveHint();
+  refreshPoCompanies();
+  toast('발주서를 저장했습니다.');
+}
+
+function applyPo(po, msg) {
+  state.po = po;
+  fillPoForm();
+  renderPoItems();
+  refreshPoTotals();
+  renderPoHistory();
+  setPoSaveHint();
+  if (msg) toast(msg);
+  const view = $('poView');
+  if (view) view.scrollIntoView({ block: 'start' });
+}
+
+function loadPoRecord(id) {
+  const rec = state.pos.find(function (x) { return x.id === id; });
+  if (!rec) return;
+  applyPo(normalizePoRecord(rec), '발주서를 불러왔습니다. 고친 뒤 저장하면 이 이력이 수정됩니다.');
+}
+
+function copyPoRecord(id) {
+  const rec = state.pos.find(function (x) { return x.id === id; });
+  if (!rec) return;
+  const po = normalizePoRecord(rec);
+  po.id = '';
+  po.savedAt = '';
+  po.updatedAt = '';
+  po.date = todayISO();
+  po.no = '';
+  applyPo(po, '새 발주서로 복사했습니다. 주문일자와 NO.를 확인하세요.');
+}
+
+async function deletePoRecord(id) {
+  const rec = state.pos.find(function (x) { return x.id === id; });
+  if (!rec) return;
+  const ans = await askDialog({
+    title: '발주서 이력 삭제',
+    message: '“' + (rec.company || '상호 없음') + ' · ' + poDateText(rec.date) + '” 발주서를 지울까요? 되돌릴 수 없습니다.',
+    okText: '삭제',
+    danger: true
+  });
+  if (ans !== 'ok') return;
+  state.pos = state.pos.filter(function (x) { return x.id !== id; });
+  persistPos();
+  renderPoHistory();
+  toast('발주서 이력을 삭제했습니다.');
+}
+
+function newPoFlow() {
+  const po = state.po;
+  const dirty = !!(po && (po.company.trim() || poRowsOf(po).length));
+  const go = function () {
+    state.po = newEmptyPo();
+    fillPoForm();
+    renderPoItems();
+    refreshPoTotals();
+    renderPoHistory();
+    setPoSaveHint();
+    $('poCompany').focus();
+  };
+  if (!dirty) { go(); return; }
+  askDialog({
+    title: '새 발주서',
+    message: '지금 작성 중인 내용을 비우고 새 발주서를 시작할까요? 저장하지 않은 내용은 사라집니다.',
+    okText: '새로 쓰기',
+    danger: true
+  }).then(function (ans) { if (ans === 'ok') go(); });
+}
+
+async function copyPoMail() {
+  const text = poMailBody(state.po);
+  let ok = false;
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(text);
+      ok = true;
+    }
+  } catch (e) { ok = false; }
+  if (!ok) {
+    try {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly', 'readonly');
+      ta.style.cssText = 'position:fixed;left:-9999px;top:0';
+      document.body.appendChild(ta);
+      ta.select();
+      ok = document.execCommand('copy');
+      ta.remove();
+    } catch (e) { ok = false; }
+  }
+  toast(ok ? '메일 문구를 복사했습니다. 메일에 붙여넣기 하세요.' : '복사하지 못했습니다. 문구를 길게 눌러 직접 복사해 주세요.');
+}
+
+function openPoMailApp() {
+  readPoForm();
+  const po = state.po;
+  if (!po) return;
+  const to = String(po.email || '').trim().replace(/[\s,;]+/g, '');
+  let url = 'mailto:';
+  if (to) url += encodeURIComponent(to).replace(/%40/g, '@');
+  url += '?subject=' + encodeURIComponent(poMailSubject(po)) +
+    '&body=' + encodeURIComponent(poMailBody(po));
+  try {
+    const a = document.createElement('a');
+    a.href = url;
+    a.style.cssText = 'position:fixed;left:-9999px;top:0';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  } catch (e) {
+    window.location.href = url;
+  }
+  toast('메일 앱이 열리면 방금 저장한 PDF 파일을 첨부해 주세요!');
+}
+
+function printPo() {
+  readPoForm();
+  if (!state.po.company.trim()) {
+    toast('상호(받는 업체)를 먼저 입력해 주세요.');
+    $('poCompany').focus();
+    return;
+  }
+  renderPoSheet();
+  setTimeout(function () { window.print(); }, 80);
+}
+
+/* ---------- 발주서 A4 미리보기 확대/맞춤 ---------- */
+function fitPoPaper() {
+  const view = $('poPaperView'), scaleBox = $('poPaperScale');
+  if (!view || !scaleBox) return;
+  const sheetW = 210 * PX_PER_MM, sheetH = 297 * PX_PER_MM;
+  if (!view.clientWidth) return;
+  const avail = view.clientWidth - 30;
+  let scale = state.poZoom ? 1 : Math.min(1, avail / sheetW);
+  if (!isFinite(scale) || scale <= 0) scale = 0.3;
+  scale = Math.max(scale, 0.2);
+  scaleBox.style.transform = 'scale(' + scale + ')';
+  view.style.height = Math.round(sheetH * scale + 30) + 'px';
+  const btn = $('btnPoZoom');
+  if (btn) btn.textContent = state.poZoom ? '맞춤' : '확대';
+}
+
+function initPo() {
+  loadPoStore();
+  loadPoDraft();
+  updatePoMailText();
+  fillPoForm();
+  renderPoItems();
+  refreshPoCompanies();
+  renderPoHistory();
+  setPoSaveHint();
+  refreshPoTotals();
+  bindPoEvents();
+}
+
+function bindPoEvents() {
+  ['poNo', 'poDate', 'poCompany', 'poReceiver', 'poDelivery', 'poPayment', 'poPlace', 'poEmail', 'poTel', 'poFax', 'poMgr']
+    .forEach(function (id) {
+      const el = $(id);
+      if (!el) return;
+      el.addEventListener('input', onPoField);
+      el.addEventListener('change', onPoField);
+    });
+
+  $('tabPo').addEventListener('click', function () { setTab('po'); });
+  $('btnPoAddItem').addEventListener('click', addPoItem);
+  $('btnPoSave').addEventListener('click', savePoRecord);
+  $('btnPoNew').addEventListener('click', newPoFlow);
+  $('btnPoCopy').addEventListener('click', copyPoMail);
+  $('btnPoMailApp').addEventListener('click', openPoMailApp);
+  $('btnPoPrint').addEventListener('click', printPo);
+  $('btnPoZoom').addEventListener('click', function () {
+    state.poZoom = !state.poZoom;
+    fitPoPaper();
+  });
+
+  $('poItems').addEventListener('input', onPoItemInput);
+  $('poItems').addEventListener('click', function (e) {
+    const btn = e.target.closest('.js-po-item-del');
+    if (!btn) return;
+    const row = btn.closest('.po-item');
+    const idx = Number(row.getAttribute('data-idx'));
+    state.po.items.splice(idx, 1);
+    if (!state.po.items.length) state.po.items.push(normalizePoItem({}));
+    renderPoItems();
+    refreshPoTotals();
+  });
+
+  $('poHistory').addEventListener('click', function (e) {
+    const item = e.target.closest('.q-hitem');
+    if (!item) return;
+    const id = item.getAttribute('data-pid');
+    if (e.target.closest('.js-po-load')) loadPoRecord(id);
+    else if (e.target.closest('.js-po-copyr')) copyPoRecord(id);
+    else if (e.target.closest('.js-po-del')) deletePoRecord(id);
+  });
+
+  window.addEventListener('resize', function () {
+    if (state.tab === 'po') fitPoPaper();
+  });
+  window.addEventListener('beforeprint', function () { if (state.po) renderPoSheet(); });
+}
+
+function addPoItem() {
+  state.po.items.push(normalizePoItem({}));
+  renderPoItems();
+  refreshPoTotals();
+  const rows = document.querySelectorAll('#poItems .po-item');
+  const last = rows[rows.length - 1];
+  if (last) {
+    const input = last.querySelector('input[data-k="name"]');
+    if (input) input.focus();
+  }
+}
+
+function onPoField(e) {
+  const id = e.target.id;
+  if (id === 'poMgr' || id === 'poTel' || id === 'poFax') {
+    state.poDefaults[id === 'poMgr' ? 'mgr' : id.slice(2).toLowerCase()] = e.target.value;
+    savePoDefaultsSoon();
+  }
+  readPoForm();
+  refreshPoTotals();
+}
+
+function onPoItemInput(e) {
+  const input = e.target.closest('input[data-k]');
+  if (!input) return;
+  const row = input.closest('.po-item');
+  if (!row) return;
+  const it = state.po.items[Number(row.getAttribute('data-idx'))];
+  if (!it) return;
+  const k = input.getAttribute('data-k');
+  if (k === 'qty' || k === 'price') {
+    const digits = input.value.replace(/[^0-9]/g, '').slice(0, 12);
+    it[k] = digits;
+    const formatted = digits ? qWon(qInt(digits)) : '';
+    if (input.value !== formatted) input.value = formatted;
+  } else {
+    it[k] = input.value;
+  }
+  refreshPoTotals();
 }
 
 /* =========================================================
@@ -5692,9 +6574,10 @@ function init() {
   syncViewToggle();
   renderSyncBar();
   initQuote();
+  initPo();
   let savedTab = 'orders';
   try { savedTab = localStorage.getItem(STORE_TAB) || 'orders'; } catch (e) { savedTab = 'orders'; }
-  setTab(savedTab === 'quote' ? 'quote' : 'orders');
+  setTab(savedTab);
   if (isSyncOn()) syncFromServer({ initial: true });
 }
 
