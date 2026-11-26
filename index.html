@@ -634,8 +634,9 @@
   }
   @media (max-width:820px){
     .tabs-row{padding-bottom:8px}
-    .app-tabs{display:flex;width:100%}
-    .app-tab{flex:1 1 0;min-width:0;padding:8px 5px;font-size:13px;gap:4px;overflow:hidden;text-overflow:ellipsis}
+    .app-tabs{display:flex;width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+    .app-tabs::-webkit-scrollbar{display:none}
+    .app-tab{flex:0 0 auto;padding:8px 9px;font-size:12.5px;gap:4px}
     .quote-layout{margin-top:12px}
     .qcard{padding:14px}
     .q-item-grid{grid-template-columns:1fr 1fr}
@@ -643,7 +644,7 @@
   }
 
   @media (max-width:430px){
-    .app-tab{font-size:12px;padding:8px 3px;gap:2px;letter-spacing:-.02em}
+    .app-tab{font-size:12px;padding:8px 7px;gap:2px;letter-spacing:-.02em}
   }
 
   /* ---------- 발주서 작성 ---------- */
@@ -761,6 +762,65 @@
     .lock-card.shake{animation:none}
   }
 
+  /* ---------- 단가표 ---------- */
+  .price-view{padding-bottom:34px}
+  .price-head{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:16px 0 12px}
+  .price-head h2{margin:0;font-size:18px;letter-spacing:-.02em}
+  .price-head p{margin:3px 0 0;font-size:12.5px;color:var(--muted);font-weight:600}
+  .price-doc{font-size:11.5px;font-weight:800;color:#1d4ed8;background:#eff6ff;border:1px solid #bfdbfe;border-radius:999px;padding:4px 10px;white-space:nowrap;line-height:1.4}
+  .price-panel{background:#fff;border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px;display:flex;flex-direction:column;gap:10px}
+  .price-panel .search{flex:1 1 300px}
+  .price-toprow{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .price-filter{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0}
+  .price-filter .flabel{font-size:11.5px;font-weight:800;color:#94a3b8;letter-spacing:.02em;flex:none;min-width:46px}
+  .price-filter .chips{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%;scrollbar-width:none}
+  .price-filter .chips::-webkit-scrollbar{display:none}
+  .price-filter .chip{min-height:33px;padding:5px 12px;font-size:12.5px;white-space:nowrap}
+  .price-terms{display:flex;align-items:center;gap:10px 18px;flex-wrap:wrap;border-top:1px dashed var(--line);padding-top:11px}
+  .price-disc{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:800;color:#334155;flex:none}
+  .price-disc input{width:66px;min-height:38px;border:1px solid var(--line);border-radius:9px;padding:6px 8px;text-align:right;font-weight:800;font-variant-numeric:tabular-nums;font-size:14.5px}
+  .price-disc input:focus{outline:none;border-color:#93c5fd;box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+  .price-disc input:disabled{background:#f8fafc;color:#94a3b8}
+  .price-disc .pct{color:#94a3b8;font-weight:800}
+  .price-mat{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .price-mat .chip{min-height:33px;padding:5px 11px;font-size:12.5px;border:1px solid var(--line);border-radius:9px;background:#fff}
+  .price-mat .chip.is-active{background:#eff6ff;border-color:#93c5fd;color:#1d4ed8}
+  .price-summary{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:11px 2px 0;font-size:12.5px;color:#475569;font-weight:700}
+  .price-summary .hit{background:#eff6ff;border:1px solid #bfdbfe;color:#1d4ed8;border-radius:999px;padding:3px 9px;font-weight:800}
+  .price-summary .reset{border:0;background:transparent;color:#2563eb;font-weight:800;font-size:12.5px;cursor:pointer;padding:4px 6px;border-radius:7px}
+  .price-summary .reset:hover{background:#eff6ff}
+  .price-list{display:flex;flex-direction:column;gap:8px;margin-top:11px}
+  .price-item{display:grid;grid-template-columns:minmax(0,1fr) 152px auto;gap:12px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:12px;padding:11px 14px;box-shadow:0 1px 2px rgba(15,23,42,.03)}
+  .price-item:hover{border-color:#bfdbfe}
+  .price-main{min-width:0}
+  .price-title{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .price-model{font-size:15px;font-weight:800;letter-spacing:-.01em}
+  .price-size{font-size:12.5px;font-weight:800;color:#334155;background:#f1f5f9;border-radius:6px;padding:2px 7px;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .price-conn{font-size:11px;font-weight:800;color:#475569;border:1px solid var(--line);border-radius:999px;padding:2px 7px;background:#fff;white-space:nowrap}
+  .price-meta{display:flex;align-items:center;gap:4px 10px;flex-wrap:wrap;margin-top:5px;font-size:12px;color:var(--muted);font-weight:600}
+  .price-meta b{color:#475569;font-weight:800;font-variant-numeric:tabular-nums}
+  .price-meta .est{color:#b45309;font-weight:800}
+  .price-price{text-align:right;display:flex;flex-direction:column;align-items:flex-end}
+  .price-orig{font-size:11.5px;font-weight:700;color:#94a3b8;text-decoration:line-through;font-variant-numeric:tabular-nums;line-height:1.5}
+  .price-orig.same{text-decoration:none;color:#cbd5e1}
+  .price-final{font-size:16.5px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums;color:var(--ink)}
+  .price-final .u{font-size:12px;font-weight:700;color:var(--muted);margin-left:1px}
+  .price-btnrow{display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap}
+  .price-btnrow .btn{min-height:34px;padding:0 10px;font-size:12.5px;white-space:nowrap}
+  .price-empty{margin:18px 0 0;padding:26px 14px;text-align:center;color:var(--muted);font-size:13.5px;border:1px dashed #cbd5e1;border-radius:12px;background:#fff}
+  .price-note{margin:10px 2px 0;font-size:11.5px;line-height:1.65;color:#94a3b8}
+  .q-item.just-added{border-color:#6ee7b7;background:#f0fdf9;box-shadow:0 0 0 3px rgba(16,185,129,.12)}
+  @media (max-width:820px){
+    .price-head{margin-top:12px}
+    .price-panel{padding:12px}
+    .price-item{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"main price" "btns btns";gap:8px 10px;padding:11px 12px}
+    .price-main{grid-area:main}
+    .price-price{grid-area:price}
+    .price-btnrow{grid-area:btns;justify-content:stretch;border-top:1px dashed var(--line);padding-top:8px}
+    .price-btnrow .btn{flex:1 1 0}
+    .price-filter .flabel{min-width:0}
+  }
+
   /* ---------- 인쇄: 견적서 탭에서는 견적서만 A4 한 장으로 ---------- */
   #printArea{display:none}
   @media print{
@@ -822,6 +882,7 @@
       <button type="button" class="app-tab is-active" id="tabOrders" data-tab="orders" role="tab" aria-selected="true">📋 발주서 관리</button>
       <button type="button" class="app-tab" id="tabPo" data-tab="po" role="tab" aria-selected="false">📝 발주서 작성</button>
       <button type="button" class="app-tab" id="tabQuote" data-tab="quote" role="tab" aria-selected="false">📄 견적서 작성</button>
+      <button type="button" class="app-tab" id="tabPrice" data-tab="price" role="tab" aria-selected="false">📊 단가표</button>
     </nav>
   </div>
   <div class="wrap" id="ordersSyncBar">
@@ -1166,6 +1227,62 @@
   </div>
 </section>
 
+<!-- ============ 단가표 ============ -->
+<section class="wrap price-view" id="priceView" hidden aria-label="단가표">
+  <div class="price-head">
+    <div>
+      <h2>📊 단가표</h2>
+      <p id="priceHeadMeta">우성밸브 판체크 단가표 WSV2026-007 · 2026-08-01 적용</p>
+    </div>
+    <span class="price-doc" id="priceDocBadge">총 354개 품목</span>
+  </div>
+
+  <div class="price-panel">
+    <div class="price-toprow">
+      <div class="search">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+        <input type="search" id="priceSearch" placeholder="모델명 · 규격 · 연결방식 · Sealing 검색 (예: PC22, 50A, CV-M)" aria-label="단가표 검색" autocomplete="off">
+        <button type="button" class="clear" id="btnPriceClear" aria-label="검색어 지우기" hidden>✕</button>
+      </div>
+    </div>
+
+    <div class="price-filter">
+      <span class="flabel">메이커</span>
+      <div class="chips" id="priceMakerChips" role="group" aria-label="메이커 선택"></div>
+    </div>
+
+    <div class="price-filter">
+      <span class="flabel">연결방식</span>
+      <div class="chips" id="priceConnChips" role="group" aria-label="연결방식 필터"></div>
+    </div>
+
+    <div class="price-filter">
+      <span class="flabel">Sealing</span>
+      <div class="chips" id="priceSealChips" role="group" aria-label="Sealing 필터"></div>
+    </div>
+
+    <div class="price-terms">
+      <label class="price-disc" for="priceDiscount">할인율
+        <input id="priceDiscount" type="number" inputmode="numeric" min="0" max="90" step="1" value="0" aria-label="할인율(%)">
+        <span class="pct">%</span>
+        <span class="q-hint" id="priceDiscTarget"></span>
+      </label>
+      <div class="price-mat" id="priceMatChips" role="group" aria-label="재질 배율"></div>
+    </div>
+  </div>
+
+  <div class="price-summary">
+    <span class="hit" id="priceCount">0개</span>
+    <span id="priceTermsSummary"></span>
+    <span class="spacer"></span>
+    <button type="button" class="reset" id="btnPriceReset">↺ 검색·필터 초기화</button>
+  </div>
+
+  <div class="price-list" id="priceList"></div>
+
+  <p class="price-note" id="priceNote">적용 단가 = 단가표 기준가 × 재질 배율 × (1 − 할인율)을 10원 단위 올림(100원 단위)한 값입니다. 협가(회색 취소선)는 단가표 기준가에 재질 배율만 적용한 가격입니다. 8A·10A처럼 316L 전용으로 생산되는 품목은 기준가가 이미 316L입니다.</p>
+</section>
+
 <!-- 발주서 인쇄 전용 사본 (화면에는 보이지 않고 인쇄할 때만 쓰입니다) -->
 <div id="poPrintArea" aria-hidden="true"><div class="po-sheet" id="poPrintSheet"></div></div>
 <datalist id="poCompanyList"></datalist>
@@ -1462,6 +1579,16 @@
 <datalist id="companyList"></datalist>
 <input type="file" id="fileImport" accept=".json,application/json" hidden>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<!-- ============ 단가표 데이터 (앱 본체 스크립트보다 먼저 정의) ============ -->
+<script>
+/* 우성밸브 판체크 단가표 WSV2026-007 (적용 2026-08-01) · 354개 품목
+   work/data.py 를 work/make_price_js.py 로 변환해 넣었습니다.
+   각 항목: maker 메이커 / m 모델명 / s 호칭(인치) / a 규격(A) / mat 재질 /
+            seal Sealing / sealEst 원본 미표기로 접미사 추정(1) / p 최고사용압력 /
+            pr 단가표 기준가(원) / conn 연결방식 / sheet 가격표 번호 */
+const PRICE_DATA = {"applyDate":"2026-08-01","docNo":"WSV2026-007","ratioNote":"CF8(304)=1 / CF8M(316)=1.3 / CF3M(316L)=1.95","items":[{"maker":"우성밸브","m":"PBS-V","s":"3/8\"","a":"10A","mat":"황동","seal":"VITON","sealEst":0,"p":"10kg/㎠","pr":34400,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"CV-M","s":"1/2\"","a":"15A","mat":"황동","seal":"METAL","sealEst":0,"p":"10kg/㎠","pr":21800,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"CV-T","s":"1/2\"","a":"15A","mat":"황동","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":24600,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"UCV-E","s":"1/2\"","a":"15A","mat":"황동","seal":"EPDM","sealEst":0,"p":"10kg/㎠","pr":24200,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"PBS-V","s":"1/2\"","a":"15A","mat":"황동","seal":"VITON","sealEst":0,"p":"10kg/㎠","pr":42800,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"CV-M","s":"3/4\"","a":"20A","mat":"황동","seal":"METAL","sealEst":0,"p":"10kg/㎠","pr":34600,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"CV-T","s":"3/4\"","a":"20A","mat":"황동","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":37200,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"UCV-E","s":"3/4\"","a":"20A","mat":"황동","seal":"EPDM","sealEst":0,"p":"10kg/㎠","pr":36200,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"CV-M","s":"1\"","a":"25A","mat":"황동","seal":"METAL","sealEst":0,"p":"10kg/㎠","pr":69600,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"CV-T","s":"1\"","a":"25A","mat":"황동","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":73600,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"UCV-E","s":"1\"","a":"25A","mat":"황동","seal":"EPDM","sealEst":0,"p":"10kg/㎠","pr":72600,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"CV-M","s":"1 1/4\"","a":"32A","mat":"황동","seal":"METAL","sealEst":0,"p":"10kg/㎠","pr":93600,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"CV-T","s":"1 1/4\"","a":"32A","mat":"황동","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":98000,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"UCV-E","s":"1 1/4\"","a":"32A","mat":"황동","seal":"EPDM","sealEst":0,"p":"10kg/㎠","pr":98200,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"CV-M","s":"1 1/2\"","a":"40A","mat":"황동","seal":"METAL","sealEst":0,"p":"10kg/㎠","pr":116800,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"CV-T","s":"1 1/2\"","a":"40A","mat":"황동","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":123200,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"UCV-E","s":"1 1/2\"","a":"40A","mat":"황동","seal":"EPDM","sealEst":0,"p":"10kg/㎠","pr":148600,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"CV-M","s":"2\"","a":"50A","mat":"황동","seal":"METAL","sealEst":0,"p":"10kg/㎠","pr":175600,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"CV-T","s":"2\"","a":"50A","mat":"황동","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":184200,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"UCV-E","s":"2\"","a":"50A","mat":"황동","seal":"EPDM","sealEst":0,"p":"10kg/㎠","pr":237900,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"PCS22-M","s":"1/4\", 3/8\"","a":"8, 10A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"20kg/㎠","pr":41000,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"PCS22-T","s":"1/4\", 3/8\"","a":"8, 10A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":41400,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"PCS22-M","s":"1/2\"","a":"15A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"20kg/㎠","pr":41800,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"PCS22-T","s":"1/2\"","a":"15A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":42200,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"PCS22-M","s":"3/4\"","a":"20A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"20kg/㎠","pr":51200,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"PCS22-T","s":"3/4\"","a":"20A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":51600,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"PCS22-M","s":"1\"","a":"25A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"20kg/㎠","pr":61700,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"PCS22-T","s":"1\"","a":"25A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":63500,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"PAS22-M","s":"1\"","a":"25A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"20kg/㎠","pr":84200,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"PAS22-E","s":"1\"","a":"25A","mat":"스텐304","seal":"EPDM","sealEst":0,"p":"20kg/㎠","pr":79000,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"PAS22-V","s":"1\"","a":"25A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"20kg/㎠","pr":90500,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"PCS22-M","s":"1 1/4\"","a":"32A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"20kg/㎠","pr":73400,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"PCS22-T","s":"1 1/4\"","a":"32A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":75700,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"PAS22-M","s":"1 1/4\"","a":"32A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"20kg/㎠","pr":100400,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"PAS22-E","s":"1 1/4\"","a":"32A","mat":"스텐304","seal":"EPDM","sealEst":0,"p":"20kg/㎠","pr":94400,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"PAS22-V","s":"1 1/4\"","a":"32A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"20kg/㎠","pr":100700,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"PCS22-M","s":"1 1/2\"","a":"40A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"20kg/㎠","pr":102000,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"PCS22-T","s":"1 1/2\"","a":"40A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":106900,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"PAS22-M","s":"1 1/2\"","a":"40A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"20kg/㎠","pr":131200,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"PAS22-E","s":"1 1/2\"","a":"40A","mat":"스텐304","seal":"EPDM","sealEst":0,"p":"20kg/㎠","pr":123600,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"PAS22-V","s":"1 1/2\"","a":"40A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"20kg/㎠","pr":129200,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"PCS22-M","s":"2\"","a":"50A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"20kg/㎠","pr":142400,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"PCS22-T","s":"2\"","a":"50A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":149600,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"PAS22-M","s":"2\"","a":"50A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"20kg/㎠","pr":177600,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"PAS22-E","s":"2\"","a":"50A","mat":"스텐304","seal":"EPDM","sealEst":0,"p":"20kg/㎠","pr":167200,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"PAS22-V","s":"2\"","a":"50A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"20kg/㎠","pr":175800,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"BU22-N","s":"1/4\", 3/8\"","a":"8, 10A","mat":"스텐316L","seal":"NBR","sealEst":0,"p":"20kg/㎠","pr":49600,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"BU22-V","s":"1/4\", 3/8\"","a":"8, 10A","mat":"스텐316L","seal":"VITON","sealEst":0,"p":"20kg/㎠","pr":50800,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"BU22-N","s":"1/2\"","a":"15A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"20kg/㎠","pr":89400,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"BU22-V","s":"1/2\"","a":"15A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"20kg/㎠","pr":90800,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"BU22-N","s":"3/4\"","a":"20A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"20kg/㎠","pr":120400,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"BU22-V","s":"3/4\"","a":"20A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"20kg/㎠","pr":122000,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"PC12-M","s":"1/2\"","a":"15A","mat":"황동","seal":"METAL","sealEst":0,"p":"16kg/㎠","pr":41300,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC12-T","s":"1/2\"","a":"15A","mat":"황동","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":41600,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC12-M","s":"3/4\"","a":"20A","mat":"황동","seal":"METAL","sealEst":0,"p":"16kg/㎠","pr":54400,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC12-T","s":"3/4\"","a":"20A","mat":"황동","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":55900,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC12-M","s":"1\"","a":"25A","mat":"황동","seal":"METAL","sealEst":0,"p":"16kg/㎠","pr":63100,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC12-T","s":"1\"","a":"25A","mat":"황동","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":66400,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA12-M","s":"1\"","a":"25A","mat":"황동","seal":"METAL","sealEst":0,"p":"16kg/㎠","pr":109500,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA12-E","s":"1\"","a":"25A","mat":"황동","seal":"EPDM","sealEst":0,"p":"16kg/㎠","pr":103200,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA12-V","s":"1\"","a":"25A","mat":"황동","seal":"VITON","sealEst":0,"p":"16kg/㎠","pr":119200,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC12-M","s":"1 1/4\"","a":"32A","mat":"황동","seal":"METAL","sealEst":0,"p":"16kg/㎠","pr":80000,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC12-T","s":"1 1/4\"","a":"32A","mat":"황동","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":82700,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA12-M","s":"1 1/4\"","a":"32A","mat":"황동","seal":"METAL","sealEst":0,"p":"16kg/㎠","pr":139900,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA12-E","s":"1 1/4\"","a":"32A","mat":"황동","seal":"EPDM","sealEst":0,"p":"16kg/㎠","pr":131500,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA12-V","s":"1 1/4\"","a":"32A","mat":"황동","seal":"VITON","sealEst":0,"p":"16kg/㎠","pr":147700,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC12-M","s":"1 1/2\"","a":"40A","mat":"황동","seal":"METAL","sealEst":0,"p":"16kg/㎠","pr":99300,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC12-T","s":"1 1/2\"","a":"40A","mat":"황동","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":103100,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA12-M","s":"1 1/2\"","a":"40A","mat":"황동","seal":"METAL","sealEst":0,"p":"16kg/㎠","pr":163200,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA12-E","s":"1 1/2\"","a":"40A","mat":"황동","seal":"EPDM","sealEst":0,"p":"16kg/㎠","pr":153400,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA12-V","s":"1 1/2\"","a":"40A","mat":"황동","seal":"VITON","sealEst":0,"p":"16kg/㎠","pr":170200,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC12-M","s":"2\"","a":"50A","mat":"황동","seal":"METAL","sealEst":0,"p":"16kg/㎠","pr":129000,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC12-T","s":"2\"","a":"50A","mat":"황동","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":134200,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA12-M","s":"2\"","a":"50A","mat":"황동","seal":"METAL","sealEst":0,"p":"16kg/㎠","pr":211200,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA12-E","s":"2\"","a":"50A","mat":"황동","seal":"EPDM","sealEst":0,"p":"16kg/㎠","pr":198600,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA12-V","s":"2\"","a":"50A","mat":"황동","seal":"VITON","sealEst":0,"p":"16kg/㎠","pr":220700,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC12-M","s":"2 1/2\"","a":"65A","mat":"황동","seal":"METAL","sealEst":0,"p":"16kg/㎠","pr":170000,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC12-T","s":"2 1/2\"","a":"65A","mat":"황동","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":179400,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA12-M","s":"2 1/2\"","a":"65A","mat":"황동","seal":"METAL","sealEst":0,"p":"16kg/㎠","pr":278200,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA12-E","s":"2 1/2\"","a":"65A","mat":"황동","seal":"EPDM","sealEst":0,"p":"16kg/㎠","pr":261700,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA12-V","s":"2 1/2\"","a":"65A","mat":"황동","seal":"VITON","sealEst":0,"p":"16kg/㎠","pr":283600,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC12-M","s":"3\"","a":"80A","mat":"황동","seal":"METAL","sealEst":0,"p":"16kg/㎠","pr":249100,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC12-T","s":"3\"","a":"80A","mat":"황동","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":271300,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA12-M","s":"3\"","a":"80A","mat":"황동","seal":"METAL","sealEst":0,"p":"16kg/㎠","pr":378900,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA12-E","s":"3\"","a":"80A","mat":"황동","seal":"EPDM","sealEst":0,"p":"16kg/㎠","pr":356800,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA12-V","s":"3\"","a":"80A","mat":"황동","seal":"VITON","sealEst":0,"p":"16kg/㎠","pr":378700,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC12-M","s":"4\"","a":"100A","mat":"청동","seal":"METAL","sealEst":0,"p":"16kg/㎠","pr":597700,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC12-T","s":"4\"","a":"100A","mat":"청동","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":597700,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA12-M","s":"4\"","a":"100A","mat":"청동","seal":"METAL","sealEst":0,"p":"16kg/㎠","pr":671300,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA12-E","s":"4\"","a":"100A","mat":"청동","seal":"EPDM","sealEst":0,"p":"16kg/㎠","pr":671300,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA12-V","s":"4\"","a":"100A","mat":"청동","seal":"VITON","sealEst":0,"p":"16kg/㎠","pr":671300,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA32-T","s":"5\"","a":"125A","mat":"닥타일","seal":"PTFE","sealEst":1,"p":"10kg/㎠","pr":542900,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA32-M","s":"5\"","a":"125A","mat":"닥타일","seal":"METAL","sealEst":1,"p":"10kg/㎠","pr":487600,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA32-E","s":"5\"","a":"125A","mat":"닥타일","seal":"EPDM","sealEst":1,"p":"10kg/㎠","pr":466300,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA32-V","s":"5\"","a":"125A","mat":"닥타일","seal":"VITON","sealEst":1,"p":"10kg/㎠","pr":485600,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA32-T","s":"6\"","a":"150A","mat":"닥타일","seal":"PTFE","sealEst":1,"p":"10kg/㎠","pr":705000,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA32-M","s":"6\"","a":"150A","mat":"닥타일","seal":"METAL","sealEst":1,"p":"10kg/㎠","pr":628300,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA32-E","s":"6\"","a":"150A","mat":"닥타일","seal":"EPDM","sealEst":1,"p":"10kg/㎠","pr":603000,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA32-V","s":"6\"","a":"150A","mat":"닥타일","seal":"VITON","sealEst":1,"p":"10kg/㎠","pr":623900,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA32-T","s":"8\"","a":"200A","mat":"닥타일","seal":"PTFE","sealEst":1,"p":"10kg/㎠","pr":1166300,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA32-M","s":"8\"","a":"200A","mat":"닥타일","seal":"METAL","sealEst":1,"p":"10kg/㎠","pr":1057800,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA32-E","s":"8\"","a":"200A","mat":"닥타일","seal":"EPDM","sealEst":1,"p":"10kg/㎠","pr":1035100,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA32-V","s":"8\"","a":"200A","mat":"닥타일","seal":"VITON","sealEst":1,"p":"10kg/㎠","pr":1078200,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA32-T","s":"10\"","a":"250A","mat":"닥타일","seal":"PTFE","sealEst":1,"p":"10kg/㎠","pr":2167400,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA32-M","s":"10\"","a":"250A","mat":"닥타일","seal":"METAL","sealEst":1,"p":"10kg/㎠","pr":1927100,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA32-E","s":"10\"","a":"250A","mat":"닥타일","seal":"EPDM","sealEst":1,"p":"10kg/㎠","pr":2065000,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA32-V","s":"10\"","a":"250A","mat":"닥타일","seal":"VITON","sealEst":1,"p":"10kg/㎠","pr":2106300,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC22-M","s":"1/2\"","a":"15A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"40kg/㎠","pr":35900,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC22-T","s":"1/2\"","a":"15A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":41000,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC22-M","s":"3/4\"","a":"20A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"40kg/㎠","pr":39800,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC22-T","s":"3/4\"","a":"20A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":41800,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC22-M","s":"1\"","a":"25A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"40kg/㎠","pr":47400,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC22-T","s":"1\"","a":"25A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":50200,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-M","s":"1\"","a":"25A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"40kg/㎠","pr":92000,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-E","s":"1\"","a":"25A","mat":"스텐304","seal":"EPDM","sealEst":0,"p":"30kg/㎠","pr":86400,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-V","s":"1\"","a":"25A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"30kg/㎠","pr":98200,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC22-M","s":"1 1/4\"","a":"32A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"40kg/㎠","pr":62900,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC22-T","s":"1 1/4\"","a":"32A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":66800,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-M","s":"1 1/4\"","a":"32A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"40kg/㎠","pr":115000,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-E","s":"1 1/4\"","a":"32A","mat":"스텐304","seal":"EPDM","sealEst":0,"p":"30kg/㎠","pr":108200,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-V","s":"1 1/4\"","a":"32A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"30kg/㎠","pr":120000,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC22-M","s":"1 1/2\"","a":"40A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"40kg/㎠","pr":73200,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC22-T","s":"1 1/2\"","a":"40A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":79600,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-M","s":"1 1/2\"","a":"40A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"40kg/㎠","pr":129200,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-E","s":"1 1/2\"","a":"40A","mat":"스텐304","seal":"EPDM","sealEst":0,"p":"30kg/㎠","pr":121400,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-V","s":"1 1/2\"","a":"40A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"30kg/㎠","pr":133200,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC22-M","s":"2\"","a":"50A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"40kg/㎠","pr":96700,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC22-T","s":"2\"","a":"50A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":107600,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-M","s":"2\"","a":"50A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"40kg/㎠","pr":159800,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-E","s":"2\"","a":"50A","mat":"스텐304","seal":"EPDM","sealEst":0,"p":"30kg/㎠","pr":150400,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-V","s":"2\"","a":"50A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"30kg/㎠","pr":165400,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC22-M","s":"2 1/2\"","a":"65A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"40kg/㎠","pr":131700,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC22-T","s":"2 1/2\"","a":"65A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":146600,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-M","s":"2 1/2\"","a":"65A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"40kg/㎠","pr":201800,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-E","s":"2 1/2\"","a":"65A","mat":"스텐304","seal":"EPDM","sealEst":0,"p":"30kg/㎠","pr":190000,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-V","s":"2 1/2\"","a":"65A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"30kg/㎠","pr":204800,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC22-M","s":"3\"","a":"80A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"40kg/㎠","pr":191900,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC22-T","s":"3\"","a":"80A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":222400,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-M","s":"3\"","a":"80A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"40kg/㎠","pr":286000,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-E","s":"3\"","a":"80A","mat":"스텐304","seal":"EPDM","sealEst":0,"p":"30kg/㎠","pr":269200,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-V","s":"3\"","a":"80A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"30kg/㎠","pr":284000,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC22-M","s":"4\"","a":"100A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"40kg/㎠","pr":351500,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC22-T","s":"4\"","a":"100A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":365000,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-M","s":"4\"","a":"100A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"40kg/㎠","pr":402700,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-E","s":"4\"","a":"100A","mat":"스텐304","seal":"EPDM","sealEst":0,"p":"30kg/㎠","pr":370500,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-V","s":"4\"","a":"100A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"30kg/㎠","pr":386600,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC22-T","s":"5\"","a":"125A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":711500,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-M","s":"5\"","a":"125A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"40kg/㎠","pr":672000,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-E","s":"5\"","a":"125A","mat":"스텐304","seal":"EPDM","sealEst":0,"p":"10kg/㎠","pr":618300,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-V","s":"5\"","a":"125A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"10kg/㎠","pr":645100,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC22-T","s":"6\"","a":"150A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":1059500,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-M","s":"6\"","a":"150A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"40kg/㎠","pr":961000,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-E","s":"6\"","a":"150A","mat":"스텐304","seal":"EPDM","sealEst":0,"p":"10kg/㎠","pr":884100,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-V","s":"6\"","a":"150A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"10kg/㎠","pr":922600,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC22-T","s":"8\"","a":"200A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":1962900,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-M","s":"8\"","a":"200A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"40kg/㎠","pr":1854100,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-E","s":"8\"","a":"200A","mat":"스텐304","seal":"EPDM","sealEst":0,"p":"10kg/㎠","pr":1705800,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-V","s":"8\"","a":"200A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"10kg/㎠","pr":1780000,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC22-T","s":"10\"","a":"250A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":3207000,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-M","s":"10\"","a":"250A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"40kg/㎠","pr":3104600,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-E","s":"10\"","a":"250A","mat":"스텐304","seal":"EPDM","sealEst":0,"p":"10kg/㎠","pr":2856300,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-V","s":"10\"","a":"250A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"10kg/㎠","pr":2980400,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC22-T","s":"12\"","a":"300A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":4557000,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-M","s":"12\"","a":"300A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"40kg/㎠","pr":4214300,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-E","s":"12\"","a":"300A","mat":"스텐304","seal":"EPDM","sealEst":0,"p":"10kg/㎠","pr":4045800,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-V","s":"12\"","a":"300A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"10kg/㎠","pr":4382900,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC22-T","s":"14\"","a":"350A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":6340400,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-M","s":"14\"","a":"350A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"40kg/㎠","pr":5844900,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-E","s":"14\"","a":"350A","mat":"스텐304","seal":"EPDM","sealEst":0,"p":"10kg/㎠","pr":5611100,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-V","s":"14\"","a":"350A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"10kg/㎠","pr":6078700,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"ANA22-M","s":"1/2\"","a":"15A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"150#/300#","pr":88100,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-N","s":"1/2\"","a":"15A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"150#/300#","pr":86400,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-V","s":"1/2\"","a":"15A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"150#/300#","pr":87200,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-T","s":"1/2\"","a":"15A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"150#/300#","pr":135700,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-M","s":"3/4\"","a":"20A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"150#/300#","pr":111100,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-N","s":"3/4\"","a":"20A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"150#/300#","pr":109000,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-V","s":"3/4\"","a":"20A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"150#/300#","pr":109800,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-T","s":"3/4\"","a":"20A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"150#/300#","pr":158500,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-M","s":"1\"","a":"25A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"150#/300#","pr":125400,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-N","s":"1\"","a":"25A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"150#/300#","pr":120500,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-V","s":"1\"","a":"25A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"150#/300#","pr":122900,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-T","s":"1\"","a":"25A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"150#/300#","pr":175000,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-M","s":"1 1/4\"","a":"32A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"150#/300#","pr":143100,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-N","s":"1 1/4\"","a":"32A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"150#/300#","pr":140200,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-V","s":"1 1/4\"","a":"32A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"150#/300#","pr":140800,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-T","s":"1 1/4\"","a":"32A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"150#/300#","pr":206600,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-M","s":"1 1/2\"","a":"40A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"150#/300#","pr":169300,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-N","s":"1 1/2\"","a":"40A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"150#/300#","pr":165900,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-V","s":"1 1/2\"","a":"40A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"150#/300#","pr":166600,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-T","s":"1 1/2\"","a":"40A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"150#/300#","pr":231200,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-M","s":"2\"","a":"50A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"150#/300#","pr":281100,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-N","s":"2\"","a":"50A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"150#/300#","pr":270200,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-V","s":"2\"","a":"50A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"150#/300#","pr":275700,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-T","s":"2\"","a":"50A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"150#/300#","pr":336800,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-M","s":"2 1/2\"","a":"65A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"150#/300#","pr":373400,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-N","s":"2 1/2\"","a":"65A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"150#/300#","pr":366100,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-V","s":"2 1/2\"","a":"65A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"150#/300#","pr":370500,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-T","s":"2 1/2\"","a":"65A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"150#/300#","pr":426400,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-M","s":"3\"","a":"80A","mat":"2.0615","seal":"METAL","sealEst":0,"p":"150#/300#","pr":431400,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-N","s":"3\"","a":"80A","mat":"2.0615","seal":"NBR","sealEst":0,"p":"150#/300#","pr":451000,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-V","s":"3\"","a":"80A","mat":"2.0615","seal":"VITON","sealEst":0,"p":"150#/300#","pr":460800,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-T","s":"3\"","a":"80A","mat":"2.0615","seal":"PTFE","sealEst":0,"p":"150#/300#","pr":524100,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-M","s":"4\"","a":"100A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"150#/300#","pr":621100,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-N","s":"4\"","a":"100A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"150#/300#","pr":592900,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-V","s":"4\"","a":"100A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"150#/300#","pr":607000,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-T","s":"4\"","a":"100A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"150#/300#","pr":762300,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"PA22-M","s":"5\"","a":"125A","mat":"스텐304","seal":"METAL","sealEst":1,"p":"150#/20K","pr":672000,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"PA22-E","s":"5\"","a":"125A","mat":"스텐304","seal":"EPDM","sealEst":1,"p":"150#/20K","pr":618300,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"PA22-V","s":"5\"","a":"125A","mat":"스텐304","seal":"VITON","sealEst":1,"p":"150#/20K","pr":645100,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"PA22-T","s":"5\"","a":"125A","mat":"스텐304","seal":"PTFE","sealEst":1,"p":"150#/20K","pr":711500,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"PA22-M","s":"6\"","a":"150A","mat":"스텐304","seal":"METAL","sealEst":1,"p":"150#/20K","pr":961000,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"PA22-E","s":"6\"","a":"150A","mat":"스텐304","seal":"EPDM","sealEst":1,"p":"150#/20K","pr":884100,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"PA22-V","s":"6\"","a":"150A","mat":"스텐304","seal":"VITON","sealEst":1,"p":"150#/20K","pr":922600,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"PA22-T","s":"6\"","a":"150A","mat":"스텐304","seal":"PTFE","sealEst":1,"p":"150#/20K","pr":1059500,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"PA22-M","s":"8\"","a":"200A","mat":"스텐304","seal":"METAL","sealEst":1,"p":"150#/20K","pr":1911500,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"PA22-E","s":"8\"","a":"200A","mat":"스텐304","seal":"EPDM","sealEst":1,"p":"150#/20K","pr":1758600,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"PA22-V","s":"8\"","a":"200A","mat":"스텐304","seal":"VITON","sealEst":1,"p":"150#/20K","pr":1835100,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"PA22-T","s":"8\"","a":"200A","mat":"스텐304","seal":"PTFE","sealEst":1,"p":"150#/20K","pr":2023700,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"PA22-M","s":"10\"","a":"250A","mat":"스텐304","seal":"METAL","sealEst":1,"p":"150#/20K","pr":3200700,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"PA22-E","s":"10\"","a":"250A","mat":"스텐304","seal":"EPDM","sealEst":1,"p":"150#/20K","pr":2944700,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"PA22-V","s":"10\"","a":"250A","mat":"스텐304","seal":"VITON","sealEst":1,"p":"150#/20K","pr":3072600,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"PA22-T","s":"10\"","a":"250A","mat":"스텐304","seal":"PTFE","sealEst":1,"p":"150#/20K","pr":3306200,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"PA22-M","s":"12\"","a":"300A","mat":"스텐304","seal":"METAL","sealEst":1,"p":"150#/20K","pr":4344700,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"PA22-E","s":"12\"","a":"300A","mat":"스텐304","seal":"EPDM","sealEst":1,"p":"150#/20K","pr":4171000,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"PA22-V","s":"12\"","a":"300A","mat":"스텐304","seal":"VITON","sealEst":1,"p":"150#/20K","pr":4518500,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"PA22-T","s":"12\"","a":"300A","mat":"스텐304","seal":"PTFE","sealEst":1,"p":"150#/20K","pr":4698000,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"PA22-M","s":"14\"","a":"350A","mat":"스텐304","seal":"METAL","sealEst":1,"p":"150#/20K","pr":6025700,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"PA22-E","s":"14\"","a":"350A","mat":"스텐304","seal":"EPDM","sealEst":1,"p":"150#/20K","pr":5784700,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"PA22-V","s":"14\"","a":"350A","mat":"스텐304","seal":"VITON","sealEst":1,"p":"150#/20K","pr":6266800,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"PA22-T","s":"14\"","a":"350A","mat":"스텐304","seal":"PTFE","sealEst":1,"p":"150#/20K","pr":6536500,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"SP22-M","s":"1 1/2\"","a":"40A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"10kg/㎠","pr":130300,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-N","s":"1 1/2\"","a":"40A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"10kg/㎠","pr":127200,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-V","s":"1 1/2\"","a":"40A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"10kg/㎠","pr":128900,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-T","s":"1 1/2\"","a":"40A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"10kg/㎠","pr":186400,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-M","s":"2\"","a":"50A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"10kg/㎠","pr":132400,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-N","s":"2\"","a":"50A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"10kg/㎠","pr":128200,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-V","s":"2\"","a":"50A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"10kg/㎠","pr":131400,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-T","s":"2\"","a":"50A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"10kg/㎠","pr":187000,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-M","s":"2\"","a":"50A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"20K/150#","pr":299400,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-N","s":"2\"","a":"50A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"20K/150#","pr":287300,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-V","s":"2\"","a":"50A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"20K/150#","pr":295000,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-T","s":"2\"","a":"50A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"20K/150#","pr":454900,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-M","s":"2 1/2\"","a":"65A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"10kg/㎠","pr":175600,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-N","s":"2 1/2\"","a":"65A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"10kg/㎠","pr":168500,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-V","s":"2 1/2\"","a":"65A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"10kg/㎠","pr":179000,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-T","s":"2 1/2\"","a":"65A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"10kg/㎠","pr":253800,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-M","s":"2 1/2\"","a":"65A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"20K/150#","pr":354700,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-N","s":"2 1/2\"","a":"65A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"20K/150#","pr":341400,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-V","s":"2 1/2\"","a":"65A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"20K/150#","pr":347900,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-T","s":"2 1/2\"","a":"65A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"20K/150#","pr":515000,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-M","s":"3\"","a":"80A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"10kg/㎠","pr":200100,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-N","s":"3\"","a":"80A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"10kg/㎠","pr":190600,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-V","s":"3\"","a":"80A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"10kg/㎠","pr":196200,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-T","s":"3\"","a":"80A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"10kg/㎠","pr":303400,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-M","s":"3\"","a":"80A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"20K/150#","pr":395000,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-N","s":"3\"","a":"80A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"20K/150#","pr":371700,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-V","s":"3\"","a":"80A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"20K/150#","pr":378000,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-T","s":"3\"","a":"80A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"20K/150#","pr":568000,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-M","s":"4\"","a":"100A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"10kg/㎠","pr":264400,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-N","s":"4\"","a":"100A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"10kg/㎠","pr":255800,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-V","s":"4\"","a":"100A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"10kg/㎠","pr":261000,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-T","s":"4\"","a":"100A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"10kg/㎠","pr":334800,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-M","s":"4\"","a":"100A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"20K/150#","pr":422200,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-N","s":"4\"","a":"100A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"20K/150#","pr":401900,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-V","s":"4\"","a":"100A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"20K/150#","pr":413800,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-T","s":"4\"","a":"100A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"20K/150#","pr":597900,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-M","s":"5\"","a":"125A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"10kg/㎠","pr":376200,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-N","s":"5\"","a":"125A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"10kg/㎠","pr":354300,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-V","s":"5\"","a":"125A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"10kg/㎠","pr":362200,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-T","s":"5\"","a":"125A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"10kg/㎠","pr":479800,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-M","s":"5\"","a":"125A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"20K/150#","pr":547100,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-N","s":"5\"","a":"125A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"20K/150#","pr":516100,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-V","s":"5\"","a":"125A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"20K/150#","pr":521100,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-T","s":"5\"","a":"125A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"20K/150#","pr":718200,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-M","s":"6\"","a":"150A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"10kg/㎠","pr":555200,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-N","s":"6\"","a":"150A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"10kg/㎠","pr":514000,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-V","s":"6\"","a":"150A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"10kg/㎠","pr":525800,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-T","s":"6\"","a":"150A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"10kg/㎠","pr":684000,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-M","s":"6\"","a":"150A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"20K/150#","pr":786700,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-N","s":"6\"","a":"150A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"20K/150#","pr":766000,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-V","s":"6\"","a":"150A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"20K/150#","pr":770400,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-T","s":"6\"","a":"150A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"20K/150#","pr":974600,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-M","s":"8\"","a":"200A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"10kg/㎠","pr":1166400,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-N","s":"8\"","a":"200A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"10kg/㎠","pr":1121100,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-V","s":"8\"","a":"200A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"10kg/㎠","pr":1134200,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-T","s":"8\"","a":"200A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"10kg/㎠","pr":1119800,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-M","s":"8\"","a":"200A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"20K/150#","pr":1200300,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-N","s":"8\"","a":"200A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"20K/150#","pr":1174300,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-V","s":"8\"","a":"200A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"20K/150#","pr":1192500,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-T","s":"8\"","a":"200A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"20K/150#","pr":1484700,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-M","s":"10\"","a":"250A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"10kg/㎠","pr":1890500,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-N","s":"10\"","a":"250A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"10kg/㎠","pr":1817600,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-V","s":"10\"","a":"250A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"10kg/㎠","pr":1852300,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-T","s":"10\"","a":"250A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"10kg/㎠","pr":1814900,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-M","s":"10\"","a":"250A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"20K/150#","pr":2298400,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-N","s":"10\"","a":"250A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"20K/150#","pr":2212900,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-V","s":"10\"","a":"250A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"20K/150#","pr":2249000,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-T","s":"10\"","a":"250A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"20K/150#","pr":2475200,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-M","s":"12\"","a":"300A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"10kg/㎠","pr":2641100,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-N","s":"12\"","a":"300A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"10kg/㎠","pr":2463400,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-V","s":"12\"","a":"300A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"10kg/㎠","pr":2506300,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-T","s":"12\"","a":"300A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"10kg/㎠","pr":2739000,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-M","s":"12\"","a":"300A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"20K/150#","pr":3366500,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-N","s":"12\"","a":"300A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"20K/150#","pr":3141600,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-V","s":"12\"","a":"300A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"20K/150#","pr":3241800,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-T","s":"12\"","a":"300A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"20K/150#","pr":3865200,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-M","s":"14\"","a":"350A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"10kg/㎠","pr":3095700,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-N","s":"14\"","a":"350A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"10kg/㎠","pr":2960800,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-V","s":"14\"","a":"350A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"10kg/㎠","pr":3001400,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-T","s":"14\"","a":"350A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"10kg/㎠","pr":3651200,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-M","s":"14\"","a":"350A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"20K/150#","pr":4615900,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-N","s":"14\"","a":"350A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"20K/150#","pr":4415100,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-V","s":"14\"","a":"350A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"20K/150#","pr":4475700,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-T","s":"14\"","a":"350A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"20K/150#","pr":5444100,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-M","s":"16\"","a":"400A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"10kg/㎠","pr":4076900,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-N","s":"16\"","a":"400A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"10kg/㎠","pr":3882000,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-V","s":"16\"","a":"400A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"10kg/㎠","pr":3935600,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-T","s":"16\"","a":"400A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"10kg/㎠","pr":4786200,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-M","s":"16\"","a":"400A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"20K/150#","pr":6327500,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-N","s":"16\"","a":"400A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"20K/150#","pr":6026500,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-V","s":"16\"","a":"400A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"20K/150#","pr":6108000,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-T","s":"16\"","a":"400A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"20K/150#","pr":7428500,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-M","s":"18\"","a":"450A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"10kg/㎠","pr":5996600,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-N","s":"18\"","a":"450A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"10kg/㎠","pr":5710000,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-V","s":"18\"","a":"450A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"10kg/㎠","pr":5783000,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-T","s":"18\"","a":"450A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"10kg/㎠","pr":6734800,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-M","s":"18\"","a":"450A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"20K/150#","pr":7729000,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-N","s":"18\"","a":"450A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"20K/150#","pr":7360700,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-V","s":"18\"","a":"450A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"20K/150#","pr":7453300,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-T","s":"18\"","a":"450A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"20K/150#","pr":8679700,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-M","s":"20\"","a":"500A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"10kg/㎠","pr":8335800,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-N","s":"20\"","a":"500A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"10kg/㎠","pr":7938600,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-V","s":"20\"","a":"500A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"10kg/㎠","pr":8082600,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-T","s":"20\"","a":"500A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"10kg/㎠","pr":9466600,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-M","s":"20\"","a":"500A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"20K/150#","pr":10450000,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-N","s":"20\"","a":"500A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"20K/150#","pr":9951600,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-V","s":"20\"","a":"500A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"20K/150#","pr":10132400,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-T","s":"20\"","a":"500A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"20K/150#","pr":11864100,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-M","s":"24\"","a":"600A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"10kg/㎠","pr":12056900,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-N","s":"24\"","a":"600A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"10kg/㎠","pr":11484200,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-V","s":"24\"","a":"600A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"10kg/㎠","pr":12024200,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-T","s":"24\"","a":"600A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"10kg/㎠","pr":14483600,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-M","s":"24\"","a":"600A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"20K/150#","pr":16489900,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-N","s":"24\"","a":"600A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"20K/150#","pr":15703400,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-V","s":"24\"","a":"600A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"20K/150#","pr":16445000,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-T","s":"24\"","a":"600A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"20K/150#","pr":19805000,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-M","s":"28\"","a":"700A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"10kg/㎠","pr":16625000,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-N","s":"28\"","a":"700A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"10kg/㎠","pr":16513200,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-V","s":"28\"","a":"700A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"10kg/㎠","pr":16519300,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-T","s":"28\"","a":"700A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"10kg/㎠","pr":19528400,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-M","s":"28\"","a":"700A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"20K/150#","pr":21988800,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-N","s":"28\"","a":"700A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"20K/150#","pr":21627400,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-V","s":"28\"","a":"700A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"20K/150#","pr":21931700,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-T","s":"28\"","a":"700A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"20K/150#","pr":25576100,"conn":"스윙","sheet":"IV"}]};
+</script>
 
 <script>
 'use strict';
@@ -5489,28 +5616,32 @@ function fitPaper() {
 
 /* ---------- 상단 탭 ---------- */
 function setTab(tab) {
-  if (tab !== 'po' && tab !== 'quote') tab = 'orders';
+  if (tab !== 'po' && tab !== 'quote' && tab !== 'price') tab = 'orders';
   const isOrders = tab === 'orders';
   const isPo = tab === 'po';
   const isQuote = tab === 'quote';
+  const isPrice = tab === 'price';
   state.tab = tab;
   try { localStorage.setItem(STORE_TAB, tab); } catch (e) {}
   $('tabOrders').classList.toggle('is-active', isOrders);
   $('tabPo').classList.toggle('is-active', isPo);
   $('tabQuote').classList.toggle('is-active', isQuote);
+  $('tabPrice').classList.toggle('is-active', isPrice);
   $('tabOrders').setAttribute('aria-selected', String(isOrders));
   $('tabPo').setAttribute('aria-selected', String(isPo));
   $('tabQuote').setAttribute('aria-selected', String(isQuote));
+  $('tabPrice').setAttribute('aria-selected', String(isPrice));
   $('ordersView').hidden = !isOrders;
   $('poView').hidden = !isPo;
   $('quoteView').hidden = !isQuote;
+  $('priceView').hidden = !isPrice;
   $('ordersSyncBar').hidden = !isOrders;
   $('btnScan').hidden = !isOrders;
   $('btnChat').hidden = !isOrders;
   $('btnNew').hidden = !isOrders;
-  $('appTitle').textContent = isQuote ? '견적서 작성' : (isPo ? '발주서 작성' : '발주서 관리');
-  $('appLogo').textContent = isQuote ? '📄' : (isPo ? '📝' : '📦');
-  document.title = isQuote ? '견적서 작성 · 한열사' : (isPo ? '발주서 작성 · 한열사' : '발주서 관리 · 한열사');
+  $('appTitle').textContent = isPrice ? '단가표' : (isQuote ? '견적서 작성' : (isPo ? '발주서 작성' : '발주서 관리'));
+  $('appLogo').textContent = isPrice ? '📊' : (isQuote ? '📄' : (isPo ? '📝' : '📦'));
+  document.title = isPrice ? '단가표 · 우성밸브 | 한열사' : (isQuote ? '견적서 작성 · 한열사' : (isPo ? '발주서 작성 · 한열사' : '발주서 관리 · 한열사'));
   document.documentElement.classList.toggle('print-quote', isQuote);
   document.documentElement.classList.toggle('print-po', isPo);
   if (isQuote) refreshQuoteCompanies();
@@ -6575,6 +6706,7 @@ function init() {
   renderSyncBar();
   initQuote();
   initPo();
+  initPrice();
   let savedTab = 'orders';
   try { savedTab = localStorage.getItem(STORE_TAB) || 'orders'; } catch (e) { savedTab = 'orders'; }
   setTab(savedTab);
@@ -6639,6 +6771,354 @@ async function resetAll() {
   render();
   toast('모든 발주를 삭제했습니다.');
   pushAll(true);
+}
+
+/* =========================================================
+   단가표 (메이커별 확장)
+   - 품목 데이터는 앱 위쪽 <script>의 PRICE_DATA에 들어 있습니다(work/data.py → work/make_price_js.py).
+   - 메이커를 더하려면 PRICE_DATA.items에 { maker:'다른메이커', ... } 항목을 추가하면
+     메이커 칩과 메이커별 할인율 저장이 자동으로 따라옵니다.
+   - 할인율은 메이커별로 저장합니다: orderManager.priceDiscounts.v1 = { "우성밸브": 35 }
+   ========================================================= */
+const STORE_PRICE_DISCOUNTS = 'orderManager.priceDiscounts.v1';
+const STORE_PRICE_MATERIAL = 'orderManager.priceMaterial.v1';
+const PRICE_MATS = [
+  { key: '304', label: '기본(304 · ×1)', ratio: 1 },
+  { key: '316', label: '316(CF8M · ×1.3)', ratio: 1.3 },
+  { key: '316L', label: '316L(CF3M · ×1.95)', ratio: 1.95 }
+];
+const PRICE_CONN_FILTERS = [
+  { label: '전체', conns: null, hint: '모든 연결방식' },
+  { label: '나사식 판체크', conns: ['나사식'], hint: '가격표 I' },
+  { label: '후렌지 끼움식', conns: ['후렌지'], hint: '가격표 II' },
+  { label: 'ASME(ANSI)', conns: ['ASME'], hint: '가격표 III' },
+  { label: '기타', conns: ['스윙'], hint: '스윙 판체크 (가격표 IV)' }
+];
+const PRICE_CONN_LABEL = { '나사식': '나사식 판체크', '후렌지': '후렌지 끼움식', 'ASME': 'ASME(ANSI)', '스윙': '스윙 판체크' };
+
+const PRICE_MAKERS = (function () {
+  const seen = {}, list = [];
+  PRICE_DATA.items.forEach(function (it) {
+    if (!it.maker || seen[it.maker]) return;
+    seen[it.maker] = 1;
+    list.push(it.maker);
+  });
+  return list;
+})();
+
+const priceState = { q: '', maker: '전체', conn: '전체', seal: '전체', mat: '304', discounts: {} };
+const PRICE_SEALS = ['전체', 'METAL', 'PTFE', 'EPDM', 'VITON', 'NBR'];
+
+function loadPriceSettings() {
+  try {
+    const raw = localStorage.getItem(STORE_PRICE_DISCOUNTS);
+    const o = raw ? JSON.parse(raw) : null;
+    if (o && typeof o === 'object') {
+      Object.keys(o).forEach(function (k) {
+        const v = Number(o[k]);
+        if (isFinite(v)) priceState.discounts[k] = Math.max(0, Math.min(90, Math.round(v)));
+      });
+    }
+  } catch (e) { /* 무시 */ }
+  try {
+    const m = localStorage.getItem(STORE_PRICE_MATERIAL);
+    if (m && PRICE_MATS.some(function (x) { return x.key === m; })) priceState.mat = m;
+  } catch (e) { /* 무시 */ }
+}
+
+function savePriceDiscounts() {
+  try { localStorage.setItem(STORE_PRICE_DISCOUNTS, JSON.stringify(priceState.discounts)); } catch (e) { /* 무시 */ }
+}
+
+function savePriceMaterial() {
+  try { localStorage.setItem(STORE_PRICE_MATERIAL, priceState.mat); } catch (e) { /* 무시 */ }
+}
+
+function priceDiscOf(maker) {
+  const v = Number(priceState.discounts[maker]);
+  return isFinite(v) ? Math.max(0, Math.min(90, v)) : 0;
+}
+
+function priceMatRatio() {
+  const m = PRICE_MATS.filter(function (x) { return x.key === priceState.mat; })[0];
+  return m ? m.ratio : 1;
+}
+
+/* 재질 배율을 적용할 품목인지: 스텐 본체만 해당하고, 이미 316L인 품목은 316L 배율을 또 곱하지 않습니다. */
+function priceRatioFor(it) {
+  const r = priceMatRatio();
+  if (r === 1) return 1;
+  if (!/스텐/.test(it.mat || '')) return 1;
+  if (priceState.mat === '316L' && /316L/.test(it.mat)) return 1;
+  return r;
+}
+
+function priceRound(n) { return Math.ceil(Math.round(n) / 100) * 100; }
+function priceOrigOf(it) { return priceRound(it.pr * priceRatioFor(it)); }
+function priceFinalOf(it) { return priceRound(it.pr * priceRatioFor(it) * (1 - priceDiscOf(it.maker) / 100)); }
+
+/* 할인율 입력이 가리키는 메이커. 전체 보기에서는 메이커가 하나뿐일 때만 그 메이커를 가리킵니다. */
+function priceDiscountMaker() {
+  if (priceState.maker !== '전체') return priceState.maker;
+  return PRICE_MAKERS.length === 1 ? PRICE_MAKERS[0] : '';
+}
+
+function renderPriceChips() {
+  const makerBox = $('priceMakerChips');
+  if (makerBox) {
+    makerBox.innerHTML = ['전체'].concat(PRICE_MAKERS).map(function (m) {
+      const on = priceState.maker === m;
+      return '<button type="button" class="chip' + (on ? ' is-active' : '') + '" data-maker="' + esc(m) + '" aria-pressed="' + (on ? 'true' : 'false') + '">' + esc(m) + '</button>';
+    }).join('');
+  }
+  const connBox = $('priceConnChips');
+  if (connBox) {
+    connBox.innerHTML = PRICE_CONN_FILTERS.map(function (f) {
+      const on = priceState.conn === f.label;
+      return '<button type="button" class="chip' + (on ? ' is-active' : '') + '" data-conn="' + esc(f.label) + '" title="' + esc(f.hint) + '" aria-pressed="' + (on ? 'true' : 'false') + '">' + esc(f.label) + '</button>';
+    }).join('');
+  }
+  const sealBox = $('priceSealChips');
+  if (sealBox) {
+    sealBox.innerHTML = PRICE_SEALS.map(function (s) {
+      const on = priceState.seal === s;
+      return '<button type="button" class="chip' + (on ? ' is-active' : '') + '" data-seal="' + esc(s) + '" aria-pressed="' + (on ? 'true' : 'false') + '">' + esc(s) + '</button>';
+    }).join('');
+  }
+  const matBox = $('priceMatChips');
+  if (matBox) {
+    matBox.innerHTML = PRICE_MATS.map(function (m) {
+      const on = priceState.mat === m.key;
+      return '<button type="button" class="chip' + (on ? ' is-active' : '') + '" data-mat="' + m.key + '" aria-pressed="' + (on ? 'true' : 'false') + '">' + esc(m.label) + '</button>';
+    }).join('');
+  }
+}
+
+function syncPriceDiscountInput() {
+  const el = $('priceDiscount');
+  if (!el) return;
+  const maker = priceDiscountMaker();
+  el.disabled = !maker;
+  el.value = maker ? String(priceDiscOf(maker)) : '';
+  el.placeholder = maker ? '0' : '메이커별';
+  $('priceDiscTarget').textContent = maker ? '· ' + maker : '· 메이커를 고르면 바꿀 수 있어요';
+}
+
+function priceSearchHay(it) {
+  return [it.maker, it.m, it.s, it.a, it.mat, it.seal, it.p, PRICE_CONN_LABEL[it.conn] || it.conn]
+    .join(' ').toLowerCase();
+}
+
+function priceTermsText() {
+  const makers = priceState.maker === '전체' ? PRICE_MAKERS : [priceState.maker];
+  const multi = PRICE_MAKERS.length > 1;
+  const parts = [];
+  makers.forEach(function (m) {
+    const d = priceDiscOf(m);
+    if (d > 0) parts.push((multi ? m + ' ' : '') + d + '% 할인');
+  });
+  const mat = PRICE_MATS.filter(function (x) { return x.key === priceState.mat; })[0];
+  if (mat && mat.ratio !== 1) parts.push(mat.label);
+  if (!parts.length) parts.push('단가표 정가 기준');
+  return parts.join(' · ');
+}
+
+function priceRowHTML(it, idx) {
+  const ratio = priceRatioFor(it);
+  const orig = priceRound(it.pr * ratio);
+  const fin = priceFinalOf(it);
+  const disc = priceDiscOf(it.maker);
+  const spec = [it.s, it.a].filter(Boolean).join(' · ');
+  const meta = [];
+  if (it.seal) meta.push('<span>Sealing <b>' + esc(it.seal) + (it.sealEst ? '<span class="est">*</span>' : '') + '</b></span>');
+  if (it.p) meta.push('<span>압력 <b>' + esc(it.p) + '</b></span>');
+  if (it.mat) meta.push('<span>재질 <b>' + esc(it.mat) + '</b></span>');
+  if (priceMatRatio() !== 1 && /316L/.test(it.mat || '')) meta.push('<span class="est">이미 316L 기준</span>');
+  else if (priceMatRatio() !== 1 && !/스텐/.test(it.mat || '')) meta.push('<span class="est">재질 배율 미적용</span>');
+  return '<div class="price-item" data-i="' + idx + '">' +
+    '<div class="price-main">' +
+      '<div class="price-title">' +
+        '<span class="price-model">' + esc(it.m) + '</span>' +
+        '<span class="price-size">' + esc(spec || '-') + '</span>' +
+        (PRICE_MAKERS.length > 1 ? '<span class="price-conn">' + esc(it.maker) + '</span>' : '') +
+        '<span class="price-conn">' + esc(PRICE_CONN_LABEL[it.conn] || it.conn) + '</span>' +
+      '</div>' +
+      '<div class="price-meta">' + meta.join('') + '</div>' +
+    '</div>' +
+    '<div class="price-price">' +
+      '<span class="price-orig' + (orig === fin ? ' same' : '') + '" title="단가표 기준가' + (disc > 0 ? ' · ' + disc + '% 할인 전' : '') + '">협가 ' + qWon(orig) + '</span>' +
+      '<b class="price-final">' + qWon(fin) + '<span class="u">원</span></b>' +
+    '</div>' +
+    '<div class="price-btnrow">' +
+      '<button type="button" class="btn btn-primary js-price-quote" data-i="' + idx + '" aria-label="' + esc(it.m + ' ' + spec + ' 견적서에 담기') + '">📄 견적 담기</button>' +
+      '<button type="button" class="btn btn-ghost js-price-po" data-i="' + idx + '" aria-label="' + esc(it.m + ' ' + spec + ' 발주서에 담기') + '">📝 발주 담기</button>' +
+    '</div>' +
+  '</div>';
+}
+
+function renderPriceList() {
+  const box = $('priceList');
+  if (!box) return;
+  const tokens = String(priceState.q || '').trim().toLowerCase().split(/\s+/).filter(Boolean);
+  const filter = PRICE_CONN_FILTERS.filter(function (f) { return f.label === priceState.conn; })[0];
+  const rows = [];
+  let count = 0;
+  PRICE_DATA.items.forEach(function (it, i) {
+    if (priceState.maker !== '전체' && it.maker !== priceState.maker) return;
+    if (priceState.mat !== '304' && !/스텐/.test(it.mat || '')) return;
+    if (priceState.seal !== '전체' && it.seal !== priceState.seal) return;
+    if (filter && filter.conns && filter.conns.indexOf(it.conn) < 0) return;
+    if (tokens.length) {
+      const hay = priceSearchHay(it);
+      for (let t = 0; t < tokens.length; t++) {
+        if (hay.indexOf(tokens[t]) < 0) return;
+      }
+    }
+    count++;
+    rows.push(priceRowHTML(it, i));
+  });
+  box.innerHTML = rows.length ? rows.join('') : '<p class="price-empty">조건에 맞는 품목이 없습니다. 검색어나 필터를 바꿔 보세요.</p>';
+  $('priceCount').textContent = qWon(count) + '개';
+  $('priceTermsSummary').textContent = priceTermsText();
+}
+
+function onPriceDiscountInput() {
+  const el = $('priceDiscount');
+  const maker = priceDiscountMaker();
+  if (!el || !maker) return;
+  const digits = String(el.value).replace(/[^0-9]/g, '');
+  const v = digits === '' ? 0 : Math.min(90, parseInt(digits, 10));
+  priceState.discounts[maker] = v;
+  savePriceDiscounts();
+  renderPriceList();
+}
+
+function resetPriceFilters() {
+  priceState.q = '';
+  priceState.maker = '전체';
+  priceState.conn = '전체';
+  priceState.seal = '전체';
+  priceState.mat = '304';
+  savePriceMaterial();
+  const s = $('priceSearch');
+  if (s) s.value = '';
+  $('btnPriceClear').hidden = true;
+  renderPriceChips();
+  syncPriceDiscountInput();
+  renderPriceList();
+}
+
+function priceItemName(it) { return it.m + ' 판체크밸브'; }
+
+function priceItemSpec(it) {
+  const a = it.s || '', b = it.a || '';
+  if (a && b && a !== b) return a + ' (' + b + ')';
+  return a || b;
+}
+
+/* 단가표 품목을 견적서/발주서 초안에 담고 해당 탭을 엽니다. */
+function priceAddTo(kind, idx) {
+  const it = PRICE_DATA.items[idx];
+  if (!it) return;
+  const isQuote = kind === 'quote';
+  const rec = isQuote ? state.quote : state.po;
+  if (!rec) return;
+  const price = priceFinalOf(it);
+  const payload = { name: priceItemName(it), spec: priceItemSpec(it), qty: '1', price: String(price), note: '' };
+  const norm = isQuote ? normalizeQuoteItem : normalizePoItem;
+  const items = rec.items;
+  const last = items[items.length - 1];
+  const blank = last && !String(last.name || '').trim() && !String(last.spec || '').trim() && !last.qty && !last.price;
+  if (blank) items[items.length - 1] = norm(payload);
+  else items.push(norm(payload));
+  if (isQuote) {
+    renderQuoteItems();
+    refreshQuoteTotals();
+    setQuoteSaveHint();
+  } else {
+    renderPoItems();
+    refreshPoTotals();
+    setPoSaveHint();
+  }
+  setTab(kind);
+  const rows = document.querySelectorAll(isQuote ? '#quoteItems .q-item' : '#poItems .po-item');
+  const row = rows[items.length - 1];
+  if (row) {
+    row.classList.add('just-added');
+    setTimeout(function () { row.classList.remove('just-added'); }, 1800);
+  }
+  toast((isQuote ? '📄 견적서' : '📝 발주서') + '에 ' + it.m + ' 담았습니다 · 단가 ' + qWon(price) + '원');
+}
+
+function bindPriceEvents() {
+  $('tabPrice').addEventListener('click', function () { setTab('price'); });
+
+  $('priceSearch').addEventListener('input', function () {
+    priceState.q = $('priceSearch').value;
+    $('btnPriceClear').hidden = !priceState.q;
+    renderPriceList();
+  });
+  $('btnPriceClear').addEventListener('click', function () {
+    $('priceSearch').value = '';
+    priceState.q = '';
+    $('btnPriceClear').hidden = true;
+    renderPriceList();
+    $('priceSearch').focus();
+  });
+
+  $('priceMakerChips').addEventListener('click', function (e) {
+    const b = e.target.closest('button[data-maker]');
+    if (!b) return;
+    priceState.maker = b.getAttribute('data-maker');
+    renderPriceChips();
+    syncPriceDiscountInput();
+    renderPriceList();
+  });
+  $('priceConnChips').addEventListener('click', function (e) {
+    const b = e.target.closest('button[data-conn]');
+    if (!b) return;
+    priceState.conn = b.getAttribute('data-conn');
+    renderPriceChips();
+    renderPriceList();
+  });
+  $('priceSealChips').addEventListener('click', function (e) {
+    const b = e.target.closest('button[data-seal]');
+    if (!b) return;
+    priceState.seal = b.getAttribute('data-seal');
+    renderPriceChips();
+    renderPriceList();
+  });
+  $('priceMatChips').addEventListener('click', function (e) {
+    const b = e.target.closest('button[data-mat]');
+    if (!b) return;
+    priceState.mat = b.getAttribute('data-mat');
+    savePriceMaterial();
+    renderPriceChips();
+    renderPriceList();
+  });
+
+  $('priceDiscount').addEventListener('input', onPriceDiscountInput);
+  $('priceDiscount').addEventListener('change', onPriceDiscountInput);
+  $('priceDiscount').addEventListener('blur', syncPriceDiscountInput);
+  $('btnPriceReset').addEventListener('click', resetPriceFilters);
+
+  $('priceList').addEventListener('click', function (e) {
+    const q = e.target.closest('.js-price-quote');
+    if (q) { priceAddTo('quote', Number(q.getAttribute('data-i'))); return; }
+    const p = e.target.closest('.js-price-po');
+    if (p) priceAddTo('po', Number(p.getAttribute('data-i')));
+  });
+}
+
+function initPrice() {
+  loadPriceSettings();
+  const total = PRICE_DATA.items.length;
+  $('priceDocBadge').textContent = '총 ' + qWon(total) + '개 품목';
+  $('priceHeadMeta').textContent = PRICE_MAKERS.join(' · ') + ' 판체크 단가표 ' + PRICE_DATA.docNo + ' · ' + PRICE_DATA.applyDate + ' 적용';
+  renderPriceChips();
+  syncPriceDiscountInput();
+  bindPriceEvents();
+  renderPriceList();
 }
 
 lockBoot();
