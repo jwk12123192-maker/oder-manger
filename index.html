@@ -831,6 +831,50 @@
     html.print-quote #printArea .q-sheet{box-shadow:none;page-break-after:avoid;break-after:avoid}
     html.print-quote #printArea .q-sheet *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   }
+/* ---------- HKC 단가표 (옵션 합산 계산기) ---------- */
+.hkc-item{grid-template-rows:auto}
+.hkc-item .price-price{min-width:0}
+.hkc-range{font-size:13.5px !important;letter-spacing:-.02em;white-space:nowrap}
+.hkc-item.is-open{border-color:#93c5fd;box-shadow:0 6px 22px rgba(37,99,235,.10)}
+.hkc-btag{display:inline-block;margin-top:4px;text-align:right;font-size:10.5px;font-weight:800;color:#1d4ed8;background:#eff6ff;border:1px solid #bfdbfe;border-radius:999px;padding:2px 7px;white-space:nowrap}
+.hkc-calc{grid-column:1/-1;border-top:1px dashed var(--line);margin-top:9px;padding-top:11px;display:flex;flex-direction:column;gap:9px}
+.hkc-calc-head{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);font-weight:700}
+.hkc-calc-head b{font-size:14px;color:var(--ink);letter-spacing:-.01em}
+.hkc-frow{display:flex;align-items:flex-start;gap:8px;flex-wrap:wrap;min-width:0}
+.hkc-flabel{font-size:11.5px;font-weight:800;color:#94a3b8;flex:none;min-width:64px;padding-top:8px}
+.hkc-chips{flex-wrap:wrap;max-width:100%}
+.hkc-chips .chip{min-height:32px;padding:5px 11px;font-size:12px;white-space:nowrap}
+.hkc-chips .chip.is-dis{opacity:.42;cursor:not-allowed}
+.hkc-chips-sub{margin-top:6px;width:100%}
+.hkc-select{flex:1 1 220px;min-height:36px;border:1px solid var(--line);border-radius:9px;padding:6px 9px;font-size:12.5px;font-weight:600;background:#fff;color:var(--ink);max-width:100%}
+.hkc-optgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px 10px}
+.hkc-opt{display:flex;align-items:center;gap:7px;border:1px solid var(--line);border-radius:9px;padding:7px 9px;background:#fff;font-size:12.5px;font-weight:600;min-width:0;cursor:pointer}
+.hkc-opt input{width:16px;height:16px;margin:0;flex:none;accent-color:#2563eb}
+.hkc-opt-name{flex:1 1 auto;min-width:0}
+.hkc-opt-amt{color:#1d4ed8;font-weight:800;font-size:12px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.hkc-opt-note{color:#94a3b8;font-size:11px;font-weight:700}
+.hkc-opt.is-dis{background:#f8fafc;color:#94a3b8;cursor:not-allowed}
+.hkc-tip{margin:0;font-size:11px;line-height:1.6;color:#94a3b8;font-weight:600}
+.hkc-sum{background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:10px 11px;display:flex;flex-direction:column;gap:5px}
+.hkc-sumline{display:flex;align-items:baseline;justify-content:space-between;gap:10px;font-size:12.5px;color:#475569;font-weight:700}
+.hkc-sumline b{font-variant-numeric:tabular-nums;font-weight:800;color:#334155;white-space:nowrap}
+.hkc-sumline.opt{color:#64748b;font-weight:600;font-size:12px}
+.hkc-sumline.opt b{color:#475569}
+.hkc-sumline.total{border-top:1px dashed #cbd5e1;margin-top:3px;padding-top:7px;font-size:14px;color:var(--ink)}
+.hkc-sumline.total b{font-size:17px;color:#1d4ed8;letter-spacing:-.02em}
+.hkc-sumline.sub{font-size:11.5px;color:#94a3b8;font-weight:700}
+.hkc-summarytxt{font-size:11.5px;line-height:1.55;color:#64748b;font-weight:700;background:#fff;border:1px solid var(--line);border-radius:8px;padding:6px 8px}
+.hkc-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:2px}
+.hkc-actions .btn{flex:1 1 130px;min-height:38px;font-size:13px}
+.hkc-bad{margin:0;font-size:12.5px;font-weight:700;color:#b45309}
+@media (max-width:640px){
+  .hkc-btag{white-space:normal}
+  .hkc-optgrid{grid-template-columns:1fr}
+  .hkc-flabel{min-width:0;padding-top:0}
+  .hkc-frow{gap:5px}
+  .hkc-calc{gap:8px}
+  .hkc-sumline.total b{font-size:16px}
+}
 </style>
 </head>
 <body>
@@ -1279,6 +1323,15 @@
       <span class="flabel">단가 기준</span>
       <div class="chips" id="priceTierChips" role="group" aria-label="단가 기준 선택"></div>
     </div>
+    <div class="price-filter" id="priceHkcSeriesRow" hidden>
+      <span class="flabel">시리즈</span>
+      <div class="chips" id="priceHkcSeriesChips" role="group" aria-label="HKC 시리즈 선택"></div>
+    </div>
+
+    <div class="price-filter" id="priceHkcBasisRow" hidden>
+      <span class="flabel">가격 기준</span>
+      <div class="chips" id="priceHkcBasisChips" role="group" aria-label="HKC 가격 기준 선택"></div>
+    </div>
   </div>
 
   <div class="price-summary">
@@ -1598,6 +1651,13 @@
             seal Sealing / sealEst 원본 미표기로 접미사 추정(1) / p 최고사용압력 /
             pr 단가표 기준가(원) / conn 연결방식 / sheet 가격표 번호 */
 const PRICE_DATA = {"applyDate":"2026-08-01","docNo":"WSV2026-007","ratioNote":"CF8(304)=1 / CF8M(316)=1.3 / CF3M(316L)=1.95","items":[{"maker":"우성밸브","m":"PBS-V","s":"3/8\"","a":"10A","mat":"황동","seal":"VITON","sealEst":0,"p":"10kg/㎠","pr":34400,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"CV-M","s":"1/2\"","a":"15A","mat":"황동","seal":"METAL","sealEst":0,"p":"10kg/㎠","pr":21800,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"CV-T","s":"1/2\"","a":"15A","mat":"황동","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":24600,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"UCV-E","s":"1/2\"","a":"15A","mat":"황동","seal":"EPDM","sealEst":0,"p":"10kg/㎠","pr":24200,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"PBS-V","s":"1/2\"","a":"15A","mat":"황동","seal":"VITON","sealEst":0,"p":"10kg/㎠","pr":42800,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"CV-M","s":"3/4\"","a":"20A","mat":"황동","seal":"METAL","sealEst":0,"p":"10kg/㎠","pr":34600,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"CV-T","s":"3/4\"","a":"20A","mat":"황동","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":37200,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"UCV-E","s":"3/4\"","a":"20A","mat":"황동","seal":"EPDM","sealEst":0,"p":"10kg/㎠","pr":36200,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"CV-M","s":"1\"","a":"25A","mat":"황동","seal":"METAL","sealEst":0,"p":"10kg/㎠","pr":69600,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"CV-T","s":"1\"","a":"25A","mat":"황동","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":73600,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"UCV-E","s":"1\"","a":"25A","mat":"황동","seal":"EPDM","sealEst":0,"p":"10kg/㎠","pr":72600,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"CV-M","s":"1 1/4\"","a":"32A","mat":"황동","seal":"METAL","sealEst":0,"p":"10kg/㎠","pr":93600,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"CV-T","s":"1 1/4\"","a":"32A","mat":"황동","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":98000,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"UCV-E","s":"1 1/4\"","a":"32A","mat":"황동","seal":"EPDM","sealEst":0,"p":"10kg/㎠","pr":98200,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"CV-M","s":"1 1/2\"","a":"40A","mat":"황동","seal":"METAL","sealEst":0,"p":"10kg/㎠","pr":116800,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"CV-T","s":"1 1/2\"","a":"40A","mat":"황동","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":123200,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"UCV-E","s":"1 1/2\"","a":"40A","mat":"황동","seal":"EPDM","sealEst":0,"p":"10kg/㎠","pr":148600,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"CV-M","s":"2\"","a":"50A","mat":"황동","seal":"METAL","sealEst":0,"p":"10kg/㎠","pr":175600,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"CV-T","s":"2\"","a":"50A","mat":"황동","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":184200,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"UCV-E","s":"2\"","a":"50A","mat":"황동","seal":"EPDM","sealEst":0,"p":"10kg/㎠","pr":237900,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"PCS22-M","s":"1/4\", 3/8\"","a":"8, 10A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"20kg/㎠","pr":41000,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"PCS22-T","s":"1/4\", 3/8\"","a":"8, 10A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":41400,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"PCS22-M","s":"1/2\"","a":"15A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"20kg/㎠","pr":41800,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"PCS22-T","s":"1/2\"","a":"15A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":42200,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"PCS22-M","s":"3/4\"","a":"20A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"20kg/㎠","pr":51200,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"PCS22-T","s":"3/4\"","a":"20A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":51600,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"PCS22-M","s":"1\"","a":"25A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"20kg/㎠","pr":61700,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"PCS22-T","s":"1\"","a":"25A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":63500,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"PAS22-M","s":"1\"","a":"25A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"20kg/㎠","pr":84200,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"PAS22-E","s":"1\"","a":"25A","mat":"스텐304","seal":"EPDM","sealEst":0,"p":"20kg/㎠","pr":79000,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"PAS22-V","s":"1\"","a":"25A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"20kg/㎠","pr":90500,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"PCS22-M","s":"1 1/4\"","a":"32A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"20kg/㎠","pr":73400,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"PCS22-T","s":"1 1/4\"","a":"32A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":75700,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"PAS22-M","s":"1 1/4\"","a":"32A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"20kg/㎠","pr":100400,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"PAS22-E","s":"1 1/4\"","a":"32A","mat":"스텐304","seal":"EPDM","sealEst":0,"p":"20kg/㎠","pr":94400,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"PAS22-V","s":"1 1/4\"","a":"32A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"20kg/㎠","pr":100700,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"PCS22-M","s":"1 1/2\"","a":"40A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"20kg/㎠","pr":102000,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"PCS22-T","s":"1 1/2\"","a":"40A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":106900,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"PAS22-M","s":"1 1/2\"","a":"40A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"20kg/㎠","pr":131200,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"PAS22-E","s":"1 1/2\"","a":"40A","mat":"스텐304","seal":"EPDM","sealEst":0,"p":"20kg/㎠","pr":123600,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"PAS22-V","s":"1 1/2\"","a":"40A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"20kg/㎠","pr":129200,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"PCS22-M","s":"2\"","a":"50A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"20kg/㎠","pr":142400,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"PCS22-T","s":"2\"","a":"50A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":149600,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"PAS22-M","s":"2\"","a":"50A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"20kg/㎠","pr":177600,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"PAS22-E","s":"2\"","a":"50A","mat":"스텐304","seal":"EPDM","sealEst":0,"p":"20kg/㎠","pr":167200,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"PAS22-V","s":"2\"","a":"50A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"20kg/㎠","pr":175800,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"BU22-N","s":"1/4\", 3/8\"","a":"8, 10A","mat":"스텐316L","seal":"NBR","sealEst":0,"p":"20kg/㎠","pr":49600,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"BU22-V","s":"1/4\", 3/8\"","a":"8, 10A","mat":"스텐316L","seal":"VITON","sealEst":0,"p":"20kg/㎠","pr":50800,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"BU22-N","s":"1/2\"","a":"15A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"20kg/㎠","pr":89400,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"BU22-V","s":"1/2\"","a":"15A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"20kg/㎠","pr":90800,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"BU22-N","s":"3/4\"","a":"20A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"20kg/㎠","pr":120400,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"BU22-V","s":"3/4\"","a":"20A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"20kg/㎠","pr":122000,"conn":"나사식","sheet":"I"},{"maker":"우성밸브","m":"PC12-M","s":"1/2\"","a":"15A","mat":"황동","seal":"METAL","sealEst":0,"p":"16kg/㎠","pr":41300,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC12-T","s":"1/2\"","a":"15A","mat":"황동","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":41600,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC12-M","s":"3/4\"","a":"20A","mat":"황동","seal":"METAL","sealEst":0,"p":"16kg/㎠","pr":54400,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC12-T","s":"3/4\"","a":"20A","mat":"황동","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":55900,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC12-M","s":"1\"","a":"25A","mat":"황동","seal":"METAL","sealEst":0,"p":"16kg/㎠","pr":63100,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC12-T","s":"1\"","a":"25A","mat":"황동","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":66400,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA12-M","s":"1\"","a":"25A","mat":"황동","seal":"METAL","sealEst":0,"p":"16kg/㎠","pr":109500,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA12-E","s":"1\"","a":"25A","mat":"황동","seal":"EPDM","sealEst":0,"p":"16kg/㎠","pr":103200,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA12-V","s":"1\"","a":"25A","mat":"황동","seal":"VITON","sealEst":0,"p":"16kg/㎠","pr":119200,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC12-M","s":"1 1/4\"","a":"32A","mat":"황동","seal":"METAL","sealEst":0,"p":"16kg/㎠","pr":80000,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC12-T","s":"1 1/4\"","a":"32A","mat":"황동","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":82700,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA12-M","s":"1 1/4\"","a":"32A","mat":"황동","seal":"METAL","sealEst":0,"p":"16kg/㎠","pr":139900,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA12-E","s":"1 1/4\"","a":"32A","mat":"황동","seal":"EPDM","sealEst":0,"p":"16kg/㎠","pr":131500,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA12-V","s":"1 1/4\"","a":"32A","mat":"황동","seal":"VITON","sealEst":0,"p":"16kg/㎠","pr":147700,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC12-M","s":"1 1/2\"","a":"40A","mat":"황동","seal":"METAL","sealEst":0,"p":"16kg/㎠","pr":99300,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC12-T","s":"1 1/2\"","a":"40A","mat":"황동","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":103100,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA12-M","s":"1 1/2\"","a":"40A","mat":"황동","seal":"METAL","sealEst":0,"p":"16kg/㎠","pr":163200,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA12-E","s":"1 1/2\"","a":"40A","mat":"황동","seal":"EPDM","sealEst":0,"p":"16kg/㎠","pr":153400,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA12-V","s":"1 1/2\"","a":"40A","mat":"황동","seal":"VITON","sealEst":0,"p":"16kg/㎠","pr":170200,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC12-M","s":"2\"","a":"50A","mat":"황동","seal":"METAL","sealEst":0,"p":"16kg/㎠","pr":129000,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC12-T","s":"2\"","a":"50A","mat":"황동","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":134200,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA12-M","s":"2\"","a":"50A","mat":"황동","seal":"METAL","sealEst":0,"p":"16kg/㎠","pr":211200,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA12-E","s":"2\"","a":"50A","mat":"황동","seal":"EPDM","sealEst":0,"p":"16kg/㎠","pr":198600,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA12-V","s":"2\"","a":"50A","mat":"황동","seal":"VITON","sealEst":0,"p":"16kg/㎠","pr":220700,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC12-M","s":"2 1/2\"","a":"65A","mat":"황동","seal":"METAL","sealEst":0,"p":"16kg/㎠","pr":170000,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC12-T","s":"2 1/2\"","a":"65A","mat":"황동","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":179400,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA12-M","s":"2 1/2\"","a":"65A","mat":"황동","seal":"METAL","sealEst":0,"p":"16kg/㎠","pr":278200,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA12-E","s":"2 1/2\"","a":"65A","mat":"황동","seal":"EPDM","sealEst":0,"p":"16kg/㎠","pr":261700,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA12-V","s":"2 1/2\"","a":"65A","mat":"황동","seal":"VITON","sealEst":0,"p":"16kg/㎠","pr":283600,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC12-M","s":"3\"","a":"80A","mat":"황동","seal":"METAL","sealEst":0,"p":"16kg/㎠","pr":249100,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC12-T","s":"3\"","a":"80A","mat":"황동","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":271300,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA12-M","s":"3\"","a":"80A","mat":"황동","seal":"METAL","sealEst":0,"p":"16kg/㎠","pr":378900,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA12-E","s":"3\"","a":"80A","mat":"황동","seal":"EPDM","sealEst":0,"p":"16kg/㎠","pr":356800,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA12-V","s":"3\"","a":"80A","mat":"황동","seal":"VITON","sealEst":0,"p":"16kg/㎠","pr":378700,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC12-M","s":"4\"","a":"100A","mat":"청동","seal":"METAL","sealEst":0,"p":"16kg/㎠","pr":597700,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC12-T","s":"4\"","a":"100A","mat":"청동","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":597700,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA12-M","s":"4\"","a":"100A","mat":"청동","seal":"METAL","sealEst":0,"p":"16kg/㎠","pr":671300,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA12-E","s":"4\"","a":"100A","mat":"청동","seal":"EPDM","sealEst":0,"p":"16kg/㎠","pr":671300,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA12-V","s":"4\"","a":"100A","mat":"청동","seal":"VITON","sealEst":0,"p":"16kg/㎠","pr":671300,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA32-T","s":"5\"","a":"125A","mat":"닥타일","seal":"PTFE","sealEst":1,"p":"10kg/㎠","pr":542900,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA32-M","s":"5\"","a":"125A","mat":"닥타일","seal":"METAL","sealEst":1,"p":"10kg/㎠","pr":487600,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA32-E","s":"5\"","a":"125A","mat":"닥타일","seal":"EPDM","sealEst":1,"p":"10kg/㎠","pr":466300,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA32-V","s":"5\"","a":"125A","mat":"닥타일","seal":"VITON","sealEst":1,"p":"10kg/㎠","pr":485600,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA32-T","s":"6\"","a":"150A","mat":"닥타일","seal":"PTFE","sealEst":1,"p":"10kg/㎠","pr":705000,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA32-M","s":"6\"","a":"150A","mat":"닥타일","seal":"METAL","sealEst":1,"p":"10kg/㎠","pr":628300,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA32-E","s":"6\"","a":"150A","mat":"닥타일","seal":"EPDM","sealEst":1,"p":"10kg/㎠","pr":603000,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA32-V","s":"6\"","a":"150A","mat":"닥타일","seal":"VITON","sealEst":1,"p":"10kg/㎠","pr":623900,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA32-T","s":"8\"","a":"200A","mat":"닥타일","seal":"PTFE","sealEst":1,"p":"10kg/㎠","pr":1166300,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA32-M","s":"8\"","a":"200A","mat":"닥타일","seal":"METAL","sealEst":1,"p":"10kg/㎠","pr":1057800,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA32-E","s":"8\"","a":"200A","mat":"닥타일","seal":"EPDM","sealEst":1,"p":"10kg/㎠","pr":1035100,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA32-V","s":"8\"","a":"200A","mat":"닥타일","seal":"VITON","sealEst":1,"p":"10kg/㎠","pr":1078200,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA32-T","s":"10\"","a":"250A","mat":"닥타일","seal":"PTFE","sealEst":1,"p":"10kg/㎠","pr":2167400,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA32-M","s":"10\"","a":"250A","mat":"닥타일","seal":"METAL","sealEst":1,"p":"10kg/㎠","pr":1927100,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA32-E","s":"10\"","a":"250A","mat":"닥타일","seal":"EPDM","sealEst":1,"p":"10kg/㎠","pr":2065000,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA32-V","s":"10\"","a":"250A","mat":"닥타일","seal":"VITON","sealEst":1,"p":"10kg/㎠","pr":2106300,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC22-M","s":"1/2\"","a":"15A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"40kg/㎠","pr":35900,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC22-T","s":"1/2\"","a":"15A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":41000,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC22-M","s":"3/4\"","a":"20A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"40kg/㎠","pr":39800,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC22-T","s":"3/4\"","a":"20A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":41800,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC22-M","s":"1\"","a":"25A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"40kg/㎠","pr":47400,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC22-T","s":"1\"","a":"25A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":50200,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-M","s":"1\"","a":"25A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"40kg/㎠","pr":92000,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-E","s":"1\"","a":"25A","mat":"스텐304","seal":"EPDM","sealEst":0,"p":"30kg/㎠","pr":86400,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-V","s":"1\"","a":"25A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"30kg/㎠","pr":98200,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC22-M","s":"1 1/4\"","a":"32A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"40kg/㎠","pr":62900,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC22-T","s":"1 1/4\"","a":"32A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":66800,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-M","s":"1 1/4\"","a":"32A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"40kg/㎠","pr":115000,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-E","s":"1 1/4\"","a":"32A","mat":"스텐304","seal":"EPDM","sealEst":0,"p":"30kg/㎠","pr":108200,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-V","s":"1 1/4\"","a":"32A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"30kg/㎠","pr":120000,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC22-M","s":"1 1/2\"","a":"40A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"40kg/㎠","pr":73200,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC22-T","s":"1 1/2\"","a":"40A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":79600,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-M","s":"1 1/2\"","a":"40A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"40kg/㎠","pr":129200,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-E","s":"1 1/2\"","a":"40A","mat":"스텐304","seal":"EPDM","sealEst":0,"p":"30kg/㎠","pr":121400,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-V","s":"1 1/2\"","a":"40A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"30kg/㎠","pr":133200,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC22-M","s":"2\"","a":"50A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"40kg/㎠","pr":96700,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC22-T","s":"2\"","a":"50A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":107600,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-M","s":"2\"","a":"50A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"40kg/㎠","pr":159800,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-E","s":"2\"","a":"50A","mat":"스텐304","seal":"EPDM","sealEst":0,"p":"30kg/㎠","pr":150400,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-V","s":"2\"","a":"50A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"30kg/㎠","pr":165400,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC22-M","s":"2 1/2\"","a":"65A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"40kg/㎠","pr":131700,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC22-T","s":"2 1/2\"","a":"65A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":146600,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-M","s":"2 1/2\"","a":"65A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"40kg/㎠","pr":201800,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-E","s":"2 1/2\"","a":"65A","mat":"스텐304","seal":"EPDM","sealEst":0,"p":"30kg/㎠","pr":190000,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-V","s":"2 1/2\"","a":"65A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"30kg/㎠","pr":204800,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC22-M","s":"3\"","a":"80A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"40kg/㎠","pr":191900,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC22-T","s":"3\"","a":"80A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":222400,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-M","s":"3\"","a":"80A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"40kg/㎠","pr":286000,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-E","s":"3\"","a":"80A","mat":"스텐304","seal":"EPDM","sealEst":0,"p":"30kg/㎠","pr":269200,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-V","s":"3\"","a":"80A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"30kg/㎠","pr":284000,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC22-M","s":"4\"","a":"100A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"40kg/㎠","pr":351500,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC22-T","s":"4\"","a":"100A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":365000,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-M","s":"4\"","a":"100A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"40kg/㎠","pr":402700,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-E","s":"4\"","a":"100A","mat":"스텐304","seal":"EPDM","sealEst":0,"p":"30kg/㎠","pr":370500,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-V","s":"4\"","a":"100A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"30kg/㎠","pr":386600,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC22-T","s":"5\"","a":"125A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":711500,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-M","s":"5\"","a":"125A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"40kg/㎠","pr":672000,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-E","s":"5\"","a":"125A","mat":"스텐304","seal":"EPDM","sealEst":0,"p":"10kg/㎠","pr":618300,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-V","s":"5\"","a":"125A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"10kg/㎠","pr":645100,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC22-T","s":"6\"","a":"150A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":1059500,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-M","s":"6\"","a":"150A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"40kg/㎠","pr":961000,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-E","s":"6\"","a":"150A","mat":"스텐304","seal":"EPDM","sealEst":0,"p":"10kg/㎠","pr":884100,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-V","s":"6\"","a":"150A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"10kg/㎠","pr":922600,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC22-T","s":"8\"","a":"200A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":1962900,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-M","s":"8\"","a":"200A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"40kg/㎠","pr":1854100,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-E","s":"8\"","a":"200A","mat":"스텐304","seal":"EPDM","sealEst":0,"p":"10kg/㎠","pr":1705800,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-V","s":"8\"","a":"200A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"10kg/㎠","pr":1780000,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC22-T","s":"10\"","a":"250A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":3207000,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-M","s":"10\"","a":"250A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"40kg/㎠","pr":3104600,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-E","s":"10\"","a":"250A","mat":"스텐304","seal":"EPDM","sealEst":0,"p":"10kg/㎠","pr":2856300,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-V","s":"10\"","a":"250A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"10kg/㎠","pr":2980400,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC22-T","s":"12\"","a":"300A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":4557000,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-M","s":"12\"","a":"300A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"40kg/㎠","pr":4214300,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-E","s":"12\"","a":"300A","mat":"스텐304","seal":"EPDM","sealEst":0,"p":"10kg/㎠","pr":4045800,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-V","s":"12\"","a":"300A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"10kg/㎠","pr":4382900,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PC22-T","s":"14\"","a":"350A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"7kg/㎠","pr":6340400,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-M","s":"14\"","a":"350A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"40kg/㎠","pr":5844900,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-E","s":"14\"","a":"350A","mat":"스텐304","seal":"EPDM","sealEst":0,"p":"10kg/㎠","pr":5611100,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"PA22-V","s":"14\"","a":"350A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"10kg/㎠","pr":6078700,"conn":"후렌지","sheet":"II"},{"maker":"우성밸브","m":"ANA22-M","s":"1/2\"","a":"15A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"150#/300#","pr":88100,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-N","s":"1/2\"","a":"15A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"150#/300#","pr":86400,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-V","s":"1/2\"","a":"15A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"150#/300#","pr":87200,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-T","s":"1/2\"","a":"15A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"150#/300#","pr":135700,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-M","s":"3/4\"","a":"20A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"150#/300#","pr":111100,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-N","s":"3/4\"","a":"20A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"150#/300#","pr":109000,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-V","s":"3/4\"","a":"20A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"150#/300#","pr":109800,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-T","s":"3/4\"","a":"20A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"150#/300#","pr":158500,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-M","s":"1\"","a":"25A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"150#/300#","pr":125400,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-N","s":"1\"","a":"25A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"150#/300#","pr":120500,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-V","s":"1\"","a":"25A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"150#/300#","pr":122900,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-T","s":"1\"","a":"25A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"150#/300#","pr":175000,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-M","s":"1 1/4\"","a":"32A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"150#/300#","pr":143100,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-N","s":"1 1/4\"","a":"32A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"150#/300#","pr":140200,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-V","s":"1 1/4\"","a":"32A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"150#/300#","pr":140800,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-T","s":"1 1/4\"","a":"32A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"150#/300#","pr":206600,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-M","s":"1 1/2\"","a":"40A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"150#/300#","pr":169300,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-N","s":"1 1/2\"","a":"40A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"150#/300#","pr":165900,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-V","s":"1 1/2\"","a":"40A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"150#/300#","pr":166600,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-T","s":"1 1/2\"","a":"40A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"150#/300#","pr":231200,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-M","s":"2\"","a":"50A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"150#/300#","pr":281100,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-N","s":"2\"","a":"50A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"150#/300#","pr":270200,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-V","s":"2\"","a":"50A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"150#/300#","pr":275700,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-T","s":"2\"","a":"50A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"150#/300#","pr":336800,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-M","s":"2 1/2\"","a":"65A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"150#/300#","pr":373400,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-N","s":"2 1/2\"","a":"65A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"150#/300#","pr":366100,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-V","s":"2 1/2\"","a":"65A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"150#/300#","pr":370500,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-T","s":"2 1/2\"","a":"65A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"150#/300#","pr":426400,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-M","s":"3\"","a":"80A","mat":"2.0615","seal":"METAL","sealEst":0,"p":"150#/300#","pr":431400,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-N","s":"3\"","a":"80A","mat":"2.0615","seal":"NBR","sealEst":0,"p":"150#/300#","pr":451000,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-V","s":"3\"","a":"80A","mat":"2.0615","seal":"VITON","sealEst":0,"p":"150#/300#","pr":460800,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-T","s":"3\"","a":"80A","mat":"2.0615","seal":"PTFE","sealEst":0,"p":"150#/300#","pr":524100,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-M","s":"4\"","a":"100A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"150#/300#","pr":621100,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-N","s":"4\"","a":"100A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"150#/300#","pr":592900,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-V","s":"4\"","a":"100A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"150#/300#","pr":607000,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"ANA22-T","s":"4\"","a":"100A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"150#/300#","pr":762300,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"PA22-M","s":"5\"","a":"125A","mat":"스텐304","seal":"METAL","sealEst":1,"p":"150#/20K","pr":672000,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"PA22-E","s":"5\"","a":"125A","mat":"스텐304","seal":"EPDM","sealEst":1,"p":"150#/20K","pr":618300,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"PA22-V","s":"5\"","a":"125A","mat":"스텐304","seal":"VITON","sealEst":1,"p":"150#/20K","pr":645100,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"PA22-T","s":"5\"","a":"125A","mat":"스텐304","seal":"PTFE","sealEst":1,"p":"150#/20K","pr":711500,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"PA22-M","s":"6\"","a":"150A","mat":"스텐304","seal":"METAL","sealEst":1,"p":"150#/20K","pr":961000,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"PA22-E","s":"6\"","a":"150A","mat":"스텐304","seal":"EPDM","sealEst":1,"p":"150#/20K","pr":884100,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"PA22-V","s":"6\"","a":"150A","mat":"스텐304","seal":"VITON","sealEst":1,"p":"150#/20K","pr":922600,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"PA22-T","s":"6\"","a":"150A","mat":"스텐304","seal":"PTFE","sealEst":1,"p":"150#/20K","pr":1059500,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"PA22-M","s":"8\"","a":"200A","mat":"스텐304","seal":"METAL","sealEst":1,"p":"150#/20K","pr":1911500,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"PA22-E","s":"8\"","a":"200A","mat":"스텐304","seal":"EPDM","sealEst":1,"p":"150#/20K","pr":1758600,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"PA22-V","s":"8\"","a":"200A","mat":"스텐304","seal":"VITON","sealEst":1,"p":"150#/20K","pr":1835100,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"PA22-T","s":"8\"","a":"200A","mat":"스텐304","seal":"PTFE","sealEst":1,"p":"150#/20K","pr":2023700,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"PA22-M","s":"10\"","a":"250A","mat":"스텐304","seal":"METAL","sealEst":1,"p":"150#/20K","pr":3200700,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"PA22-E","s":"10\"","a":"250A","mat":"스텐304","seal":"EPDM","sealEst":1,"p":"150#/20K","pr":2944700,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"PA22-V","s":"10\"","a":"250A","mat":"스텐304","seal":"VITON","sealEst":1,"p":"150#/20K","pr":3072600,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"PA22-T","s":"10\"","a":"250A","mat":"스텐304","seal":"PTFE","sealEst":1,"p":"150#/20K","pr":3306200,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"PA22-M","s":"12\"","a":"300A","mat":"스텐304","seal":"METAL","sealEst":1,"p":"150#/20K","pr":4344700,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"PA22-E","s":"12\"","a":"300A","mat":"스텐304","seal":"EPDM","sealEst":1,"p":"150#/20K","pr":4171000,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"PA22-V","s":"12\"","a":"300A","mat":"스텐304","seal":"VITON","sealEst":1,"p":"150#/20K","pr":4518500,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"PA22-T","s":"12\"","a":"300A","mat":"스텐304","seal":"PTFE","sealEst":1,"p":"150#/20K","pr":4698000,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"PA22-M","s":"14\"","a":"350A","mat":"스텐304","seal":"METAL","sealEst":1,"p":"150#/20K","pr":6025700,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"PA22-E","s":"14\"","a":"350A","mat":"스텐304","seal":"EPDM","sealEst":1,"p":"150#/20K","pr":5784700,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"PA22-V","s":"14\"","a":"350A","mat":"스텐304","seal":"VITON","sealEst":1,"p":"150#/20K","pr":6266800,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"PA22-T","s":"14\"","a":"350A","mat":"스텐304","seal":"PTFE","sealEst":1,"p":"150#/20K","pr":6536500,"conn":"ASME","sheet":"III"},{"maker":"우성밸브","m":"SP22-M","s":"1 1/2\"","a":"40A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"10kg/㎠","pr":130300,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-N","s":"1 1/2\"","a":"40A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"10kg/㎠","pr":127200,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-V","s":"1 1/2\"","a":"40A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"10kg/㎠","pr":128900,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-T","s":"1 1/2\"","a":"40A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"10kg/㎠","pr":186400,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-M","s":"2\"","a":"50A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"10kg/㎠","pr":132400,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-N","s":"2\"","a":"50A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"10kg/㎠","pr":128200,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-V","s":"2\"","a":"50A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"10kg/㎠","pr":131400,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-T","s":"2\"","a":"50A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"10kg/㎠","pr":187000,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-M","s":"2\"","a":"50A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"20K/150#","pr":299400,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-N","s":"2\"","a":"50A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"20K/150#","pr":287300,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-V","s":"2\"","a":"50A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"20K/150#","pr":295000,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-T","s":"2\"","a":"50A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"20K/150#","pr":454900,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-M","s":"2 1/2\"","a":"65A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"10kg/㎠","pr":175600,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-N","s":"2 1/2\"","a":"65A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"10kg/㎠","pr":168500,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-V","s":"2 1/2\"","a":"65A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"10kg/㎠","pr":179000,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-T","s":"2 1/2\"","a":"65A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"10kg/㎠","pr":253800,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-M","s":"2 1/2\"","a":"65A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"20K/150#","pr":354700,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-N","s":"2 1/2\"","a":"65A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"20K/150#","pr":341400,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-V","s":"2 1/2\"","a":"65A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"20K/150#","pr":347900,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-T","s":"2 1/2\"","a":"65A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"20K/150#","pr":515000,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-M","s":"3\"","a":"80A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"10kg/㎠","pr":200100,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-N","s":"3\"","a":"80A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"10kg/㎠","pr":190600,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-V","s":"3\"","a":"80A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"10kg/㎠","pr":196200,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-T","s":"3\"","a":"80A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"10kg/㎠","pr":303400,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-M","s":"3\"","a":"80A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"20K/150#","pr":395000,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-N","s":"3\"","a":"80A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"20K/150#","pr":371700,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-V","s":"3\"","a":"80A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"20K/150#","pr":378000,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-T","s":"3\"","a":"80A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"20K/150#","pr":568000,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-M","s":"4\"","a":"100A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"10kg/㎠","pr":264400,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-N","s":"4\"","a":"100A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"10kg/㎠","pr":255800,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-V","s":"4\"","a":"100A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"10kg/㎠","pr":261000,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-T","s":"4\"","a":"100A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"10kg/㎠","pr":334800,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-M","s":"4\"","a":"100A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"20K/150#","pr":422200,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-N","s":"4\"","a":"100A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"20K/150#","pr":401900,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-V","s":"4\"","a":"100A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"20K/150#","pr":413800,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-T","s":"4\"","a":"100A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"20K/150#","pr":597900,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-M","s":"5\"","a":"125A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"10kg/㎠","pr":376200,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-N","s":"5\"","a":"125A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"10kg/㎠","pr":354300,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-V","s":"5\"","a":"125A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"10kg/㎠","pr":362200,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-T","s":"5\"","a":"125A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"10kg/㎠","pr":479800,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-M","s":"5\"","a":"125A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"20K/150#","pr":547100,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-N","s":"5\"","a":"125A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"20K/150#","pr":516100,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-V","s":"5\"","a":"125A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"20K/150#","pr":521100,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-T","s":"5\"","a":"125A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"20K/150#","pr":718200,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-M","s":"6\"","a":"150A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"10kg/㎠","pr":555200,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-N","s":"6\"","a":"150A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"10kg/㎠","pr":514000,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-V","s":"6\"","a":"150A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"10kg/㎠","pr":525800,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-T","s":"6\"","a":"150A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"10kg/㎠","pr":684000,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-M","s":"6\"","a":"150A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"20K/150#","pr":786700,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-N","s":"6\"","a":"150A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"20K/150#","pr":766000,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-V","s":"6\"","a":"150A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"20K/150#","pr":770400,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-T","s":"6\"","a":"150A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"20K/150#","pr":974600,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-M","s":"8\"","a":"200A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"10kg/㎠","pr":1166400,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-N","s":"8\"","a":"200A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"10kg/㎠","pr":1121100,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-V","s":"8\"","a":"200A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"10kg/㎠","pr":1134200,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-T","s":"8\"","a":"200A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"10kg/㎠","pr":1119800,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-M","s":"8\"","a":"200A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"20K/150#","pr":1200300,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-N","s":"8\"","a":"200A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"20K/150#","pr":1174300,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-V","s":"8\"","a":"200A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"20K/150#","pr":1192500,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-T","s":"8\"","a":"200A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"20K/150#","pr":1484700,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-M","s":"10\"","a":"250A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"10kg/㎠","pr":1890500,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-N","s":"10\"","a":"250A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"10kg/㎠","pr":1817600,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-V","s":"10\"","a":"250A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"10kg/㎠","pr":1852300,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-T","s":"10\"","a":"250A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"10kg/㎠","pr":1814900,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-M","s":"10\"","a":"250A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"20K/150#","pr":2298400,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-N","s":"10\"","a":"250A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"20K/150#","pr":2212900,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-V","s":"10\"","a":"250A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"20K/150#","pr":2249000,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-T","s":"10\"","a":"250A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"20K/150#","pr":2475200,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-M","s":"12\"","a":"300A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"10kg/㎠","pr":2641100,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-N","s":"12\"","a":"300A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"10kg/㎠","pr":2463400,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-V","s":"12\"","a":"300A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"10kg/㎠","pr":2506300,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-T","s":"12\"","a":"300A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"10kg/㎠","pr":2739000,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-M","s":"12\"","a":"300A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"20K/150#","pr":3366500,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-N","s":"12\"","a":"300A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"20K/150#","pr":3141600,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-V","s":"12\"","a":"300A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"20K/150#","pr":3241800,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-T","s":"12\"","a":"300A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"20K/150#","pr":3865200,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-M","s":"14\"","a":"350A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"10kg/㎠","pr":3095700,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-N","s":"14\"","a":"350A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"10kg/㎠","pr":2960800,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-V","s":"14\"","a":"350A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"10kg/㎠","pr":3001400,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-T","s":"14\"","a":"350A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"10kg/㎠","pr":3651200,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-M","s":"14\"","a":"350A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"20K/150#","pr":4615900,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-N","s":"14\"","a":"350A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"20K/150#","pr":4415100,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-V","s":"14\"","a":"350A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"20K/150#","pr":4475700,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-T","s":"14\"","a":"350A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"20K/150#","pr":5444100,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-M","s":"16\"","a":"400A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"10kg/㎠","pr":4076900,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-N","s":"16\"","a":"400A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"10kg/㎠","pr":3882000,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-V","s":"16\"","a":"400A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"10kg/㎠","pr":3935600,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-T","s":"16\"","a":"400A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"10kg/㎠","pr":4786200,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-M","s":"16\"","a":"400A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"20K/150#","pr":6327500,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-N","s":"16\"","a":"400A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"20K/150#","pr":6026500,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-V","s":"16\"","a":"400A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"20K/150#","pr":6108000,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-T","s":"16\"","a":"400A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"20K/150#","pr":7428500,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-M","s":"18\"","a":"450A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"10kg/㎠","pr":5996600,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-N","s":"18\"","a":"450A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"10kg/㎠","pr":5710000,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-V","s":"18\"","a":"450A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"10kg/㎠","pr":5783000,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-T","s":"18\"","a":"450A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"10kg/㎠","pr":6734800,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-M","s":"18\"","a":"450A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"20K/150#","pr":7729000,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-N","s":"18\"","a":"450A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"20K/150#","pr":7360700,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-V","s":"18\"","a":"450A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"20K/150#","pr":7453300,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-T","s":"18\"","a":"450A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"20K/150#","pr":8679700,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-M","s":"20\"","a":"500A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"10kg/㎠","pr":8335800,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-N","s":"20\"","a":"500A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"10kg/㎠","pr":7938600,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-V","s":"20\"","a":"500A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"10kg/㎠","pr":8082600,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-T","s":"20\"","a":"500A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"10kg/㎠","pr":9466600,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-M","s":"20\"","a":"500A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"20K/150#","pr":10450000,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-N","s":"20\"","a":"500A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"20K/150#","pr":9951600,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-V","s":"20\"","a":"500A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"20K/150#","pr":10132400,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-T","s":"20\"","a":"500A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"20K/150#","pr":11864100,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-M","s":"24\"","a":"600A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"10kg/㎠","pr":12056900,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-N","s":"24\"","a":"600A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"10kg/㎠","pr":11484200,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-V","s":"24\"","a":"600A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"10kg/㎠","pr":12024200,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-T","s":"24\"","a":"600A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"10kg/㎠","pr":14483600,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-M","s":"24\"","a":"600A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"20K/150#","pr":16489900,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-N","s":"24\"","a":"600A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"20K/150#","pr":15703400,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-V","s":"24\"","a":"600A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"20K/150#","pr":16445000,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-T","s":"24\"","a":"600A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"20K/150#","pr":19805000,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-M","s":"28\"","a":"700A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"10kg/㎠","pr":16625000,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-N","s":"28\"","a":"700A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"10kg/㎠","pr":16513200,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-V","s":"28\"","a":"700A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"10kg/㎠","pr":16519300,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SP22-T","s":"28\"","a":"700A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"10kg/㎠","pr":19528400,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-M","s":"28\"","a":"700A","mat":"스텐304","seal":"METAL","sealEst":0,"p":"20K/150#","pr":21988800,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-N","s":"28\"","a":"700A","mat":"스텐304","seal":"NBR","sealEst":0,"p":"20K/150#","pr":21627400,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-V","s":"28\"","a":"700A","mat":"스텐304","seal":"VITON","sealEst":0,"p":"20K/150#","pr":21931700,"conn":"스윙","sheet":"IV"},{"maker":"우성밸브","m":"SPS22-T","s":"28\"","a":"700A","mat":"스텐304","seal":"PTFE","sealEst":0,"p":"20K/150#","pr":25576100,"conn":"스윙","sheet":"IV"},{"maker":"칼리피(Caleffi)","m":"327400","s":"1/2\"","a":"","mat":"","seal":"","sealEst":0,"p":"","pr":21000,"dealer":23100,"retail":25500,"noDisc":1,"conn":"기타","sheet":""},{"maker":"칼리피(Caleffi)","m":"327500","s":"3/4\"","a":"","mat":"","seal":"","sealEst":0,"p":"","pr":29000,"dealer":31900,"retail":35100,"noDisc":1,"conn":"기타","sheet":""},{"maker":"칼리피(Caleffi)","m":"327600","s":"1\"","a":"","mat":"","seal":"","sealEst":0,"p":"","pr":42600,"dealer":46900,"retail":51600,"noDisc":1,"conn":"기타","sheet":""},{"maker":"칼리피(Caleffi)","m":"327700","s":"1-1/4\"","a":"","mat":"","seal":"","sealEst":0,"p":"","pr":63900,"dealer":70300,"retail":77400,"noDisc":1,"conn":"기타","sheet":""},{"maker":"칼리피(Caleffi)","m":"327800","s":"1-1/2\"","a":"","mat":"","seal":"","sealEst":0,"p":"","pr":107000,"dealer":117700,"retail":129500,"noDisc":1,"conn":"기타","sheet":""},{"maker":"칼리피(Caleffi)","m":"327900","s":"2\"","a":"","mat":"","seal":"","sealEst":0,"p":"","pr":151600,"dealer":166800,"retail":183500,"noDisc":1,"conn":"기타","sheet":""},{"maker":"칼리피(Caleffi)","m":"502041","s":"1/2\"","a":"","mat":"","seal":"","sealEst":0,"p":"","pr":12800,"dealer":14100,"retail":15600,"noDisc":1,"conn":"기타","sheet":""},{"maker":"칼리피(Caleffi)","m":"533041","s":"1/2\"","a":"","mat":"","seal":"","sealEst":0,"p":"","pr":27600,"dealer":30400,"retail":33500,"noDisc":1,"conn":"기타","sheet":""},{"maker":"칼리피(Caleffi)","m":"533241","s":"1/2\"","a":"","mat":"","seal":"","sealEst":0,"p":"","pr":38000,"dealer":41800,"retail":46000,"noDisc":1,"conn":"기타","sheet":""},{"maker":"칼리피(Caleffi)","m":"533251","s":"3/4\"","a":"","mat":"","seal":"","sealEst":0,"p":"","pr":39300,"dealer":43300,"retail":47700,"noDisc":1,"conn":"기타","sheet":""},{"maker":"칼리피(Caleffi)","m":"533441","s":"1/2\"","a":"","mat":"","seal":"","sealEst":0,"p":"","pr":30000,"dealer":33000,"retail":36300,"noDisc":1,"conn":"기타","sheet":""},{"maker":"칼리피(Caleffi)","m":"533451","s":"3/4\"","a":"","mat":"","seal":"","sealEst":0,"p":"","pr":32300,"dealer":35600,"retail":39200,"noDisc":1,"conn":"기타","sheet":""},{"maker":"칼리피(Caleffi)","m":"535040","s":"1/2\"","a":"","mat":"","seal":"","sealEst":0,"p":"","pr":77000,"dealer":84700,"retail":93200,"noDisc":1,"conn":"기타","sheet":""},{"maker":"칼리피(Caleffi)","m":"535050","s":"3/4\"","a":"","mat":"","seal":"","sealEst":0,"p":"","pr":90600,"dealer":99700,"retail":109700,"noDisc":1,"conn":"기타","sheet":""},{"maker":"칼리피(Caleffi)","m":"535060","s":"1\"","a":"","mat":"","seal":"","sealEst":0,"p":"","pr":111600,"dealer":122800,"retail":135100,"noDisc":1,"conn":"기타","sheet":""},{"maker":"칼리피(Caleffi)","m":"535070","s":"1-1/4\"","a":"","mat":"","seal":"","sealEst":0,"p":"","pr":266000,"dealer":292600,"retail":321900,"noDisc":1,"conn":"기타","sheet":""},{"maker":"칼리피(Caleffi)","m":"535080","s":"1-1/2\"","a":"","mat":"","seal":"","sealEst":0,"p":"","pr":313300,"dealer":344700,"retail":379200,"noDisc":1,"conn":"기타","sheet":""},{"maker":"칼리피(Caleffi)","m":"535090","s":"2\"","a":"","mat":"","seal":"","sealEst":0,"p":"","pr":368400,"dealer":405300,"retail":445900,"noDisc":1,"conn":"기타","sheet":""},{"maker":"R.B.M","m":"87.06.70","s":"1\"","a":"","mat":"","seal":"","sealEst":0,"p":"","pr":104000,"dealer":114400,"retail":125900,"noDisc":1,"conn":"기타","sheet":""},{"maker":"R.B.M","m":"87.07.70","s":"1-1/4\"","a":"","mat":"","seal":"","sealEst":0,"p":"","pr":128600,"dealer":141500,"retail":155700,"noDisc":1,"conn":"기타","sheet":""},{"maker":"R.B.M","m":"87.08.70","s":"1-1/2\"","a":"","mat":"","seal":"","sealEst":0,"p":"","pr":143800,"dealer":158200,"retail":174100,"noDisc":1,"conn":"기타","sheet":""},{"maker":"R.B.M","m":"87.09.70","s":"2\"","a":"","mat":"","seal":"","sealEst":0,"p":"","pr":189000,"dealer":207900,"retail":228700,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21JN1ROV20(23)","s":"N.C 1/8\" , 0~20BAR","a":"","mat":"컴팩트","seal":"","sealEst":0,"p":"","pr":17600,"dealer":16000,"retail":20800,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21TG1KROV22","s":"N.C 1/8\" , 0~20BAR","a":"","mat":"컴팩트","seal":"","sealEst":0,"p":"","pr":19800,"dealer":18000,"retail":23400,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21TG2KROV22","s":"N.C 1/4\" , 0~20BAR","a":"","mat":"컴팩트","seal":"","sealEst":0,"p":"","pr":19800,"dealer":18000,"retail":23400,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21TG2KROV28","s":"N.C 1/4\" , 0~14BAR","a":"","mat":"컴팩트","seal":"","sealEst":0,"p":"","pr":19800,"dealer":18000,"retail":23400,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21A2KR20","s":"N.C 1/4\" , 0~25BAR","a":"","mat":"다이렉트","seal":"","sealEst":0,"p":"","pr":46200,"dealer":42000,"retail":54600,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21A2ZR20","s":"N.C 1/4\" , 0~25BAR","a":"","mat":"다이렉트","seal":"","sealEst":0,"p":"","pr":50820,"dealer":46200,"retail":60060,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21A2KV20","s":"N.C 1/4\" , 0~20BAR","a":"","mat":"다이렉트","seal":"","sealEst":0,"p":"","pr":39270,"dealer":35700,"retail":46410,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21A2KV25","s":"N.C 1/4\" , 0~14BAR","a":"","mat":"다이렉트","seal":"","sealEst":0,"p":"","pr":39270,"dealer":35700,"retail":46410,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21A2KV30","s":"N.C 1/4\" , 0~10BAR","a":"","mat":"다이렉트","seal":"","sealEst":0,"p":"","pr":39270,"dealer":35700,"retail":46410,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21A2ZV20D","s":"N.O 1/4\" , 0~20BAR","a":"","mat":"다이렉트","seal":"","sealEst":0,"p":"","pr":52030,"dealer":47300,"retail":61490,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21A5KV45","s":"N.C 3/8\" , 0~5BAR","a":"","mat":"다이렉트","seal":"","sealEst":0,"p":"","pr":40480,"dealer":36800,"retail":47840,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21A5ZV45","s":"N.O 3/8\" , 0~4BAR","a":"","mat":"다이렉트","seal":"","sealEst":0,"p":"","pr":54340,"dealer":49400,"retail":64220,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21A8KV45","s":"N.C 1/2\" , 0~5BAR","a":"","mat":"다이렉트","seal":"","sealEst":0,"p":"","pr":41580,"dealer":37800,"retail":49140,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21A8ZV45","s":"N.O 1/2\"\" , 0~4BAR","a":"","mat":"다이렉트","seal":"","sealEst":0,"p":"","pr":56650,"dealer":51500,"retail":66950,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21H11K0V120","s":"N.C 3/8\" , 0~16BAR","a":"","mat":"다이렉트","seal":"","sealEst":0,"p":"","pr":63580,"dealer":57800,"retail":75140,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21H12K0V120","s":"N.C 1/2\" , 0~16BAR","a":"","mat":"다이렉트","seal":"","sealEst":0,"p":"","pr":71500,"dealer":65000,"retail":84500,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21H13K0V190","s":"N.C 3/4\" , 0~5BAR","a":"","mat":"다이렉트","seal":"","sealEst":0,"p":"","pr":80850,"dealer":73500,"retail":95550,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21H14K0V250","s":"N.C 1\" , 0~5BAR","a":"","mat":"다이렉트","seal":"","sealEst":0,"p":"","pr":103950,"dealer":94500,"retail":122850,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21HT3K0Y110","s":"N.C 3/8\" , 0~14BAR","a":"","mat":"다이렉트","seal":"","sealEst":0,"p":"","pr":63580,"dealer":57800,"retail":75140,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21HT4K0Y160","s":"N.C 1/2\" , 0~14BAR","a":"","mat":"다이렉트","seal":"","sealEst":0,"p":"","pr":71500,"dealer":65000,"retail":84500,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21HT5K0Y160","s":"N.C 3/4\" , 0~14BAR","a":"","mat":"다이렉트","seal":"","sealEst":0,"p":"","pr":81400,"dealer":74000,"retail":96200,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21HT6K0Y250","s":"N.C 1\" , 0~8BAR","a":"","mat":"다이렉트","seal":"","sealEst":0,"p":"","pr":104500,"dealer":95000,"retail":123500,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21H7KB120","s":"N.C 3/8\" , 0.1~20BAR","a":"","mat":"파이롯트","seal":"","sealEst":0,"p":"","pr":46200,"dealer":42000,"retail":54600,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21H7KV120","s":"N.C 3/8\" , 0.1~20BAR","a":"","mat":"파이롯트","seal":"","sealEst":0,"p":"","pr":47300,"dealer":43000,"retail":55900,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21H8KB120","s":"N.C 1/2\" , 0.1~20BAR","a":"","mat":"파이롯트","seal":"","sealEst":0,"p":"","pr":47300,"dealer":43000,"retail":55900,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21H8KV120","s":"N.C 1/2\" , 0.1~20BAR","a":"","mat":"파이롯트","seal":"","sealEst":0,"p":"","pr":48400,"dealer":44000,"retail":57200,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21H9KV180","s":"N.C 3/4\", 0.1~16BAR","a":"","mat":"파이롯트","seal":"","sealEst":0,"p":"","pr":66000,"dealer":60000,"retail":78000,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21WA3K0V130","s":"N.C 3/8\" , 0.2~16BAR","a":"","mat":"파이롯트","seal":"","sealEst":0,"p":"","pr":57750,"dealer":52500,"retail":68250,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21WA3K0B130","s":"N.C 3/8\" , 0.2~16BAR","a":"","mat":"파이롯트","seal":"","sealEst":0,"p":"","pr":54340,"dealer":49400,"retail":64220,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21WA3Z0V130","s":"N.O 3/8\" , 0.2~16BAR","a":"","mat":"파이롯트","seal":"","sealEst":0,"p":"","pr":77440,"dealer":70400,"retail":91520,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21WA4K0V130","s":"N.C 1/2\" , 0.2~16BAR","a":"","mat":"파이롯트","seal":"","sealEst":0,"p":"","pr":57750,"dealer":52500,"retail":68250,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21WA4K0B130","s":"N.C 1/2\" , 0.2~16BAR","a":"","mat":"파이롯트","seal":"","sealEst":0,"p":"","pr":54340,"dealer":49400,"retail":64220,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21WA4Z0V130","s":"N.O 1/2\" , 0.2~16BAR","a":"","mat":"파이롯트","seal":"","sealEst":0,"p":"","pr":77440,"dealer":70400,"retail":91520,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21W3KV190","s":"N.C 3/4\" , 0.2~16BAR","a":"","mat":"파이롯트","seal":"","sealEst":0,"p":"","pr":95920,"dealer":87200,"retail":113360,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21W3KB190","s":"N.C 3/4\" , 0.2~16BAR","a":"","mat":"파이롯트","seal":"","sealEst":0,"p":"","pr":88990,"dealer":80900,"retail":105170,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21W3ZV190","s":"N.O 3/4\" , 0.2~10BAR","a":"","mat":"파이롯트","seal":"","sealEst":0,"p":"","pr":110880,"dealer":100800,"retail":131040,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21W4KV250","s":"N.C 1\" , 0.2~16BAR","a":"","mat":"파이롯트","seal":"","sealEst":0,"p":"","pr":105160,"dealer":95600,"retail":124280,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21W4KB250","s":"N.C 1\" , 0.2~16BAR","a":"","mat":"파이롯트","seal":"","sealEst":0,"p":"","pr":97020,"dealer":88200,"retail":114660,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21W4ZV250","s":"N.O 1\", 0.2~10BAR","a":"","mat":"파이롯트","seal":"","sealEst":0,"p":"","pr":120120,"dealer":109200,"retail":141960,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21W5KV350","s":"N.C 1-1/4\" , 0.2~10BAR","a":"","mat":"파이롯트","seal":"","sealEst":0,"p":"","pr":196350,"dealer":178500,"retail":232050,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21W5KB350","s":"N.C 1-1/4\" , 0.2~10BAR","a":"","mat":"파이롯트","seal":"","sealEst":0,"p":"","pr":175560,"dealer":159600,"retail":207480,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21W5ZB350","s":"N.O 1-1/4\", 0.2~10BAR","a":"","mat":"파이롯트","seal":"","sealEst":0,"p":"","pr":192940,"dealer":175400,"retail":228020,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21W6KV400","s":"N.C 1-1/2\" , 0.2~10BAR","a":"","mat":"파이롯트","seal":"","sealEst":0,"p":"","pr":206800,"dealer":188000,"retail":244400,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21W6KB400","s":"N.C 1-1/2\" , 0.2~10BAR","a":"","mat":"파이롯트","seal":"","sealEst":0,"p":"","pr":185900,"dealer":169000,"retail":219700,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21W6ZB400","s":"N.O 1-1/2\", 0.2~10BAR","a":"","mat":"파이롯트","seal":"","sealEst":0,"p":"","pr":220660,"dealer":200600,"retail":260780,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21W7KV500","s":"N.C 2\" , 0.2~10BAR","a":"","mat":"파이롯트","seal":"","sealEst":0,"p":"","pr":295680,"dealer":268800,"retail":349440,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21W7KB500","s":"N.C 2\" , 0.2~10BAR","a":"","mat":"파이롯트","seal":"","sealEst":0,"p":"","pr":242550,"dealer":220500,"retail":286650,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21W7ZB500","s":"N.O 2\", 0.2~10BAR","a":"","mat":"파이롯트","seal":"","sealEst":0,"p":"","pr":263340,"dealer":239400,"retail":311220,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21YW4K0T130","s":"N.C 1/2\" , 0.5~10BAR 스팀","a":"","mat":"스팀","seal":"","sealEst":0,"p":"","pr":138600,"dealer":126000,"retail":163800,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21YW5K0T190","s":"N.C 3/4\" , 0.5~10BAR 스팀","a":"","mat":"스팀","seal":"","sealEst":0,"p":"","pr":150150,"dealer":136500,"retail":177450,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21YW6K0T250","s":"N.C 1\" , 0.5~10BAR 스팀","a":"","mat":"스팀","seal":"","sealEst":0,"p":"","pr":173250,"dealer":157500,"retail":204750,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"31A3AV25","s":"3-WAY 1/8\" , 0~7BAR","a":"","mat":"3WAY","seal":"","sealEst":0,"p":"","pr":41580,"dealer":37800,"retail":49140,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"31A2AV20","s":"3-WAY 1/4\" , 0~9BAR","a":"","mat":"3WAY","seal":"","sealEst":0,"p":"","pr":41580,"dealer":37800,"retail":49140,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21A2KOT12-XC","s":"N.C 1/4\", 0~100BAR","a":"","mat":"고압용","seal":"","sealEst":0,"p":"","pr":49720,"dealer":45200,"retail":58760,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"4731KOT70","s":"N.C  3/8\", 3~100BAR","a":"","mat":"고압용","seal":"","sealEst":0,"p":"","pr":176000,"dealer":160000,"retail":208000,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"4966K0Q120","s":"N.C 1/2\", 3~100BAR","a":"","mat":"고압용","seal":"","sealEst":0,"p":"","pr":264000,"dealer":240000,"retail":312000,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"4592MZU190","s":"N.C 3/4\", 3~50BAR","a":"","mat":"고압용","seal":"","sealEst":0,"p":"","pr":385000,"dealer":350000,"retail":455000,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21L2K1T30","s":"N.C 1/4\"(SUS316) , 0~10BAR","a":"","mat":"스테인레스316","seal":"","sealEst":0,"p":"","pr":83600,"dealer":76000,"retail":98800,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21L2K1V40","s":"N.C 1/4\"(SUS316) , 0~10BAR","a":"","mat":"스테인레스316","seal":"","sealEst":0,"p":"","pr":83600,"dealer":76000,"retail":98800,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21IH3K1V150","s":"N.C 3/8\", 0~14BAR(SUS316)","a":"","mat":"스테인레스316","seal":"","sealEst":0,"p":"","pr":124300,"dealer":113000,"retail":146900,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21IH4K1V160","s":"N.C 1/2\", 0~14BAR(SUS316)","a":"","mat":"스테인레스316","seal":"","sealEst":0,"p":"","pr":129800,"dealer":118000,"retail":153400,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21IH5K1V200","s":"N.C 3/4\", 0~14BAR(SUS316)","a":"","mat":"스테인레스316","seal":"","sealEst":0,"p":"","pr":151800,"dealer":138000,"retail":179400,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21IH6K1V250","s":"N.C 1\", 0~14BAR(SUS316)","a":"","mat":"스테인레스316","seal":"","sealEst":0,"p":"","pr":192500,"dealer":175000,"retail":227500,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21IH7K1V350","s":"N.C 1-1/4\", 0~14BAR(SUS316)","a":"","mat":"스테인레스316","seal":"","sealEst":0,"p":"","pr":308000,"dealer":280000,"retail":364000,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21IH8K1V400","s":"N.C 1-1/2\", 0~14BAR(SUS316)","a":"","mat":"스테인레스316","seal":"","sealEst":0,"p":"","pr":330000,"dealer":300000,"retail":390000,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21X1KT120","s":"재고소진시까지, 스팀가능","a":"","mat":"스테인레스316","seal":"","sealEst":0,"p":"","pr":220000,"dealer":200000,"retail":260000,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21X2KT120","s":"N.C 1/2\"(SUS316) , 0.5~10BAR","a":"","mat":"스테인레스316","seal":"","sealEst":0,"p":"","pr":220000,"dealer":200000,"retail":260000,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21X3KT190","s":"N.C 3/4\"(SUS316) , 0.5~10BAR","a":"","mat":"스테인레스316","seal":"","sealEst":0,"p":"","pr":330000,"dealer":300000,"retail":390000,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21X4KT250","s":"N.C 1\"(SUS316) , 0.5~10BAR","a":"","mat":"스테인레스316","seal":"","sealEst":0,"p":"","pr":352000,"dealer":320000,"retail":416000,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21IZ1CSBTT015BT","s":"N.C 1/2\", 0~16BAR(SUS304)","a":"","mat":"Y형 공압밸브","seal":"","sealEst":0,"p":"","pr":104060,"dealer":94600,"retail":122980,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21IZ1DSBTT020BT","s":"N.C 3/4\", 0~16BAR(SUS304)","a":"","mat":"Y형 공압밸브","seal":"","sealEst":0,"p":"","pr":114950,"dealer":104500,"retail":135850,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21IZ1ESATT025BT","s":"N.C 1\", 0~16BAR(SUS316)","a":"","mat":"Y형 공압밸브","seal":"","sealEst":0,"p":"","pr":124630,"dealer":113300,"retail":147290,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21IZ1ESATT032BT","s":"N.C 1-1/4\", 0~16BAR(SUS316)","a":"","mat":"Y형 공압밸브","seal":"","sealEst":0,"p":"","pr":176176,"dealer":160160,"retail":208208,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21IZ1ESATT040BT","s":"N.C 1-1/2\", 0~16BAR(SUS316)","a":"","mat":"Y형 공압밸브","seal":"","sealEst":0,"p":"","pr":197230,"dealer":179300,"retail":233090,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"21IZ1FSATT050BT","s":"N.C  2\", 0~16BAR(SUS316)","a":"","mat":"Y형 공압밸브","seal":"","sealEst":0,"p":"","pr":279510,"dealer":254100,"retail":330330,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"BDA08220","s":"COIL/8W","a":"","mat":"코일","seal":"","sealEst":0,"p":"","pr":12100,"dealer":11000,"retail":14300,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"BDV08220","s":"COIL/8W H CLASS","a":"","mat":"코일","seal":"","sealEst":0,"p":"","pr":15400,"dealer":14000,"retail":18200,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"UDA12220","s":"COIL/12W","a":"","mat":"코일","seal":"","sealEst":0,"p":"","pr":19800,"dealer":18000,"retail":23400,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"UDV12220","s":"COIL/12W H CLASS","a":"","mat":"코일","seal":"","sealEst":0,"p":"","pr":23100,"dealer":21000,"retail":27300,"noDisc":1,"conn":"기타","sheet":""},{"maker":"ODE","m":"GDV14220","s":"COIL/14W H CLASS","a":"","mat":"코일","seal":"","sealEst":0,"p":"","pr":33000,"dealer":30000,"retail":39000,"noDisc":1,"conn":"기타","sheet":""}]};
+</script>
+
+<!-- ============ HKC 단가표 데이터 (HKC 대리점 가격표 2026-06-24 Rev.0 · 7개 시리즈) ============ -->
+<script>
+/* HKC 대리점 가격표 2026-06-24 Rev.0 (6쪽 전수 추출 · work/hkc/extract_hkc.py)
+   시리즈: APL · HP · HGO · HM · HL · ET · HQ. 금액은 모두 대리점가(원)입니다. */
+const HKC_DATA = {"docNo":"HKC 대리점 가격표 2026-06-24 Rev.0","applyDate":"2026-06-24","supplyNote":"공급가 = 대리점가 × 1.15 ~ 1.2","series":[{"key":"APL","name":"APL Series","sub":"리미트 스위치 박스","sizes":["APL-2","APL-3","APL-5","APL-8","APL-9"],"bodies":[{"model":"APL-X10N","spec":"Standard","prices":[19500,31000,65000,50000,29000]},{"model":"APL-X10S","spec":"SUS316","prices":[null,null,290000,220000,null]},{"model":"APL-X10L","spec":"SUS316L","prices":[null,null,null,null,60000]},{"model":"APL-X10SF","spec":"SUS316 + Flag type indicator","prices":[null,null,320000,250000,90000]}],"switches":[{"model":"APL-X11","desc":"3xSPDT, Zippy","prices":[null,4500,6000,6000,4500]},{"model":"APL-X12","desc":"4xSPDT, Zippy","prices":[null,6500,8000,8000,6500]},{"model":"APL-X14","desc":"2xDPDT, Zippy (4xSPDT 변형)","prices":[null,6500,8000,8000,6500]},{"model":"APL-X15","desc":"2xSPDT, Zippy + PIU (1 kΩ / RV24N)","prices":[null,41500,43000,43000,41500]},{"model":"APL-X16","desc":"2xSPDT, Zippy + CPT (4-20 mA)","prices":[null,64500,80000,80000,64500]},{"model":"APL-X10","desc":"2xSPDT, Omron(SS-5GL)","prices":[3000,3000,null,null,3000]},{"model":"APL-X10","desc":"2xSPDT, Omron(SS-10GL)","prices":[3000,3000,null,null,3000]},{"model":"APL-X18","desc":"2xSPDT, Omron(SS-01GL) / Golden Plate","prices":[4000,4000,null,null,4000]},{"model":"APL-X10","desc":"2xSPDT, Omron(VX-011K-1C22) / Golden Plate","prices":[null,7000,12000,12000,7000]},{"model":"APL-X10","desc":"2xSPDT, Deco(VP531A-4FR) [TOMOE, IP68, 6P TB]","prices":[null,5000,null,null,null]},{"model":"APL-X10NI","desc":"2xSPDT, Omron(D3V-165-1C25) / Inductive","prices":[62000,62000,62000,62000,62000]},{"model":"APL-X12","desc":"4xSPDT, Omron(VX-011K-1C22) / Golden Plate","prices":[null,14000,20000,20000,null]},{"model":"APL-X14","desc":"2xDPDT, Omron(VX-011K-1C22) (4 x SPDT 변형)","prices":[null,14000,20000,20000,null]},{"model":"APL-X14","desc":"2xDPDT, Omron(V-011K-1C22, 구형) (4 x SPDT 변형)","prices":[null,14000,20000,20000,null]},{"model":"APL-X14","desc":"2xDPDT, Omron(DZ-10GW-1B)","prices":[null,38000,60000,60000,null]},{"model":"APL-X05","desc":"No switch + PIU (1kΩ / RV24)","prices":[null,40000,null,null,40000]},{"model":"APL-X20","desc":"No Sensor/Switch + 8P Terminal Block","prices":[-1000,-1000,-1000,-1000,-1000]},{"model":"APL-X20","desc":"2x2-Wire, P&F(NJ2-V3-N, N.C)","prices":[64000,64000,64000,64000,64000]},{"model":"APL-X20","desc":"4x2-Wire, P&F(NJ2-V3-N, N.C)","prices":[null,null,115000,115000,null]},{"model":"APL-X25","desc":"2x2-Wire, P&F(NJ2-V3-N, N.C) + PIU (1kΩ RV24N)","prices":[null,null,120000,null,null]},{"model":"APL-X26","desc":"2x2-Wire, P&F(NJ2-V3-N, N.C) + CPT (4-20 mA)","prices":[null,null,180000,null,null]},{"model":"APL-X23","desc":"2x2-Wire, P&F(NBB3-V3-Z4, N.O)","prices":[76000,76000,76000,76000,76000]},{"model":"APL-X23","desc":"3x2-Wire, P&F(NBB3-V3-Z4, N.O)","prices":[null,null,105000,105000,null]},{"model":"APL-X23","desc":"4x2-Wire, P&F(NBB3-V3-Z4, N.O)","prices":[null,null,140000,140000,null]},{"model":"APL-X26","desc":"2x2-Wire, P&F(NBB3-V3-Z4, N.O) + CPT (4-20 mA)","prices":[null,null,200000,null,null]},{"model":"APL-X23","desc":"2x2-Wire, P&F(NBB2-V3-Z4L, N.O)","prices":[76000,76000,76000,76000,76000]},{"model":"APL-X23","desc":"4x2-Wire, P&F(NBB2-V3-Z4L, N.O)","prices":[null,null,140000,140000,null]},{"model":"APL-X23","desc":"2x3-Wire, P&F(NBB2-V3-E0, N.O, NPN)","prices":[165000,165000,165000,165000,165000]},{"model":"APL-X23","desc":"2x3-Wire, P&F(NBB2-V3-E2, N.O, PNP)","prices":[64000,64000,64000,64000,64000]},{"model":"APL-X21","desc":"2x2-Wire, Autonics(PSNT17-5DCU, N.C)","prices":[null,38000,38000,38000,null]},{"model":"APL-X21","desc":"2x2-Wire, Autonics(PSNT17-5DOU, N.O)","prices":[null,38000,38000,38000,null]},{"model":"APL-X21","desc":"2x3-Wire, Autonics(PSN17-5DNU, N.O, NPN)","prices":[null,38000,38000,38000,null]},{"model":"APL-X21","desc":"2x3-Wire, Autonics(PSN17-5DN2, N.C, NPN)","prices":[null,38000,38000,38000,null]},{"model":"APL-X21","desc":"2x3-Wire, Autonics(PSN17-5DPU, N.O, PNP)","prices":[null,38000,38000,38000,null]},{"model":"APL-X21","desc":"2x3-Wire, Autonics(PSN17-5DP2, N.C, PNP)","prices":[null,38000,38000,38000,null]},{"model":"APL-X21","desc":"2x3-Wire, Autonics(PSN17-5DP2U, N.C, PNP)","prices":[null,38000,38000,38000,null]},{"model":"APL-X30","desc":"2xSPST, MS-B301 (1A)","prices":[25000,25000,25000,25000,25000]},{"model":"APL-X30","desc":"4xSPST, MS-B301 (1A)","prices":[null,35000,35000,35000,null]},{"model":"APL-X30","desc":"2xSPDT, MS-B301 (0.25A)","prices":[30000,30000,30000,30000,30000]},{"model":"APL-X30","desc":"4xSPDT, MS-B301 (0.25A)","prices":[null,40000,40000,40000,null]},{"model":"APL-X32","desc":"2xSPDT, MK21P-1C90C-500W, model 90","prices":[null,null,40000,null,null]},{"model":"APL-X32","desc":"4xSPDT, MK21P-1C90C-500W, model 90","prices":[null,null,80000,null,null]},{"model":"APL-X40","desc":"2xSPDT, HKC-634W (120Vac/dc 3A)","prices":[null,65500,null,null,null]},{"model":"APL-X41","desc":"2xSPDT, HKC-630RT","prices":[null,null,63000,null,null]},{"model":"APL-X42","desc":"2xSPDT, HKC-933WT","prices":[null,null,75000,null,null]}],"brackets":[{"unit":1100,"label":"MBP-100 (Standard)","prices":[0,0,0,0,null]},{"unit":1500,"label":"MBP-200","prices":[500,500,500,500,null]},{"unit":2000,"label":"MBP-300","prices":[1000,1000,1000,1000,null]},{"unit":2800,"label":"MBP-400","prices":[1500,1500,1500,1500,null]},{"unit":1500,"label":"MBP-L-1C Steel Black","prices":[null,500,500,null,null]},{"unit":2700,"label":"MBP-L-1S","prices":[null,1500,1500,null,null]},{"unit":1200,"label":"MBP-L-2C Steel Black","prices":[null,500,500,null,null]},{"unit":2700,"label":"MBP-L-2S","prices":[null,1500,1500,null,null]},{"unit":1800,"label":"MBP-L-3C (24:1 G/O) Steel Black","prices":[null,1000,1000,null,null]},{"unit":1400,"label":"MBP-L-6C Steel Black (Tomoe)","prices":[null,500,500,null,null]},{"unit":4200,"label":"MBP-L-9C Steel Black (Tomoe)","prices":[null,3000,3000,null,null]},{"unit":2300,"label":"MBP-o-1C Steel Black","prices":[null,1500,1500,null,null]},{"unit":4100,"label":"MBP-o-1S","prices":[null,3000,3000,null,null]},{"unit":2600,"label":"MBP-o-2C Steel Black","prices":[null,1500,1500,null,null]},{"unit":4100,"label":"MBP-o-2S","prices":[null,3000,3000,null,null]},{"unit":3000,"label":"MBP-o-3C Steel Black","prices":[null,2000,2000,null,null]},{"unit":5900,"label":"MBP-o-3S","prices":[null,5000,5000,null,null]},{"unit":3800,"label":"MBP-o-4C Steel Black","prices":[null,3000,3000,null,null]},{"unit":7500,"label":"MBP-o-4S","prices":[null,6000,6000,null,null]}],"etc":[{"key":"c5","label":"C5 Coating 옵션","prices":[15000,15000,20000,20000,15000]},{"key":"ip68","label":"IP68 옵션","prices":[10000,10000,20000,20000,10000]},{"key":"low","label":"저온 옵션","prices":[5000,8000,18000,15000,8000]},{"key":"way3","label":"3-way T-port/L-port 옵션","prices":[2000,2000,2000,2000,null]}]},{"key":"HP","name":"HP Series","sub":"공압 액추에이터 (Rack & Pinion / Scotch Yoke)","rp":[{"model":"HP-035","double":29500,"single":null,"spring":null,"hard":1500,"bodycoat":null,"side":null,"nano":15000,"low":6000,"deg135":null},{"model":"HP-050","double":43000,"single":56200,"spring":1100,"hard":2500,"bodycoat":10000,"side":21000,"nano":15000,"low":8000,"deg135":null},{"model":"HP-063","double":52500,"single":68100,"spring":1300,"hard":3500,"bodycoat":10000,"side":22000,"nano":15000,"low":9500,"deg135":null},{"model":"HP-066","double":59500,"single":77500,"spring":1500,"hard":3500,"bodycoat":10000,"side":22000,"nano":15000,"low":11000,"deg135":null},{"model":"HP-075","double":69500,"single":91100,"spring":1800,"hard":4000,"bodycoat":15000,"side":24000,"nano":20000,"low":12500,"deg135":195000},{"model":"HP-088","double":91500,"single":115500,"spring":2000,"hard":6000,"bodycoat":15000,"side":28000,"nano":20000,"low":17000,"deg135":null},{"model":"HP-100","double":105000,"single":130200,"spring":2100,"hard":7000,"bodycoat":18000,"side":34000,"nano":25000,"low":19500,"deg135":292000},{"model":"HP-115","double":145000,"single":175000,"spring":2500,"hard":7000,"bodycoat":20000,"side":59000,"nano":30000,"low":27000,"deg135":null},{"model":"HP-125","double":165000,"single":201000,"spring":3000,"hard":7000,"bodycoat":20000,"side":63000,"nano":30000,"low":30000,"deg135":411000},{"model":"HP-145","double":243000,"single":303000,"spring":5000,"hard":8000,"bodycoat":25000,"side":71000,"nano":30000,"low":45000,"deg135":540000},{"model":"HP-160","double":282000,"single":358800,"spring":6400,"hard":10000,"bodycoat":30000,"side":76000,"nano":40000,"low":52000,"deg135":null},{"model":"HP-180","double":417000,"single":519000,"spring":8500,"hard":15000,"bodycoat":35000,"side":82000,"nano":50000,"low":78000,"deg135":864000},{"model":"HP-200","double":594000,"single":702000,"spring":9000,"hard":20000,"bodycoat":35000,"side":115000,"nano":60000,"low":111000,"deg135":1188000},{"model":"HP-210","double":696000,"single":816000,"spring":10000,"hard":20000,"bodycoat":35000,"side":119000,"nano":60000,"low":129000,"deg135":null}],"sy":[{"model":"HP-211","double":825000,"single42":932000,"single56":987000,"hard":20000,"bodycoat":35000,"side":null,"nano":60000,"low":155000},{"model":"HP-212","double":995000,"single42":1225000,"single56":1335000,"hard":20000,"bodycoat":35000,"side":null,"nano":80000,"low":186000},{"model":"HP-250","double":1650000,"single42":2150000,"single56":null,"hard":null,"bodycoat":null,"side":null,"nano":null,"low":null}]},{"key":"HGO","name":"HGO Series","sub":"수동 기어 오퍼레이터","rows":[{"model":"HGO-010","price":155000,"material":"Aluminium","hpModel":"HP-035 to HP-075","mech":20000,"nano":25000,"low":30000},{"model":"HGO-050","price":248000,"material":"Cast iron","hpModel":"HP-088 to HP-125","mech":20000,"nano":30000,"low":49000},{"model":"HGO-080","price":279000,"material":"Cast iron","hpModel":"HP-125 to HP-160","mech":20000,"nano":40000,"low":55000},{"model":"HGO-150","price":479000,"material":"Cast iron","hpModel":"HP-160 to HP-200","mech":20000,"nano":50000,"low":89000}]},{"key":"HM","name":"HM Series","sub":"멀티턴 전동 액추에이터","rows":[{"model":"HM-004","standard":1620000,"exp":{"pct":15},"pcu":100000,"cpt":100000,"ams":100000,"ip68":162000,"low":243000,"nano":162000,"profibus":500000,"modbus":400000,"pbc":null},{"model":"HM-008","standard":1660000,"exp":{"pct":15},"pcu":100000,"cpt":100000,"ams":100000,"ip68":166000,"low":249000,"nano":166000,"profibus":500000,"modbus":400000,"pbc":null},{"model":"HM-011","standard":1771000,"exp":{"pct":15},"pcu":100000,"cpt":100000,"ams":100000,"ip68":177100,"low":265650,"nano":177100,"profibus":500000,"modbus":400000,"pbc":null},{"model":"HM-020","standard":1950000,"exp":{"pct":15},"pcu":100000,"cpt":100000,"ams":100000,"ip68":195000,"low":292500,"nano":195000,"profibus":500000,"modbus":400000,"pbc":null},{"model":"HM-040","standard":2050000,"exp":{"pct":15},"pcu":100000,"cpt":100000,"ams":100000,"ip68":205000,"low":307500,"nano":205000,"profibus":500000,"modbus":400000,"pbc":null},{"model":"HM-060","standard":2345000,"exp":{"pct":15},"pcu":100000,"cpt":100000,"ams":100000,"ip68":234500,"low":351750,"nano":234500,"profibus":500000,"modbus":400000,"pbc":null},{"model":"HM-100","standard":3659000,"exp":{"pct":15},"pcu":100000,"cpt":100000,"ams":100000,"ip68":365900,"low":548850,"nano":365900,"profibus":500000,"modbus":400000,"pbc":null},{"model":"HM-150","standard":4150000,"exp":{"pct":15},"pcu":100000,"cpt":100000,"ams":100000,"ip68":415000,"low":622500,"nano":415000,"profibus":500000,"modbus":400000,"pbc":null},{"model":"HM-200","standard":4450000,"exp":{"pct":15},"pcu":100000,"cpt":100000,"ams":100000,"ip68":445000,"low":667500,"nano":445000,"profibus":500000,"modbus":400000,"pbc":null},{"model":"HM-300","standard":5500000,"exp":{"pct":15},"pcu":100000,"cpt":100000,"ams":100000,"ip68":550000,"low":825000,"nano":550000,"profibus":500000,"modbus":400000,"pbc":null}],"note":"PBC 부싱 단가는 추후 안내"},{"key":"HL","name":"HL Series","sub":"리니어 전동 액추에이터","rows":[{"model":"HL-05KN","standard":520000,"exp":{"pct":15},"motor3p":5000,"v24acdc":30000,"pcu":250000,"cpt":120000,"piu":49000,"line23":15000,"als":null,"ip68":{"pct":10},"low":{"pct":20}},{"model":"HL-07KN","standard":561000,"exp":{"pct":15},"motor3p":5000,"v24acdc":30000,"pcu":250000,"cpt":120000,"piu":49000,"line23":15000,"als":15000,"ip68":{"pct":10},"low":{"pct":20}},{"model":"HL-10KN","standard":805000,"exp":{"pct":15},"motor3p":8000,"v24acdc":30000,"pcu":250000,"cpt":120000,"piu":59000,"line23":15000,"als":15000,"ip68":{"pct":10},"low":{"pct":20}},{"model":"HL-12KN","standard":841000,"exp":{"pct":15},"motor3p":8000,"v24acdc":30000,"pcu":250000,"cpt":120000,"piu":59000,"line23":15000,"als":15000,"ip68":{"pct":10},"low":{"pct":20}},{"model":"HL-15KN","standard":926000,"exp":{"pct":15},"motor3p":8000,"v24acdc":30000,"pcu":250000,"cpt":120000,"piu":59000,"line23":15000,"als":15000,"ip68":{"pct":10},"low":{"pct":20}},{"model":"HL-18KN","standard":1055000,"exp":{"pct":15},"motor3p":8000,"v24acdc":30000,"pcu":250000,"cpt":120000,"piu":59000,"line23":15000,"als":15000,"ip68":{"pct":10},"low":{"pct":20}},{"model":"HL-20KN","standard":1122000,"exp":{"pct":15},"motor3p":8000,"v24acdc":30000,"pcu":250000,"cpt":120000,"piu":59000,"line23":15000,"als":15000,"ip68":{"pct":10},"low":{"pct":20}},{"model":"HL-25KN","standard":1356000,"exp":{"pct":15},"motor3p":12500,"v24acdc":30000,"pcu":250000,"cpt":120000,"piu":59000,"line23":15000,"als":15000,"ip68":{"pct":10},"low":{"pct":20}}],"lcuCols":["LCU-B","LCU-C","LCU-Z","RBP","LCU-2B(EX)","LCU-2C(EX)","Profibus","Modbus"],"lcu":[{"voltage":"일반 1P","values":[300000,600000,200000,null,null,null,700000,600000],"notes":["300,000","600,000","200,000","-","-","-","700,000","600,000"]},{"voltage":"일반 3P","values":[350000,600000,null,null,null,null,750000,650000],"notes":["350,000","600,000","-","-","-","-","750,000","650,000"]},{"voltage":"방폭 1P","values":[370000,660000,null,null,710000,820000,800000,710000],"notes":["370,000","660,000","-","-","710,000","820,000","800,000","710,000"]},{"voltage":"방폭 3P","values":[420000,660000,null,null,760000,820000,850000,760000],"notes":["420,000","660,000","-","-","760,000","820,000","850,000","760,000"]},{"voltage":"24V DC","values":[null,null,null,480000,null,null,null,null],"notes":["-","-","-","480,000","-","-","일반: RBP · 방폭: LCU-2B(EX)","-"]}]},{"key":"ET","name":"ET Series","sub":"헤비듀티 스카치요크 공압 액추에이터","rows":[{"model":"ETS-050-120","da":1246000,"sr1":1399000,"sr2":1414000,"sr3":1431000,"hoDa":null,"hoSr":null},{"model":"ETS-050-140","da":1309000,"sr1":1457000,"sr2":1470000,"sr3":1487000,"hoDa":null,"hoSr":null},{"model":"ETS-050-180","da":1379000,"sr1":1552000,"sr2":1566000,"sr3":1583000,"hoDa":null,"hoSr":null},{"model":"ETS-050-200","da":1413000,"sr1":1587000,"sr2":1600000,"sr3":1617000,"hoDa":null,"hoSr":null},{"model":"ETS-065-180","da":1292000,"sr1":2016000,"sr2":2211000,"sr3":2257000,"hoDa":990000,"hoSr":660000},{"model":"ETS-065-200","da":1466000,"sr1":2188000,"sr2":2383000,"sr3":2429000,"hoDa":990000,"hoSr":660000},{"model":"ETS-065-235","da":1713000,"sr1":2418000,"sr2":2614000,"sr3":2660000,"hoDa":990000,"hoSr":660000},{"model":"ETS-065-250","da":1765000,"sr1":2470000,"sr2":2666000,"sr3":2712000,"hoDa":990000,"hoSr":660000},{"model":"ETS-065-300","da":1848000,"sr1":2606000,"sr2":2806000,"sr3":2853359,"hoDa":990000,"hoSr":660000},{"model":"ETS-065-335","da":1939000,"sr1":2707000,"sr2":2898000,"sr3":2943149,"hoDa":990000,"hoSr":660000},{"model":"ETS-065-385","da":2227000,"sr1":2977000,"sr2":3176000,"sr3":3223161,"hoDa":990000,"hoSr":660000},{"model":"ETS-085-200","da":1913000,"sr1":2817000,"sr2":2895000,"sr3":3194000,"hoDa":1000000,"hoSr":750000},{"model":"ETS-085-235","da":1954000,"sr1":2872000,"sr2":2938000,"sr3":3240000,"hoDa":1000000,"hoSr":750000},{"model":"ETS-085-250","da":1997000,"sr1":2931000,"sr2":2985000,"sr3":3285000,"hoDa":1000000,"hoSr":750000},{"model":"ETS-085-300","da":2072000,"sr1":3086000,"sr2":3128000,"sr3":3428000,"hoDa":1000000,"hoSr":750000},{"model":"ETS-085-335","da":2202000,"sr1":3194000,"sr2":3222000,"sr3":3523000,"hoDa":1000000,"hoSr":750000},{"model":"ETS-085-385","da":2500000,"sr1":3527400,"sr2":3544000,"sr3":3845000,"hoDa":1000000,"hoSr":750000},{"model":"ETS-085-435","da":2600000,"sr1":3657000,"sr2":3662000,"sr3":3963000,"hoDa":1000000,"hoSr":750000},{"model":"ETS-100-335","da":2690000,"sr1":4135560,"sr2":4231000,"sr3":4333000,"hoDa":1100000,"hoSr":800000},{"model":"ETS-100-385","da":2854000,"sr1":4527000,"sr2":4630000,"sr3":4741000,"hoDa":1100000,"hoSr":800000},{"model":"ETS-100-435","da":2966000,"sr1":4639000,"sr2":4740000,"sr3":4848000,"hoDa":1100000,"hoSr":800000},{"model":"ETS-100-485","da":3273000,"sr1":4925000,"sr2":5027000,"sr3":5134000,"hoDa":1100000,"hoSr":800000},{"model":"ETS-100-535","da":3637000,"sr1":5544000,"sr2":5653000,"sr3":5769000,"hoDa":1100000,"hoSr":800000},{"model":"ETS-100-585","da":3925000,"sr1":5874000,"sr2":5986000,"sr3":6106000,"hoDa":1100000,"hoSr":800000},{"model":"ETS-130-335","da":3501000,"sr1":5153000,"sr2":5286000,"sr3":5428000,"hoDa":1400000,"hoSr":1100000},{"model":"ETS-130-385","da":3697000,"sr1":5372000,"sr2":5509000,"sr3":5656000,"hoDa":1400000,"hoSr":1100000},{"model":"ETS-130-435","da":3906000,"sr1":5604000,"sr2":5745000,"sr3":5896000,"hoDa":1400000,"hoSr":1100000},{"model":"ETS-130-485","da":4185000,"sr1":5892000,"sr2":6037000,"sr3":6193000,"hoDa":1400000,"hoSr":1100000},{"model":"ETS-130-535","da":4634000,"sr1":6266000,"sr2":6417000,"sr3":6576000,"hoDa":1400000,"hoSr":1100000},{"model":"ETS-130-585","da":5334000,"sr1":6649000,"sr2":6804000,"sr3":6969000,"hoDa":1400000,"hoSr":1100000},{"model":"ETS-130-635","da":6000000,"sr1":7220000,"sr2":7379000,"sr3":7549000,"hoDa":1400000,"hoSr":1100000},{"model":"ETS-130-685","da":7163000,"sr1":7481000,"sr2":7623000,"sr3":7859000,"hoDa":1400000,"hoSr":1100000},{"model":"ETS-130-735","da":7320000,"sr1":7591000,"sr2":7733000,"sr3":8052000,"hoDa":1400000,"hoSr":1100000},{"model":"ETS-160-385","da":5586000,"sr1":10657000,"sr2":11510000,"sr3":12491000,"hoDa":1800000,"hoSr":1300000},{"model":"ETS-160-435","da":5814000,"sr1":11033000,"sr2":11912000,"sr3":12923000,"hoDa":1800000,"hoSr":1300000},{"model":"ETS-160-485","da":6120000,"sr1":11484000,"sr2":12389000,"sr3":13430000,"hoDa":1800000,"hoSr":1300000},{"model":"ETS-160-535","da":6540000,"sr1":12043000,"sr2":12975000,"sr3":14047000,"hoDa":1800000,"hoSr":1300000},{"model":"ETS-160-585","da":6836000,"sr1":12495000,"sr2":13456000,"sr3":14560000,"hoDa":1800000,"hoSr":1300000},{"model":"ETS-160-635","da":7539000,"sr1":13712000,"sr2":14701000,"sr3":15838000,"hoDa":1800000,"hoSr":1300000},{"model":"ETS-160-685","da":8217000,"sr1":14519000,"sr2":15538000,"sr3":16710000,"hoDa":1800000,"hoSr":1300000},{"model":"ETS-160-735","da":8415000,"sr1":14914000,"sr2":15963000,"sr3":17170000,"hoDa":1800000,"hoSr":1300000},{"model":"ETS-200w-485","da":9401600,"sr1":21014000,"sr2":22460000,"sr3":24079000,"hoDa":2500000,"hoSr":2000000},{"model":"ETS-200w-535","da":9860500,"sr1":22020000,"sr2":23538000,"sr3":25239000,"hoDa":2500000,"hoSr":2000000},{"model":"ETS-200w-585","da":10208000,"sr1":22938000,"sr2":24532000,"sr3":26318000,"hoDa":2500000,"hoSr":2000000},{"model":"ETS-200w-635","da":10968000,"sr1":24489000,"sr2":26163000,"sr3":28038000,"hoDa":2500000,"hoSr":2000000},{"model":"ETS-200w-685","da":12017000,"sr1":26123000,"sr2":27881000,"sr3":29850000,"hoDa":2500000,"hoSr":2000000},{"model":"ETS-200w-735","da":12291000,"sr1":27040000,"sr2":28886000,"sr3":30953000,"hoDa":2500000,"hoSr":2000000},{"model":"ETS-200w-785","da":13205000,"sr1":29087000,"sr2":31081000,"sr3":33313000,"hoDa":2500000,"hoSr":2000000},{"model":"ETS-200w-835","da":13388000,"sr1":30579000,"sr2":32732000,"sr3":35143000,"hoDa":2500000,"hoSr":2000000},{"model":"ETS-200w-885","da":14950000,"sr1":33479000,"sr2":35805000,"sr3":38409000,"hoDa":2500000,"hoSr":2000000},{"model":"ETS-200w-935","da":17730000,"sr1":37055000,"sr2":39566000,"sr3":42379000,"hoDa":2500000,"hoSr":2000000},{"model":"ETS-200w-985","da":20291000,"sr1":41095000,"sr2":43807000,"sr3":46845000,"hoDa":2500000,"hoSr":2000000},{"model":"ETS-200w-1050","da":24990000,"sr1":47019000,"sr2":49948000,"sr3":53228000,"hoDa":2500000,"hoSr":2000000},{"model":"ETS-270w-735","da":19097000,"sr1":44112000,"sr2":47275000,"sr3":34965000,"hoDa":null,"hoSr":null},{"model":"ETS-270w-785","da":20176000,"sr1":37841000,"sr2":40133000,"sr3":42701000,"hoDa":null,"hoSr":null},{"model":"ETS-270w-835","da":20391000,"sr1":39566000,"sr2":42042000,"sr3":44814000,"hoDa":null,"hoSr":null},{"model":"ETS-270w-885","da":22285000,"sr1":42966000,"sr2":45640000,"sr3":48635000,"hoDa":null,"hoSr":null},{"model":"ETS-270w-935","da":24085000,"sr1":46395000,"sr2":49283000,"sr3":52517000,"hoDa":null,"hoSr":null},{"model":"ETS-270w-985","da":28712000,"sr1":52599000,"sr2":55717000,"sr3":59210000,"hoDa":null,"hoSr":null},{"model":"ETS-270w-1050","da":34340000,"sr1":59823000,"sr2":63191000,"sr3":66963000,"hoDa":null,"hoSr":null},{"model":"ETS-270w-1150","da":40891000,"sr1":67372000,"sr2":70009000,"sr3":72961000,"hoDa":null,"hoSr":null},{"model":"ETS-270w-1200","da":49182000,"sr1":68137000,"sr2":71775000,"sr3":75849000,"hoDa":null,"hoSr":null},{"model":"ETS-270w-1250","da":59961000,"sr1":78985000,"sr2":81832000,"sr3":85021000,"hoDa":null,"hoSr":null}]},{"key":"HQ","name":"HQ Series","sub":"쿼터턴 전동 액추에이터","rows":[{"model":"HQ-004","standard":85000,"exp":null,"motor3p":null,"v24dc":null,"v24acdc":null,"pcu":null,"cpt":null,"piu":null,"modbus":null,"line23":10000,"ext":{"cable":[{"len":"2m","price":4000},{"len":"3m","price":7000},{"len":"4m","price":10000},{"len":"6.2m","price":20000},{"len":"10m","price":25000}]},"reverse":null,"als":null,"folding":null,"ip68":null,"low":null,"bushing":null,"c5":20000},{"model":"HQ-005","standard":127000,"exp":null,"motor3p":null,"v24dc":null,"v24acdc":null,"pcu":150000,"cpt":null,"piu":null,"modbus":null,"line23":null,"ext":{"note":"RBP 110,000","price":110000},"reverse":null,"als":null,"folding":null,"ip68":{"pct":10},"low":{"pct":20},"bushing":null,"c5":30000},{"model":"HQ-006","standard":112000,"exp":165000,"motor3p":null,"v24dc":0,"v24acdc":30000,"pcu":250000,"cpt":120000,"piu":49000,"modbus":350000,"line23":null,"ext":{"note":"LCU-D 70,000","price":70000},"reverse":null,"als":null,"folding":null,"ip68":{"pct":10},"low":{"pct":20},"bushing":null,"c5":30000},{"model":"HQ-008","standard":255000,"exp":306000,"motor3p":5000,"v24dc":0,"v24acdc":30000,"pcu":250000,"cpt":120000,"piu":49000,"modbus":350000,"line23":15000,"ext":10000,"reverse":5000,"als":15000,"folding":8000,"ip68":{"pct":10},"low":{"pct":20},"bushing":6000,"c5":70000},{"model":"HQ-010","standard":270000,"exp":324000,"motor3p":5000,"v24dc":0,"v24acdc":30000,"pcu":250000,"cpt":120000,"piu":49000,"modbus":350000,"line23":15000,"ext":10000,"reverse":5000,"als":15000,"folding":8000,"ip68":{"pct":10},"low":{"pct":20},"bushing":6000,"c5":70000},{"model":"HQ-015","standard":345000,"exp":414000,"motor3p":8000,"v24dc":0,"v24acdc":30000,"pcu":250000,"cpt":120000,"piu":59000,"modbus":350000,"line23":15000,"ext":20000,"reverse":5000,"als":15000,"folding":8000,"ip68":{"pct":10},"low":{"pct":20},"bushing":7000,"c5":100000},{"model":"HQ-020","standard":360000,"exp":432000,"motor3p":8000,"v24dc":0,"v24acdc":30000,"pcu":250000,"cpt":120000,"piu":59000,"modbus":350000,"line23":15000,"ext":20000,"reverse":5000,"als":15000,"folding":8000,"ip68":{"pct":10},"low":{"pct":20},"bushing":7000,"c5":100000},{"model":"HQ-030","standard":430000,"exp":516000,"motor3p":8000,"v24dc":0,"v24acdc":30000,"pcu":250000,"cpt":120000,"piu":59000,"modbus":350000,"line23":15000,"ext":30000,"reverse":5000,"als":15000,"folding":8000,"ip68":{"pct":10},"low":{"pct":20},"bushing":9000,"c5":120000},{"model":"HQ-050","standard":450000,"exp":540000,"motor3p":8000,"v24dc":null,"v24acdc":null,"pcu":250000,"cpt":120000,"piu":59000,"modbus":350000,"line23":15000,"ext":30000,"reverse":5000,"als":15000,"folding":8000,"ip68":{"pct":10},"low":{"pct":20},"bushing":9000,"c5":140000},{"model":"HQ-060","standard":475000,"exp":570000,"motor3p":8000,"v24dc":150000,"v24acdc":180000,"pcu":250000,"cpt":120000,"piu":59000,"modbus":350000,"line23":15000,"ext":30000,"reverse":5000,"als":15000,"folding":8000,"ip68":{"pct":10},"low":{"pct":20},"bushing":9000,"c5":140000},{"model":"HQ-080","standard":590000,"exp":708000,"motor3p":12500,"v24dc":120000,"v24acdc":150000,"pcu":250000,"cpt":120000,"piu":59000,"modbus":350000,"line23":15000,"ext":40000,"reverse":5000,"als":15000,"folding":8000,"ip68":{"pct":10},"low":{"pct":20},"bushing":12000,"c5":180000},{"model":"HQ-120","standard":625000,"exp":750000,"motor3p":12500,"v24dc":120000,"v24acdc":150000,"pcu":250000,"cpt":120000,"piu":59000,"modbus":350000,"line23":15000,"ext":40000,"reverse":5000,"als":15000,"folding":8000,"ip68":{"pct":10},"low":{"pct":20},"bushing":12000,"c5":180000},{"model":"HQ-200","standard":1050000,"exp":1260000,"motor3p":12500,"v24dc":120000,"v24acdc":150000,"pcu":250000,"cpt":120000,"piu":59000,"modbus":350000,"line23":15000,"ext":null,"reverse":5000,"als":15000,"folding":8000,"ip68":{"pct":10},"low":{"pct":20},"bushing":12000,"c5":220000},{"model":"HQ-300","standard":1110000,"exp":1332000,"motor3p":12500,"v24dc":120000,"v24acdc":150000,"pcu":250000,"cpt":120000,"piu":59000,"modbus":350000,"line23":15000,"ext":null,"reverse":5000,"als":15000,"folding":8000,"ip68":{"pct":10},"low":{"pct":20},"bushing":12000,"c5":220000},{"model":"HQ-350","standard":1550000,"exp":null,"motor3p":12500,"v24dc":null,"v24acdc":null,"pcu":250000,"cpt":120000,"piu":59000,"modbus":{"note":"PCU box 사용"},"line23":null,"ext":50000,"reverse":5000,"als":15000,"folding":8000,"ip68":null,"low":null,"bushing":20000,"c5":300000},{"model":"HQ-400","standard":1650000,"exp":null,"motor3p":12500,"v24dc":null,"v24acdc":null,"pcu":250000,"cpt":120000,"piu":59000,"modbus":{"note":"PCU box 사용"},"line23":null,"ext":50000,"reverse":5000,"als":15000,"folding":8000,"ip68":null,"low":null,"bushing":20000,"c5":300000},{"model":"HQ-600","standard":3170000,"exp":null,"motor3p":12500,"v24dc":null,"v24acdc":null,"pcu":250000,"cpt":120000,"piu":59000,"modbus":{"note":"PCU box 사용"},"line23":null,"ext":null,"reverse":5000,"als":15000,"folding":8000,"ip68":null,"low":null,"bushing":20000,"c5":500000},{"model":"HQ-800","standard":3350000,"exp":null,"motor3p":12500,"v24dc":null,"v24acdc":null,"pcu":250000,"cpt":120000,"piu":59000,"modbus":{"note":"PCU box 사용"},"line23":null,"ext":null,"reverse":5000,"als":15000,"folding":8000,"ip68":null,"low":null,"bushing":20000,"c5":500000},{"model":"HQ-900","standard":3710000,"exp":null,"motor3p":12500,"v24dc":null,"v24acdc":null,"pcu":250000,"cpt":120000,"piu":59000,"modbus":{"note":"PCU box 사용"},"line23":null,"ext":null,"reverse":5000,"als":15000,"folding":8000,"ip68":null,"low":null,"bushing":20000,"c5":500000}],"lcuCols":["LCU-B","LCU-C","LCU-Z","RBP","LCU-2B(EX)","LCU-2C(EX)","Profibus","Modbus"],"lcu":[{"voltage":"일반 1P","values":[300000,600000,200000,null,null,null,700000,600000],"notes":["300,000","600,000","200,000","-","-","-","700,000","600,000"]},{"voltage":"일반 3P","values":[350000,600000,null,null,null,null,750000,650000],"notes":["350,000","600,000","-","-","-","-","750,000","650,000"]},{"voltage":"방폭 1P","values":[370000,660000,null,null,710000,820000,800000,710000],"notes":["370,000","660,000","-","-","710,000","820,000","800,000","710,000"]},{"voltage":"방폭 3P","values":[420000,660000,null,null,760000,820000,850000,760000],"notes":["420,000","660,000","-","-","760,000","820,000","850,000","760,000"]},{"voltage":"24V DC","values":[null,null,null,480000,null,null,null,null],"notes":["-","-","-","480,000","-","-","일반: RBP · 방폭: LCU-2B(EX)","-"]}],"notes":["CPT (TR 위장형) 14만원","CSA PCU AC 35만원 / DC 40만원"]}]};
 </script>
 
 <script>
@@ -6884,7 +6944,7 @@ function priceDiscountMaker() {
 function renderPriceChips() {
   const makerBox = $('priceMakerChips');
   if (makerBox) {
-    makerBox.innerHTML = ['전체'].concat(PRICE_MAKERS).map(function (m) {
+    makerBox.innerHTML = ['전체'].concat(PRICE_MAKERS, [HKC_MAKER]).map(function (m) {
       const on = priceState.maker === m;
       return '<button type="button" class="chip' + (on ? ' is-active' : '') + '" data-maker="' + esc(m) + '" aria-pressed="' + (on ? 'true' : 'false') + '">' + esc(m) + '</button>';
     }).join('');
@@ -6936,6 +6996,7 @@ function renderPriceChips() {
   if ($('priceTermsRow')) $('priceTermsRow').hidden = !isWoosung;
   if ($('priceOdeSizeRow')) $('priceOdeSizeRow').hidden = !isOde;
   if ($('priceTierRow')) $('priceTierRow').hidden = !noDisc;
+  if (typeof applyHkcMode === 'function') applyHkcMode();
 }
 
 function makerHasNoDisc(maker) {
@@ -7017,6 +7078,7 @@ function priceRowHTML(it, idx) {
 function renderPriceList() {
   const box = $('priceList');
   if (!box) return;
+  if (priceState.maker === HKC_MAKER) { renderHkcList(); return; }
   const tokens = String(priceState.q || '').trim().toLowerCase().split(/\s+/).filter(Boolean);
   const filter = PRICE_CONN_FILTERS.filter(function (f) { return f.label === priceState.conn; })[0];
   const rows = [];
@@ -7071,6 +7133,9 @@ function resetPriceFilters() {
   priceState.seal = '전체';
   priceState.mat = '304';
   priceState.odeSize = '전체';
+  hkcState.series = '전체';
+  hkcState.open = '';
+  renderHkcChips();
   savePriceMaterial();
   const s = $('priceSearch');
   if (s) s.value = '';
@@ -7143,6 +7208,14 @@ function bindPriceEvents() {
     if (!b) return;
     priceState.maker = b.getAttribute('data-maker');
     if (priceState.maker === 'ODE') priceState.tier = 'dealer';
+    if (priceState.maker === HKC_MAKER) {
+      $('priceHeadMeta').textContent = hkcHeadMeta();
+      $('priceDocBadge').textContent = 'HKC 7개 시리즈 · ' + qWon(hkcProducts().length) + '개 모델';
+    } else {
+      $('priceHeadMeta').textContent = PRICE_MAKERS.join(' · ') + ' 판체크 단가표 ' + PRICE_DATA.docNo + ' · ' + PRICE_DATA.applyDate + ' 적용';
+      $('priceDocBadge').textContent = '총 ' + qWon(PRICE_DATA.items.length) + '개 품목';
+    }
+    hkcState.open = '';
     renderPriceChips();
     syncPriceDiscountInput();
     renderPriceList();
@@ -7202,11 +7275,883 @@ function initPrice() {
   const total = PRICE_DATA.items.length;
   $('priceDocBadge').textContent = '총 ' + qWon(total) + '개 품목';
   $('priceHeadMeta').textContent = PRICE_MAKERS.join(' · ') + ' 판체크 단가표 ' + PRICE_DATA.docNo + ' · ' + PRICE_DATA.applyDate + ' 적용';
+  initHkc();
   renderPriceChips();
   syncPriceDiscountInput();
   bindPriceEvents();
   renderPriceList();
 }
+
+/* ===== HKC 단가표 시작 (HKC 대리점 가격표 2026-06-24 Rev.0 · 7개 시리즈) =====
+   자료: 2026 HKC대리점 가격표_rev0 (6쪽) — work/hkc/extract_hkc.py 로 뽑아 HKC_DATA에 넣었습니다.
+   - 기존 메이커(우성밸브·칼리피·R.B.M·ODE)의 동작은 건드리지 않고, 메이커 'HKC'를 골랐을 때만
+     시리즈 필터 · 가격 기준(대리점가/공급가) · 옵션 합산 계산기가 나타납니다. */
+const HKC_MAKER = 'HKC';
+const HKC_BASIS = [
+  { key: 'dealer', label: '대리점가', mult: 1 },
+  { key: 's15', label: '공급가 ×1.15', mult: 1.15 },
+  { key: 's20', label: '공급가 ×1.2', mult: 1.2 }
+];
+const hkcState = { series: '전체', basis: 'dealer', open: '', sel: {} };
+
+function hkcSeriesOf(key) {
+  return HKC_DATA.series.filter(function (s) { return s.key === key; })[0];
+}
+
+function hkcMult() {
+  const b = HKC_BASIS.filter(function (x) { return x.key === hkcState.basis; })[0];
+  return b ? b.mult : 1;
+}
+
+function hkcBasisLabel() {
+  const b = HKC_BASIS.filter(function (x) { return x.key === hkcState.basis; })[0];
+  return b ? b.label : '대리점가';
+}
+
+/* 대리점가 → 화면 표시가(선택한 가격 기준 배수 적용) */
+function hkcPrice(n) {
+  if (typeof n !== 'number' || !isFinite(n)) return '-';
+  return qWon(Math.round(n * hkcMult()));
+}
+
+function hkcIsNum(v) { return typeof v === 'number' && isFinite(v); }
+
+/* ---------- 품목 목록 ---------- */
+function hkcProducts() {
+  if (hkcProducts._cache) return hkcProducts._cache;
+  const out = [];
+  const apl = hkcSeriesOf('APL');
+  apl.bodies.forEach(function (b) {
+    const vals = b.prices.filter(hkcIsNum);
+    out.push({
+      id: 'APL:' + b.model, sk: 'APL', seriesName: 'APL', kind: 'body', model: b.model,
+      body: b, base: Math.min.apply(null, vals), max: Math.max.apply(null, vals),
+      baseLabel: apl.sizes[0] + '~' + apl.sizes[apl.sizes.length - 1].replace('APL-', '') + ' 기준',
+      sub: b.spec,
+      search: [b.model, b.spec, 'APL 리미트 스위치 박스'].join(' ')
+    });
+  });
+  const hp = hkcSeriesOf('HP');
+  hp.rp.forEach(function (r) {
+    out.push({
+      id: 'HP:' + r.model, sk: 'HP', seriesName: 'HP', kind: 'rp', model: r.model, row: r,
+      base: r.double, baseLabel: 'Double 기준', sub: 'Rack & Pinion',
+      search: [r.model, 'HP 공압 액추에이터 Rack Pinion'].join(' ')
+    });
+  });
+  hp.sy.forEach(function (r) {
+    out.push({
+      id: 'HP:' + r.model, sk: 'HP', seriesName: 'HP', kind: 'sy', model: r.model, row: r,
+      base: r.double, baseLabel: 'Double 기준', sub: 'Scotch Yoke',
+      search: [r.model, 'HP 공압 액추에이터 Scotch Yoke'].join(' ')
+    });
+  });
+  hkcSeriesOf('HGO').rows.forEach(function (r) {
+    out.push({
+      id: 'HGO:' + r.model, sk: 'HGO', seriesName: 'HGO', kind: 'hgo', model: r.model, row: r,
+      base: r.price, baseLabel: '대리점가', sub: r.material + ' · ' + r.hpModel,
+      search: [r.model, r.material, r.hpModel, 'HGO 수동 기어 오퍼레이터'].join(' ')
+    });
+  });
+  hkcSeriesOf('HM').rows.forEach(function (r) {
+    out.push({
+      id: 'HM:' + r.model, sk: 'HM', seriesName: 'HM', kind: 'hm', model: r.model, row: r,
+      base: r.standard, baseLabel: 'Standard', sub: '멀티턴 전동 액추에이터',
+      search: [r.model, 'HM 멀티턴 전동 액추에이터'].join(' ')
+    });
+  });
+  hkcSeriesOf('HL').rows.forEach(function (r) {
+    out.push({
+      id: 'HL:' + r.model, sk: 'HL', seriesName: 'HL', kind: 'hl', model: r.model, row: r,
+      base: r.standard, baseLabel: 'Standard', sub: '리니어 전동 액추에이터',
+      search: [r.model, 'HL 리니어 전동 액추에이터'].join(' ')
+    });
+  });
+  hkcSeriesOf('ET').rows.forEach(function (r) {
+    out.push({
+      id: 'ET:' + r.model, sk: 'ET', seriesName: 'ET', kind: 'et', model: r.model, row: r,
+      base: r.da, baseLabel: 'Double Acting 기준', sub: '헤비듀티 스카치요크',
+      search: [r.model, 'ET 헤비듀티 스카치요크 공압 액추에이터'].join(' ').replace(/-/g, ' ')
+    });
+  });
+  hkcSeriesOf('HQ').rows.forEach(function (r) {
+    out.push({
+      id: 'HQ:' + r.model, sk: 'HQ', seriesName: 'HQ', kind: 'hq', model: r.model, row: r,
+      base: r.standard, baseLabel: 'Standard', sub: '쿼터턴 전동 액추에이터',
+      search: [r.model, 'HQ 쿼터턴 전동 액추에이터'].join(' ')
+    });
+  });
+  hkcProducts._cache = out;
+  return out;
+}
+
+function hkcProductById(id) {
+  return hkcProducts().filter(function (p) { return p.id === id; })[0] || null;
+}
+
+/* ---------- 선택값(기본값) ---------- */
+function hkcDefaultSel(p) {
+  const s = { action: '', size: '', sw: '', bracket: '', base: 'std', opts: {}, lcu: { voltage: '', col: '' }, cable: '' };
+  if (p.sk === 'APL') {
+    const idx = p.body.prices.findIndex(hkcIsNum);
+    s.size = hkcSeriesOf('APL').sizes[idx < 0 ? 0 : idx];
+  } else if (p.sk === 'ET') {
+    s.action = 'da';
+  } else {
+    s.action = 'double';
+  }
+  return s;
+}
+
+function hkcSelOf(p) {
+  const cur = hkcState.sel[p.id];
+  if (!cur) { hkcState.sel[p.id] = hkcDefaultSel(p); return hkcState.sel[p.id]; }
+  return cur;
+}
+
+/* ---------- 계산 ---------- */
+function hkcResult(p, sel) {
+  const lines = [];
+  let base = 0;
+  let baseLabel = '기본가';
+  let bad = false;
+  const std = p.base; /* 퍼센트 옵션은 Standard/기본가 기준 */
+
+  function add(label, amount, kind, note) {
+    if (!hkcIsNum(amount)) return;
+    if (!amount && amount !== 0) return;
+    lines.push({ label: label, amount: amount, kind: kind || 'opt', note: note || '' });
+  }
+  function addPct(key, label, pct, note) {
+    add(label, Math.round(std * pct / 100), 'pct', note || ('기본가의 ' + pct + '%'));
+  }
+
+  if (p.sk === 'APL') {
+    const s = hkcSeriesOf('APL');
+    const idx = s.sizes.indexOf(sel.size);
+    const v = p.body.prices[idx];
+    if (!hkcIsNum(v)) { bad = true; baseLabel = p.model + ' ' + sel.size; }
+    else { base = v; baseLabel = p.model + (p.body.spec !== 'Standard' ? ' (' + p.body.spec + ')' : ''); }
+    if (sel.sw) {
+      const sw = s.switches[Number(sel.sw)];
+      if (sw) add('Switch ' + sw.model + ' · ' + sw.desc, sw.prices[idx]);
+    }
+    if (sel.bracket) {
+      const br = s.brackets[Number(sel.bracket)];
+      if (br) add('Bracket ' + br.label, br.prices[idx]);
+    }
+    s.etc.forEach(function (e) {
+      if (sel.opts[e.key]) add(e.label.replace(/ 옵션$/, ''), e.prices[idx]);
+    });
+  } else if (p.sk === 'HP' && p.kind === 'rp') {
+    const r = p.row;
+    if (sel.action === 'single' && hkcIsNum(r.single)) { base = r.single; baseLabel = 'Single (12개)'; }
+    else { base = r.double; baseLabel = 'Double'; }
+    if (sel.opts.deg135 && hkcIsNum(r.deg135)) {
+      lines.push({ label: '135° 사양 총액', amount: r.deg135, kind: 'base', note: '추가금이 아니라 135° 사양 가격으로 대체' });
+      base = r.deg135;
+      baseLabel = '135° 사양 총액';
+      bad = false;
+    }
+    if (sel.opts.hard) add('하드 아노다이징', r.hard);
+    if (sel.opts.bodycoat) add('바디&커버 분체도장', r.bodycoat);
+    if (sel.opts.side) add('Side Stopper', r.side);
+    if (sel.opts.nano) add('Nano Coating', r.nano);
+    if (sel.opts.low) add('저온', r.low);
+  } else if (p.sk === 'HP' && p.kind === 'sy') {
+    const r = p.row;
+    if (sel.action === 'single42' && hkcIsNum(r.single42)) { base = r.single42; baseLabel = 'Single (4.2 bar)'; }
+    else if (sel.action === 'single56' && hkcIsNum(r.single56)) { base = r.single56; baseLabel = 'Single (5.6 bar)'; }
+    else { base = r.double; baseLabel = 'Double'; }
+    if (sel.opts.hard) add('하드 아노다이징', r.hard);
+    if (sel.opts.bodycoat) add('바디&커버 분체도장', r.bodycoat);
+    if (sel.opts.side) add('Side Stopper', r.side);
+    if (sel.opts.nano) add('Nano Coating', r.nano);
+    if (sel.opts.low) add('저온', r.low);
+  } else if (p.sk === 'HGO') {
+    const r = p.row;
+    base = r.price; baseLabel = r.material + ' · ' + r.hpModel;
+    const n = Number(sel.opts.mech || 0);
+    if (n >= 2 && hkcIsNum(r.mech)) {
+      const extra = Math.max(0, n - 2);
+      add('Mechanical Valve ' + n + '개', r.mech + extra * r.mech, 'opt',
+        extra ? ('2개 ' + qWon(r.mech) + ' + 1개 추가 ' + qWon(extra * r.mech)) : '');
+    }
+    if (sel.opts.nano) add('Nano Coating', r.nano);
+    if (sel.opts.low) add('저온', r.low);
+  } else if (p.sk === 'HM') {
+    const r = p.row;
+    base = r.standard; baseLabel = 'Standard';
+    if (sel.opts.exp) addPct('exp', '방폭 (15% up)', 15);
+    if (sel.opts.pcu) add('PCU', r.pcu);
+    if (sel.opts.cpt) add('CPT', r.cpt);
+    if (sel.opts.ams) add('AMS', r.ams);
+    if (sel.opts.ip68) add('IP68', r.ip68, 'opt', '기본가의 10% 상당');
+    if (sel.opts.low) add('저온', r.low, 'opt', '기본가의 15% 상당');
+    if (sel.opts.nano) add('Nano Coating', r.nano, 'opt', '기본가의 10% 상당');
+    if (sel.opts.profibus) add('Profibus', r.profibus);
+    if (sel.opts.modbus) add('Modbus', r.modbus);
+  } else if (p.sk === 'HL') {
+    const r = p.row;
+    base = r.standard; baseLabel = 'Standard';
+    if (sel.opts.exp) addPct('exp', '방폭 (15% up)', 15);
+    if (sel.opts.motor3p) add('3P 모터', r.motor3p);
+    if (sel.opts.v24acdc) add('24V AC/DC', r.v24acdc);
+    if (sel.opts.pcu) add('PCU', r.pcu);
+    if (sel.opts.cpt) add('CPT', r.cpt);
+    if (sel.opts.piu) add('PIU', r.piu);
+    if (sel.opts.line23) add('2줄/3줄 · HSA', r.line23);
+    if (sel.opts.als) add('ALS/ATS', r.als);
+    if (sel.opts.ip68) addPct('ip68', 'IP68 (10% up)', 10);
+    if (sel.opts.low) addPct('low', '저온 (20% up)', 20);
+    hkcLcuLine(p, sel, add);
+  } else if (p.sk === 'ET') {
+    const r = p.row;
+    if (sel.action === 'sr1' && hkcIsNum(r.sr1)) { base = r.sr1; baseLabel = 'Single Acting SR C1~C3'; }
+    else if (sel.action === 'sr2' && hkcIsNum(r.sr2)) { base = r.sr2; baseLabel = 'Single Acting SR C4~C6'; }
+    else if (sel.action === 'sr3' && hkcIsNum(r.sr3)) { base = r.sr3; baseLabel = 'Single Acting SR C7~'; }
+    else { base = r.da; baseLabel = 'Double Acting DA'; }
+    if (sel.opts.ho) {
+      const isDa = sel.action === 'da';
+      const v = isDa ? r.hoDa : r.hoSr;
+      if (hkcIsNum(v)) add('Hydraulic Override (' + (isDa ? 'Double Acting' : 'Single Acting') + ')', v);
+    }
+  } else if (p.sk === 'HQ') {
+    const r = p.row;
+    if (sel.base === 'exp' && hkcIsNum(r.exp)) { base = r.exp; baseLabel = '방폭'; }
+    else { base = r.standard; baseLabel = 'Standard'; }
+    if (sel.opts.motor3p) add('3P 모터', r.motor3p);
+    if (sel.opts.v24dc) add('24V DC', r.v24dc);
+    if (sel.opts.v24acdc) add('24V AC/DC', r.v24acdc);
+    if (sel.opts.pcu) add('PCU', r.pcu);
+    if (sel.opts.cpt) add('CPT', r.cpt);
+    if (sel.opts.piu) add('PIU', r.piu);
+    if (sel.opts.modbus && hkcIsNum(r.modbus)) add('MODBUS 단일카드', r.modbus);
+    if (sel.opts.line23) add('2/3줄 · HSA', r.line23);
+    if (sel.opts.ext || (r.ext && r.ext.cable && sel.cable)) {
+      if (r.ext && r.ext.cable) {
+        const c = r.ext.cable.filter(function (x) { return x.len === sel.cable; })[0];
+        if (c) add('EXT (135°) · Cable ' + c.len, c.price);
+      } else if (r.ext && hkcIsNum(r.ext.price)) {
+        add('EXT (135°)', r.ext.price, 'opt', r.ext.note || '');
+      } else if (hkcIsNum(r.ext)) {
+        add('EXT (135°)', r.ext);
+      }
+    }
+    if (sel.opts.reverse) add('역방향', r.reverse);
+    if (sel.opts.als) add('ALS/ATS', r.als);
+    if (sel.opts.folding) add('접이식핸들', r.folding);
+    if (sel.opts.ip68) addPct('ip68', 'IP68 (10% up)', 10);
+    if (sel.opts.low) addPct('low', '저온 (20% up)', 20);
+    if (sel.opts.bushing) add('부싱 B2 추가구매', r.bushing);
+    if (sel.opts.c5) add('C5 Coating', r.c5);
+    hkcLcuLine(p, sel, add);
+  }
+
+  let total = bad ? null : base;
+  if (!bad) lines.forEach(function (l) { if (l.kind === 'opt' || l.kind === 'pct') total += l.amount; });
+  return { base: base, baseLabel: baseLabel, lines: lines, total: total, bad: bad };
+}
+
+function hkcLcuLine(p, sel, add) {
+  if (!sel.lcu || !sel.lcu.voltage || !sel.lcu.col) return;
+  const s = hkcSeriesOf(p.sk);
+  const row = s.lcu.filter(function (x) { return x.voltage === sel.lcu.voltage; })[0];
+  if (!row) return;
+  const ci = s.lcuCols.indexOf(sel.lcu.col);
+  if (ci < 0) return;
+  const v = row.values[ci];
+  if (hkcIsNum(v)) add('제어 ' + sel.lcu.col + ' (' + sel.lcu.voltage + ')', v);
+}
+
+/* 옵션 요약 문자열 */
+function hkcSummary(p, sel) {
+  const parts = [];
+  if (p.sk === 'APL') {
+    parts.push(sel.size);
+    if (sel.sw) {
+      const sw = hkcSeriesOf('APL').switches[Number(sel.sw)];
+      if (sw) parts.push(sw.model + ' ' + sw.desc);
+    }
+    if (sel.bracket) {
+      const br = hkcSeriesOf('APL').brackets[Number(sel.bracket)];
+      if (br) parts.push('Bracket ' + br.label);
+    }
+    hkcSeriesOf('APL').etc.forEach(function (e) {
+      if (sel.opts[e.key]) parts.push(e.label.replace(/ 옵션$/, ''));
+    });
+  } else if (p.sk === 'HP') {
+    parts.push(sel.action === 'single' ? 'Single (12개)' : (sel.action === 'single42' ? 'Single (4.2 bar)' : (sel.action === 'single56' ? 'Single (5.6 bar)' : 'Double')));
+    if (sel.opts.deg135) parts.push('135° 사양');
+    ['hard', 'bodycoat', 'side', 'nano', 'low'].forEach(function (k) {
+      if (sel.opts[k]) parts.push(HKC_OPT_LABEL[k]);
+    });
+  } else if (p.sk === 'HGO') {
+    const n = Number(sel.opts.mech || 0);
+    if (n >= 2) parts.push('Mechanical Valve ' + n + '개');
+    if (sel.opts.nano) parts.push('Nano Coating');
+    if (sel.opts.low) parts.push('저온');
+  } else if (p.sk === 'ET') {
+    parts.push(sel.action === 'da' ? 'Double Acting DA' :
+      (sel.action === 'sr1' ? 'Single Acting SR C1~C3' :
+        (sel.action === 'sr2' ? 'Single Acting SR C4~C6' : 'Single Acting SR C7~')));
+    if (sel.opts.ho) parts.push('Hydraulic Override');
+  } else {
+    if (p.sk === 'HQ') { if (sel.base === 'exp') parts.push('방폭'); }
+    else if (sel.opts.exp) parts.push('방폭 (15% up)');
+    const cableMode = p.sk === 'HQ' && p.row.ext && p.row.ext.cable;
+    HKC_OPT_ORDER.forEach(function (k) {
+      if (k === 'ext' && cableMode) return;
+      if (sel.opts[k] && k !== 'exp') parts.push(HKC_OPT_LABEL[k] || k);
+    });
+    if (sel.lcu && sel.lcu.col) parts.push('제어 ' + sel.lcu.col + ' (' + sel.lcu.voltage + ')');
+    if (p.sk === 'HQ' && sel.opts.ext && p.row.ext && p.row.ext.cable && sel.cable) parts.push('EXT Cable ' + sel.cable);
+  }
+  return parts.join(' · ');
+}
+
+const HKC_OPT_LABEL = {
+  exp: '방폭', pcu: 'PCU', cpt: 'CPT', ams: 'AMS', ip68: 'IP68', low: '저온', nano: 'Nano Coating',
+  profibus: 'Profibus', modbus: 'MODBUS 단일카드', motor3p: '3P 모터', v24dc: '24V DC',
+  v24acdc: '24V AC/DC', piu: 'PIU', line23: '2/3줄·HSA', als: 'ALS/ATS', ext: 'EXT (135°)',
+  reverse: '역방향', folding: '접이식핸들', bushing: '부싱 B2 추가구매', c5: 'C5 Coating',
+  hard: '하드 아노다이징', bodycoat: '바디&커버 분체도장', side: 'Side Stopper', ho: 'Hydraulic Override'
+};
+const HKC_OPT_ORDER = ['exp', 'motor3p', 'v24dc', 'v24acdc', 'pcu', 'cpt', 'piu', 'ams', 'modbus', 'line23', 'ext',
+  'reverse', 'als', 'folding', 'ip68', 'low', 'nano', 'bushing', 'c5', 'profibus'];
+
+/* ---------- 화면 ---------- */
+function renderHkcChips() {
+  const seriesBox = $('priceHkcSeriesChips');
+  if (seriesBox) {
+    seriesBox.innerHTML = ['전체'].concat(HKC_DATA.series.map(function (s) { return s.key; })).map(function (k) {
+      const on = hkcState.series === k;
+      return '<button type="button" class="chip' + (on ? ' is-active' : '') + '" data-hkc-series="' + esc(k) + '" aria-pressed="' + (on ? 'true' : 'false') + '">' + esc(k) + '</button>';
+    }).join('');
+  }
+  const basisBox = $('priceHkcBasisChips');
+  if (basisBox) {
+    basisBox.innerHTML = HKC_BASIS.map(function (b) {
+      const on = hkcState.basis === b.key;
+      return '<button type="button" class="chip' + (on ? ' is-active' : '') + '" data-hkc-basis="' + esc(b.key) + '" aria-pressed="' + (on ? 'true' : 'false') + '">' + esc(b.label) + '</button>';
+    }).join('');
+  }
+}
+
+function hkcVisibleProducts() {
+  const tokens = String(priceState.q || '').trim().toLowerCase().split(/\s+/).filter(Boolean);
+  return hkcProducts().filter(function (p) {
+    if (hkcState.series !== '전체' && p.sk !== hkcState.series) return false;
+    if (!tokens.length) return true;
+    const hay = (p.search + ' ' + p.model).toLowerCase();
+    for (let i = 0; i < tokens.length; i++) if (hay.indexOf(tokens[i]) < 0) return false;
+    return true;
+  });
+}
+
+function hkcMetaHTML(p) {
+  const bits = [];
+  if (p.sk === 'APL') {
+    const s = hkcSeriesOf('APL');
+    const parts = s.sizes.map(function (sz, i) {
+      return hkcIsNum(p.body.prices[i]) ? sz + ' ' + qWon(Math.round(p.body.prices[i] * hkcMult())) : '';
+    }).filter(Boolean);
+    bits.push('<span>본체 <b>' + esc(p.body.spec) + '</b></span>');
+    bits.push('<span>' + parts.join(' · ') + '</span>');
+  } else if (p.sk === 'HP' && p.kind === 'rp') {
+    bits.push('<span>' + esc(p.sub) + '</span>');
+    bits.push('<span>Double <b>' + hkcPrice(p.row.double) + '</b></span>');
+    if (hkcIsNum(p.row.single)) bits.push('<span>Single <b>' + hkcPrice(p.row.single) + '</b></span>');
+    if (hkcIsNum(p.row.deg135)) bits.push('<span>135° <b>' + hkcPrice(p.row.deg135) + '</b></span>');
+  } else if (p.sk === 'HP' && p.kind === 'sy') {
+    bits.push('<span>' + esc(p.sub) + '</span>');
+    bits.push('<span>Double <b>' + hkcPrice(p.row.double) + '</b></span>');
+    if (hkcIsNum(p.row.single42)) bits.push('<span>Single 4.2bar <b>' + hkcPrice(p.row.single42) + '</b></span>');
+    if (hkcIsNum(p.row.single56)) bits.push('<span>Single 5.6bar <b>' + hkcPrice(p.row.single56) + '</b></span>');
+  } else if (p.sk === 'ET') {
+    bits.push('<span>' + esc(p.sub) + '</span>');
+    bits.push('<span>DA <b>' + hkcPrice(p.row.da) + '</b></span>');
+    if (hkcIsNum(p.row.sr1)) bits.push('<span>SR C1~C3 <b>' + hkcPrice(p.row.sr1) + '</b></span>');
+    if (hkcIsNum(p.row.hoDa) || hkcIsNum(p.row.hoSr)) bits.push('<span class="est">HO 옵션 있음</span>');
+  } else {
+    bits.push('<span>' + esc(p.sub || '') + '</span>');
+    if (p.sk === 'HQ' && hkcIsNum(p.row.exp)) bits.push('<span>방폭 <b>' + hkcPrice(p.row.exp) + '</b></span>');
+  }
+  return bits.join('');
+}
+
+function hkcCardHTML(p) {
+  const open = hkcState.open === p.id;
+  const range = hkcIsNum(p.max) && p.max !== p.base;
+  const res = open ? hkcResult(p, hkcSelOf(p)) : null;
+  const showTotal = !!(res && !res.bad && hkcIsNum(res.total));
+  const priceTxt = showTotal ? hkcPrice(res.total)
+    : (range ? hkcPrice(p.base) + '~' + hkcPrice(p.max) : hkcPrice(p.base));
+  const tagTxt = showTotal ? ('선택 사양 합계 · ' + hkcBasisLabel())
+    : (hkcBasisLabel() + (p.baseLabel ? ' · ' + p.baseLabel : ''));
+  return '<div class="price-item hkc-item' + (open ? ' is-open' : '') + '" data-hkc-item="' + esc(p.id) + '">' +
+    '<div class="price-main">' +
+      '<div class="price-title">' +
+        '<span class="price-model">' + esc(p.model) + '</span>' +
+        '<span class="price-conn">' + esc(p.seriesName) + '</span>' +
+      '</div>' +
+      '<div class="price-meta">' + hkcMetaHTML(p) + '</div>' +
+    '</div>' +
+    '<div class="price-price">' +
+      '<b class="price-final' + (!showTotal && range ? ' hkc-range' : '') + '">' + priceTxt + '<span class="u">원</span></b>' +
+      '<span class="hkc-btag">' + esc(tagTxt) + '</span>' +
+    '</div>' +
+    '<div class="price-btnrow">' +
+      '<button type="button" class="btn ' + (open ? 'btn-ghost' : 'btn-primary') + ' js-hkc-open" data-hkc-open="' + esc(p.id) + '">' + (open ? '🧮 닫기' : '🧮 옵션 선택') + '</button>' +
+    '</div>' +
+    (open ? hkcCalcHTML(p) : '') +
+    '</div>';
+}
+
+function hkcChipRow(label, field, choices, cur) {
+  return '<div class="hkc-frow"><span class="hkc-flabel">' + esc(label) + '</span><div class="chips hkc-chips">' +
+    choices.map(function (c) {
+      const on = String(cur) === String(c.v);
+      return '<button type="button" class="chip' + (on ? ' is-active' : '') + (c.dis ? ' is-dis' : '') + '"' +
+        (c.dis ? ' disabled aria-disabled="true"' : '') +
+        ' data-hkc-field="' + esc(field) + '" data-hkc-val="' + esc(c.v) + '">' + esc(c.t) + '</button>';
+    }).join('') + '</div></div>';
+}
+
+function hkcCheckRow(p, key, label, amountTxt, checked, disabled, note) {
+  return '<label class="hkc-opt' + (disabled ? ' is-dis' : '') + '">' +
+    '<input type="checkbox" data-hkc-opt="' + esc(key) + '"' + (checked ? ' checked' : '') + (disabled ? ' disabled' : '') + '>' +
+    '<span class="hkc-opt-name">' + esc(label) + '</span>' +
+    (amountTxt ? '<b class="hkc-opt-amt">' + esc(amountTxt) + '</b>' : '') +
+    (note ? '<span class="hkc-opt-note">' + esc(note) + '</span>' : '') +
+    '</label>';
+}
+
+function hkcAmtTxt(v) {
+  if (hkcIsNum(v)) return (v < 0 ? '−' : '+') + hkcPrice(Math.abs(v)) + '원';
+  if (v && v.pct) return '+' + v.pct + '% (기본가 기준)';
+  return '';
+}
+
+function hkcLcuHTML(p, sel) {
+  const s = hkcSeriesOf(p.sk);
+  if (!s || !s.lcu) return '';
+  const vSel = sel.lcu.voltage || '';
+  const row = s.lcu.filter(function (x) { return x.voltage === vSel; })[0];
+  const colOpts = row ? s.lcuCols.map(function (c, i) {
+    const v = row.values[i];
+    return { v: c, t: c + (hkcIsNum(v) ? ' +' + hkcPrice(v) : (row.notes[i] && row.notes[i] !== '-' ? ' (' + row.notes[i] + ')' : ' (—)')), dis: !hkcIsNum(v) };
+  }) : [];
+  return '<div class="hkc-frow hkc-lcu"><span class="hkc-flabel">제어/LCU</span>' +
+    '<div class="chips hkc-chips">' +
+      ['', '일반 1P', '일반 3P', '방폭 1P', '방폭 3P', '24V DC'].map(function (v) {
+        if (v === '' && vSel !== '') return '';
+        const on = vSel === v;
+        if (v === '') {
+          return vSel === '' ? '<button type="button" class="chip is-active" data-hkc-lcu="voltage" data-hkc-val="">제어옵션 없음</button>' : '';
+        }
+        return '<button type="button" class="chip' + (on ? ' is-active' : '') + '" data-hkc-lcu="voltage" data-hkc-val="' + esc(v) + '">' + esc(v) + '</button>';
+      }).join('') +
+    '</div>' +
+    (row ? '<div class="chips hkc-chips hkc-chips-sub">' + colOpts.map(function (c) {
+      const on = sel.lcu.col === c.v;
+      return '<button type="button" class="chip' + (on ? ' is-active' : '') + (c.dis ? ' is-dis' : '') + '"' +
+        (c.dis ? ' disabled' : '') + ' data-hkc-lcu="col" data-hkc-val="' + esc(c.v) + '">' + esc(c.t) + '</button>';
+    }).join('') + '</div>' : '') +
+    '</div>';
+}
+
+function hkcCalcHTML(p) {
+  const sel = hkcSelOf(p);
+  const r = hkcResult(p, sel);
+  const out = [];
+  out.push('<div class="hkc-calc" role="group" aria-label="' + esc(p.model) + ' 옵션 계산기">');
+  out.push('<div class="hkc-calc-head"><b>' + esc(p.model) + '</b><span>' + esc(p.sub || '') + '</span>' +
+    '<span class="hkc-btag">' + esc(hkcBasisLabel()) + '</span></div>');
+
+  if (p.sk === 'APL') {
+    const s = hkcSeriesOf('APL');
+    out.push(hkcChipRow('호칭', 'size', s.sizes.map(function (sz, i) {
+      return { v: sz, t: sz + (hkcIsNum(p.body.prices[i]) ? ' ' + qWon(Math.round(p.body.prices[i] * hkcMult())) : ' (없음)'), dis: !hkcIsNum(p.body.prices[i]) };
+    }), sel.size));
+    const idx = s.sizes.indexOf(sel.size);
+    out.push('<div class="hkc-frow"><span class="hkc-flabel">Switch</span>' +
+      '<select class="hkc-select" data-hkc-field="sw" aria-label="Switch Option">' +
+      '<option value="">선택 없음 (스위치 미포함)</option>' +
+      s.switches.map(function (sw, i) {
+        const v = sw.prices[idx];
+        const dis = !hkcIsNum(v);
+        return '<option value="' + i + '"' + (String(sel.sw) === String(i) ? ' selected' : '') + (dis ? ' disabled' : '') + '>' +
+          esc(sw.model + ' · ' + sw.desc + ' — ' + (hkcIsNum(v) ? '+' + qWon(Math.round(v * hkcMult())) + '원' : '이 호칭 없음')) + '</option>';
+      }).join('') + '</select></div>');
+    out.push('<div class="hkc-frow"><span class="hkc-flabel">Bracket</span>' +
+      '<select class="hkc-select" data-hkc-field="bracket" aria-label="Bracket Option">' +
+      '<option value="">선택 없음</option>' +
+      s.brackets.map(function (br, i) {
+        const v = br.prices[idx];
+        const dis = !hkcIsNum(v);
+        return '<option value="' + i + '"' + (String(sel.bracket) === String(i) ? ' selected' : '') + (dis ? ' disabled' : '') + '>' +
+          esc(br.label + ' — ' + (hkcIsNum(v) ? (v ? '+' + qWon(Math.round(v * hkcMult())) + '원' : '추가금 없음') : '이 호칭 없음')) + '</option>';
+      }).join('') + '</select></div>');
+    out.push('<div class="hkc-optgrid">' + s.etc.map(function (e) {
+      const v = e.prices[idx];
+      return hkcCheckRow(p, e.key, e.label.replace(/ 옵션$/, ''), hkcAmtTxt(v), !!sel.opts[e.key], !hkcIsNum(v));
+    }).join('') + '</div>');
+    out.push('<p class="hkc-tip">호칭을 바꾸면 그 호칭에 없는 옵션은 목록에서 선택할 수 없습니다. 본체 재질은 위 카드의 모델명(APL-X10N/S/SF)으로 고릅니다.</p>');
+  } else if (p.sk === 'HP' && p.kind === 'rp') {
+    const row = p.row;
+    out.push(hkcChipRow('작동', 'action', [
+      { v: 'double', t: 'Double ' + hkcPrice(row.double) },
+      { v: 'single', t: 'Single 12개 ' + (hkcIsNum(row.single) ? hkcPrice(row.single) : '없음'), dis: !hkcIsNum(row.single) }
+    ], sel.action));
+    out.push('<div class="hkc-optgrid">' +
+      hkcCheckRow(p, 'hard', '하드 아노다이징', hkcAmtTxt(row.hard), !!sel.opts.hard, !hkcIsNum(row.hard)) +
+      hkcCheckRow(p, 'bodycoat', '바디&커버 분체도장', hkcAmtTxt(row.bodycoat), !!sel.opts.bodycoat, !hkcIsNum(row.bodycoat)) +
+      hkcCheckRow(p, 'side', 'Side Stopper', hkcAmtTxt(row.side), !!sel.opts.side, !hkcIsNum(row.side)) +
+      hkcCheckRow(p, 'nano', 'Nano Coating', hkcAmtTxt(row.nano), !!sel.opts.nano, !hkcIsNum(row.nano)) +
+      hkcCheckRow(p, 'low', '저온', hkcAmtTxt(row.low), !!sel.opts.low, !hkcIsNum(row.low)) +
+      hkcCheckRow(p, 'deg135', '135° 사양', hkcIsNum(row.deg135) ? hkcPrice(row.deg135) + '원(총액)' : '이 모델 없음', !!sel.opts.deg135, !hkcIsNum(row.deg135)) +
+      '</div>');
+    if (hkcIsNum(row.spring)) {
+      out.push('<p class="hkc-tip">Spring Price ' + qWon(row.spring) + '원 × 12개 = ' + qWon(row.spring * 12) + '원이 Single(12개) 가격에 포함되어 있습니다. 135°는 추가금이 아니라 그 모델의 135° 사양 총액입니다.</p>');
+    }
+  } else if (p.sk === 'HP' && p.kind === 'sy') {
+    const row = p.row;
+    out.push(hkcChipRow('작동', 'action', [
+      { v: 'double', t: 'Double ' + hkcPrice(row.double) },
+      { v: 'single42', t: 'Single 4.2bar ' + (hkcIsNum(row.single42) ? hkcPrice(row.single42) : '없음'), dis: !hkcIsNum(row.single42) },
+      { v: 'single56', t: 'Single 5.6bar ' + (hkcIsNum(row.single56) ? hkcPrice(row.single56) : '없음'), dis: !hkcIsNum(row.single56) }
+    ], sel.action));
+    out.push('<div class="hkc-optgrid">' +
+      hkcCheckRow(p, 'hard', '하드 아노다이징', hkcAmtTxt(row.hard), !!sel.opts.hard, !hkcIsNum(row.hard)) +
+      hkcCheckRow(p, 'bodycoat', '바디&커버 분체도장', hkcAmtTxt(row.bodycoat), !!sel.opts.bodycoat, !hkcIsNum(row.bodycoat)) +
+      hkcCheckRow(p, 'side', 'Side Stopper', hkcAmtTxt(row.side), !!sel.opts.side, !hkcIsNum(row.side)) +
+      hkcCheckRow(p, 'nano', 'Nano Coating', hkcAmtTxt(row.nano), !!sel.opts.nano, !hkcIsNum(row.nano)) +
+      hkcCheckRow(p, 'low', '저온', hkcAmtTxt(row.low), !!sel.opts.low, !hkcIsNum(row.low)) +
+      '</div>');
+  } else if (p.sk === 'HGO') {
+    const row = p.row;
+    out.push('<div class="hkc-frow"><span class="hkc-flabel">Mechanical Valve</span>' +
+      '<select class="hkc-select" data-hkc-field="mech" aria-label="Mechanical Valve 수량">' +
+      [0, 2, 3, 4].map(function (n) {
+        const amt = n >= 2 && hkcIsNum(row.mech) ? row.mech + Math.max(0, n - 2) * row.mech : 0;
+        return '<option value="' + n + '"' + (String(Number(sel.opts.mech || 0)) === String(n) ? ' selected' : '') + (n >= 2 && !hkcIsNum(row.mech) ? ' disabled' : '') + '>' +
+          (n === 0 ? '선택 없음' : n + '개 — +' + qWon(Math.round(amt * hkcMult())) + '원') + '</option>';
+      }).join('') + '</select></div>');
+    out.push('<div class="hkc-optgrid">' +
+      hkcCheckRow(p, 'nano', 'Nano Coating', hkcAmtTxt(row.nano), !!sel.opts.nano, !hkcIsNum(row.nano)) +
+      hkcCheckRow(p, 'low', '저온', hkcAmtTxt(row.low), !!sel.opts.low, !hkcIsNum(row.low)) +
+      '</div>');
+    out.push('<p class="hkc-tip">Mechanical Valve는 2개 ' + qWon(row.mech) + '원, 1개 추가마다 ' + qWon(row.mech) + '원으로 계산했습니다(원본 표기: “2개 (+1개 추가)”).</p>');
+  } else if (p.sk === 'HM') {
+    const row = p.row;
+    out.push('<div class="hkc-optgrid">' +
+      hkcCheckRow(p, 'exp', '방폭', '+15% (기본가 기준)', !!sel.opts.exp, !row.exp) +
+      hkcCheckRow(p, 'pcu', 'PCU', hkcAmtTxt(row.pcu), !!sel.opts.pcu, !hkcIsNum(row.pcu)) +
+      hkcCheckRow(p, 'cpt', 'CPT', hkcAmtTxt(row.cpt), !!sel.opts.cpt, !hkcIsNum(row.cpt)) +
+      hkcCheckRow(p, 'ams', 'AMS', hkcAmtTxt(row.ams), !!sel.opts.ams, !hkcIsNum(row.ams)) +
+      hkcCheckRow(p, 'ip68', 'IP68', hkcAmtTxt(row.ip68), !!sel.opts.ip68, !hkcIsNum(row.ip68)) +
+      hkcCheckRow(p, 'low', '저온', hkcAmtTxt(row.low), !!sel.opts.low, !hkcIsNum(row.low)) +
+      hkcCheckRow(p, 'nano', 'Nano Coating', hkcAmtTxt(row.nano), !!sel.opts.nano, !hkcIsNum(row.nano)) +
+      hkcCheckRow(p, 'profibus', 'Profibus', hkcAmtTxt(row.profibus), !!sel.opts.profibus, !hkcIsNum(row.profibus)) +
+      hkcCheckRow(p, 'modbus', 'Modbus', hkcAmtTxt(row.modbus), !!sel.opts.modbus, !hkcIsNum(row.modbus)) +
+      hkcCheckRow(p, 'pbc', 'PBC 부싱', '단가 추후 안내', false, true) +
+      '</div>');
+  } else if (p.sk === 'HL') {
+    const row = p.row;
+    out.push('<div class="hkc-optgrid">' +
+      hkcCheckRow(p, 'exp', '방폭', '+15% (기본가 기준)', !!sel.opts.exp, !row.exp) +
+      hkcCheckRow(p, 'motor3p', '3P 모터', hkcAmtTxt(row.motor3p), !!sel.opts.motor3p, !hkcIsNum(row.motor3p)) +
+      hkcCheckRow(p, 'v24acdc', '24V AC/DC', hkcAmtTxt(row.v24acdc), !!sel.opts.v24acdc, !hkcIsNum(row.v24acdc)) +
+      hkcCheckRow(p, 'pcu', 'PCU', hkcAmtTxt(row.pcu), !!sel.opts.pcu, !hkcIsNum(row.pcu)) +
+      hkcCheckRow(p, 'cpt', 'CPT', hkcAmtTxt(row.cpt), !!sel.opts.cpt, !hkcIsNum(row.cpt)) +
+      hkcCheckRow(p, 'piu', 'PIU', hkcAmtTxt(row.piu), !!sel.opts.piu, !hkcIsNum(row.piu)) +
+      hkcCheckRow(p, 'line23', '2줄/3줄 · HSA', hkcAmtTxt(row.line23), !!sel.opts.line23, !hkcIsNum(row.line23)) +
+      hkcCheckRow(p, 'als', 'ALS/ATS', hkcAmtTxt(row.als), !!sel.opts.als, !hkcIsNum(row.als)) +
+      hkcCheckRow(p, 'ip68', 'IP68', '+10% (기본가 기준)', !!sel.opts.ip68, !row.ip68) +
+      hkcCheckRow(p, 'low', '저온', '+20% (기본가 기준)', !!sel.opts.low, !row.low) +
+      '</div>');
+    out.push(hkcLcuHTML(p, sel));
+  } else if (p.sk === 'ET') {
+    const row = p.row;
+    out.push(hkcChipRow('작동', 'action', [
+      { v: 'da', t: 'DA ' + hkcPrice(row.da) },
+      { v: 'sr1', t: 'SR C1~C3 ' + (hkcIsNum(row.sr1) ? hkcPrice(row.sr1) : '없음'), dis: !hkcIsNum(row.sr1) },
+      { v: 'sr2', t: 'SR C4~C6 ' + (hkcIsNum(row.sr2) ? hkcPrice(row.sr2) : '없음'), dis: !hkcIsNum(row.sr2) },
+      { v: 'sr3', t: 'SR C7~ ' + (hkcIsNum(row.sr3) ? hkcPrice(row.sr3) : '없음'), dis: !hkcIsNum(row.sr3) }
+    ], sel.action));
+    const isDa = sel.action === 'da';
+    const ho = isDa ? row.hoDa : row.hoSr;
+    out.push('<div class="hkc-optgrid">' +
+      hkcCheckRow(p, 'ho', 'Hydraulic Override (' + (isDa ? 'Double Acting' : 'Single Acting') + ')', hkcAmtTxt(ho), !!sel.opts.ho, !hkcIsNum(ho)) +
+      '</div>');
+    if (!hkcIsNum(ho)) out.push('<p class="hkc-tip">이 모델 구간에는 Hydraulic Override 가격이 없습니다.</p>');
+  } else if (p.sk === 'HQ') {
+    const row = p.row;
+    const modbusOff = row.modbus && row.modbus.note;
+    out.push(hkcChipRow('사양', 'base', [
+      { v: 'std', t: 'Standard ' + hkcPrice(row.standard) },
+      { v: 'exp', t: '방폭 ' + (hkcIsNum(row.exp) ? hkcPrice(row.exp) : '없음'), dis: !hkcIsNum(row.exp) }
+    ], sel.base || 'std'));
+    out.push('<div class="hkc-optgrid">' +
+      hkcCheckRow(p, 'motor3p', '3P 모터', hkcAmtTxt(row.motor3p), !!sel.opts.motor3p, !hkcIsNum(row.motor3p)) +
+      hkcCheckRow(p, 'v24dc', '24V DC', hkcIsNum(row.v24dc) ? (row.v24dc ? hkcAmtTxt(row.v24dc) : '추가금 없음(0원)') : '', !!sel.opts.v24dc, !hkcIsNum(row.v24dc)) +
+      hkcCheckRow(p, 'v24acdc', '24V AC/DC', hkcAmtTxt(row.v24acdc), !!sel.opts.v24acdc, !hkcIsNum(row.v24acdc)) +
+      hkcCheckRow(p, 'pcu', 'PCU', hkcAmtTxt(row.pcu), !!sel.opts.pcu, !hkcIsNum(row.pcu)) +
+      hkcCheckRow(p, 'cpt', 'CPT', hkcAmtTxt(row.cpt), !!sel.opts.cpt, !hkcIsNum(row.cpt)) +
+      hkcCheckRow(p, 'piu', 'PIU', hkcAmtTxt(row.piu), !!sel.opts.piu, !hkcIsNum(row.piu)) +
+      hkcCheckRow(p, 'modbus', 'MODBUS 단일카드', modbusOff ? row.modbus.note : hkcAmtTxt(row.modbus), !!sel.opts.modbus, !hkcIsNum(row.modbus)) +
+      hkcCheckRow(p, 'line23', '2/3줄 · HSA', hkcAmtTxt(row.line23), !!sel.opts.line23, !hkcIsNum(row.line23)) +
+      hkcCheckRow(p, 'reverse', '역방향', hkcAmtTxt(row.reverse), !!sel.opts.reverse, !hkcIsNum(row.reverse)) +
+      hkcCheckRow(p, 'als', 'ALS/ATS', hkcAmtTxt(row.als), !!sel.opts.als, !hkcIsNum(row.als)) +
+      hkcCheckRow(p, 'folding', '접이식핸들', hkcAmtTxt(row.folding), !!sel.opts.folding, !hkcIsNum(row.folding)) +
+      hkcCheckRow(p, 'ip68', 'IP68', '+10% (Standard 기준)', !!sel.opts.ip68, !row.ip68) +
+      hkcCheckRow(p, 'low', '저온', '+20% (Standard 기준)', !!sel.opts.low, !row.low) +
+      hkcCheckRow(p, 'bushing', '부싱 B2 추가구매', hkcAmtTxt(row.bushing), !!sel.opts.bushing, !hkcIsNum(row.bushing)) +
+      hkcCheckRow(p, 'c5', 'C5 Coating', hkcAmtTxt(row.c5), !!sel.opts.c5, !hkcIsNum(row.c5)) +
+      '</div>');
+    if (row.ext && row.ext.cable) {
+      out.push('<div class="hkc-frow"><span class="hkc-flabel">EXT Cable</span><div class="chips hkc-chips">' +
+        row.ext.cable.map(function (c) {
+          const on = sel.cable === c.len;
+          return '<button type="button" class="chip' + (on ? ' is-active' : '') + '" data-hkc-field="cable" data-hkc-val="' + esc(c.len) + '">' + esc(c.len + ' +' + hkcPrice(c.price)) + '</button>';
+        }).join('') + '</div></div>');
+    }
+    if (row.ext && row.ext.note) out.push('<p class="hkc-tip">이 모델의 EXT(135°)는 표에 “' + esc(row.ext.note) + '”로 적혀 있어 그 금액으로 계산했습니다.</p>');
+    if (modbusOff) out.push('<p class="hkc-tip">MODBUS는 ' + esc(row.modbus.note) + ' — 별도 카드 금액이 없습니다.</p>');
+    out.push('<p class="hkc-tip">방폭은 Standard에 더하는 금액이 아니라 <b>기본가를 방폭 사양 가격으로 바꾸는</b> 금액입니다. IP68(10% up)·저온(20% up)의 % 는 Standard 가격 기준입니다.</p>');
+    out.push(hkcLcuHTML(p, sel));
+  }
+
+  /* 합계 · 내역 */
+  out.push('<div class="hkc-sum">');
+  if (r.bad) {
+    out.push('<p class="hkc-bad">이 조합(' + esc(r.baseLabel) + ')은 가격표에 금액이 없습니다. 다른 호칭·모델을 골라 주세요.</p>');
+  } else {
+    out.push('<div class="hkc-sumline"><span>기본가 · ' + esc(r.baseLabel) + '</span><b>' + hkcPrice(r.base) + '원</b></div>');
+    r.lines.forEach(function (l) {
+      out.push('<div class="hkc-sumline opt"><span>' + esc(l.label) + '</span><b>' + (l.amount < 0 ? '−' : '+') + hkcPrice(Math.abs(l.amount)) + '원</b></div>');
+    });
+    out.push('<div class="hkc-sumline total"><span>합계 (' + esc(hkcBasisLabel()) + ')</span><b>' + hkcPrice(r.total) + '원</b></div>');
+    if (hkcState.basis !== 'dealer') {
+      out.push('<div class="hkc-sumline sub"><span>대리점가 기준</span><b>' + qWon(r.total) + '원</b></div>');
+    }
+    out.push('<div class="hkc-summarytxt">' + esc(hkcSummary(p, sel)) + '</div>');
+    out.push('<div class="hkc-actions">' +
+      '<button type="button" class="btn btn-primary js-hkc-quote" data-hkc-quote="' + esc(p.id) + '">📄 견적 담기</button>' +
+      '<button type="button" class="btn btn-ghost js-hkc-po" data-hkc-po="' + esc(p.id) + '">📝 발주 담기</button>' +
+      '</div>');
+  }
+  out.push('</div>');
+  out.push('</div>');
+  return out.join('');
+}
+
+function renderHkcList() {
+  const box = $('priceList');
+  if (!box) return;
+  const list = hkcVisibleProducts();
+  box.innerHTML = list.length ? list.map(hkcCardHTML).join('')
+    : '<p class="price-empty">조건에 맞는 HKC 품목이 없습니다. 시리즈나 검색어를 바꿔 보세요.</p>';
+  $('priceCount').textContent = qWon(list.length) + '개';
+  $('priceTermsSummary').textContent = hkcBasisLabel() + ' · 옵션 합산 계산';
+}
+
+function hkcAddTo(kind, id) {
+  const p = hkcProductById(id);
+  if (!p) return;
+  const sel = hkcSelOf(p);
+  const r = hkcResult(p, sel);
+  if (r.bad || !hkcIsNum(r.total)) { toast('가격이 없는 조합입니다. 호칭이나 모델을 바꿔 주세요.'); return; }
+  const isQuote = kind === 'quote';
+  const rec = isQuote ? state.quote : state.po;
+  if (!rec) return;
+  const total = Math.round(r.total * hkcMult());
+  const name = 'HKC ' + p.model;
+  const spec = hkcSummary(p, sel);
+  const payload = { name: name, spec: spec, qty: '1', price: String(total), note: '' };
+  const norm = isQuote ? normalizeQuoteItem : normalizePoItem;
+  const items = rec.items;
+  const last = items[items.length - 1];
+  const blank = last && !String(last.name || '').trim() && !String(last.spec || '').trim() && !last.qty && !last.price;
+  if (blank) items[items.length - 1] = norm(payload);
+  else items.push(norm(payload));
+  if (isQuote) { renderQuoteItems(); refreshQuoteTotals(); setQuoteSaveHint(); }
+  else { renderPoItems(); refreshPoTotals(); setPoSaveHint(); }
+  setTab(kind);
+  const rows = document.querySelectorAll(isQuote ? '#quoteItems .q-item' : '#poItems .po-item');
+  const row = rows[items.length - 1];
+  if (row) {
+    row.classList.add('just-added');
+    setTimeout(function () { row.classList.remove('just-added'); }, 1800);
+  }
+  toast((isQuote ? '📄 견적서' : '📝 발주서') + '에 HKC ' + p.model + ' 담았습니다 · ' + hkcBasisLabel() + ' ' + qWon(total) + '원');
+}
+
+function hkcToggle(id) {
+  hkcState.open = hkcState.open === id ? '' : id;
+  const card = document.querySelector('[data-hkc-item="' + id + '"]');
+  if (!card) { renderHkcList(); return; }
+  const box = $('priceList');
+  if (!box) return;
+  /* 카드 하나만 다시 그려 스크롤 위치를 지킵니다. */
+  const p = hkcProductById(id);
+  const tmp = document.createElement('div');
+  tmp.innerHTML = hkcCardHTML(p);
+  const fresh = tmp.firstChild;
+  card.parentNode.replaceChild(fresh, card);
+  if (hkcState.open === id) {
+    const btn = fresh.querySelector('.js-hkc-open');
+    if (btn) btn.focus({ preventScroll: true });
+  }
+}
+
+function hkcRerenderCalc(id, focusField) {
+  const p = hkcProductById(id);
+  const card = document.querySelector('[data-hkc-item="' + id + '"]');
+  if (!p || !card) return;
+  const old = card.querySelector('.hkc-calc');
+  const tmp = document.createElement('div');
+  tmp.innerHTML = hkcCalcHTML(p);
+  const fresh = tmp.firstChild;
+  if (old) card.replaceChild(fresh, old);
+  else card.appendChild(fresh);
+  const res = hkcResult(p, hkcSelOf(p));
+  const pf = card.querySelector('.price-final');
+  const tag = card.querySelector('.hkc-btag');
+  if (pf && res && !res.bad && hkcIsNum(res.total)) {
+    pf.classList.remove('hkc-range');
+    pf.innerHTML = hkcPrice(res.total) + '<span class="u">원</span>';
+    if (tag) tag.textContent = '선택 사양 합계 · ' + hkcBasisLabel();
+  }
+  if (focusField) {
+    const el = card.querySelector('[data-hkc-field="' + focusField + '"]');
+    if (el && el.tagName === 'SELECT') el.focus({ preventScroll: true });
+  }
+}
+
+function hkcOnClick(e) {
+  const openBtn = e.target.closest('[data-hkc-open]');
+  if (openBtn) { hkcToggle(openBtn.getAttribute('data-hkc-open')); return; }
+  const card = e.target.closest('[data-hkc-item]');
+  if (!card) return;
+  const id = card.getAttribute('data-hkc-item');
+  const fieldBtn = e.target.closest('[data-hkc-field]');
+  if (fieldBtn && fieldBtn.tagName === 'BUTTON') {
+    const p = hkcProductById(id);
+    const sel = hkcSelOf(p);
+    const f = fieldBtn.getAttribute('data-hkc-field');
+    const v = fieldBtn.getAttribute('data-hkc-val');
+    if (f === 'base') {
+      sel.base = v;
+    } else if (f === 'size') {
+      sel.size = v;
+      /* 호칭이 바뀌면 그 호칭에 없는 스위치·브래킷은 해제 */
+      const s = hkcSeriesOf('APL');
+      const idx = s.sizes.indexOf(v);
+      if (sel.sw && !hkcIsNum(s.switches[Number(sel.sw)].prices[idx])) sel.sw = '';
+      if (sel.bracket && !hkcIsNum(s.brackets[Number(sel.bracket)].prices[idx])) sel.bracket = '';
+    } else if (f === 'action') {
+      sel.action = v;
+      if (v !== 'single' && v !== 'single42' && v !== 'single56' && p.sk === 'HP') sel.opts.deg135 = sel.opts.deg135;
+    } else if (f === 'cable') {
+      sel.cable = sel.cable === v ? '' : v;
+    }
+    hkcRerenderCalc(id);
+    return;
+  }
+  const lcuBtn = e.target.closest('[data-hkc-lcu]');
+  if (lcuBtn) {
+    const p = hkcProductById(id);
+    const sel = hkcSelOf(p);
+    const which = lcuBtn.getAttribute('data-hkc-lcu');
+    const v = lcuBtn.getAttribute('data-hkc-val');
+    if (which === 'voltage') { sel.lcu.voltage = v; sel.lcu.col = ''; }
+    else sel.lcu.col = sel.lcu.col === v ? '' : v;
+    hkcRerenderCalc(id);
+    return;
+  }
+  const q = e.target.closest('[data-hkc-quote]');
+  if (q) { hkcAddTo('quote', q.getAttribute('data-hkc-quote')); return; }
+  const po = e.target.closest('[data-hkc-po]');
+  if (po) { hkcAddTo('po', po.getAttribute('data-hkc-po')); return; }
+}
+
+function hkcOnChange(e) {
+  const card = e.target.closest('[data-hkc-item]');
+  if (!card) return;
+  const id = card.getAttribute('data-hkc-item');
+  const p = hkcProductById(id);
+  const sel = hkcSelOf(p);
+  const opt = e.target.getAttribute('data-hkc-opt');
+  if (opt) {
+    sel.opts[opt] = !!e.target.checked;
+    hkcRerenderCalc(id);
+    return;
+  }
+  const f = e.target.getAttribute('data-hkc-field');
+  if (f === 'sw') { sel.sw = e.target.value; hkcRerenderCalc(id, 'sw'); return; }
+  if (f === 'bracket') { sel.bracket = e.target.value; hkcRerenderCalc(id, 'bracket'); return; }
+  if (f === 'mech') { sel.opts.mech = Number(e.target.value) || 0; hkcRerenderCalc(id, 'mech'); return; }
+}
+
+function bindHkcEvents() {
+  const seriesBox = $('priceHkcSeriesChips');
+  if (seriesBox) {
+    seriesBox.addEventListener('click', function (e) {
+      const b = e.target.closest('[data-hkc-series]');
+      if (!b) return;
+      hkcState.series = b.getAttribute('data-hkc-series');
+      hkcState.open = '';
+      renderHkcChips();
+      renderHkcList();
+    });
+  }
+  const basisBox = $('priceHkcBasisChips');
+  if (basisBox) {
+    basisBox.addEventListener('click', function (e) {
+      const b = e.target.closest('[data-hkc-basis]');
+      if (!b) return;
+      hkcState.basis = b.getAttribute('data-hkc-basis');
+      renderHkcChips();
+      renderHkcList();
+    });
+  }
+  const list = $('priceList');
+  if (list) {
+    list.addEventListener('click', hkcOnClick);
+    list.addEventListener('change', hkcOnChange);
+  }
+}
+
+/* HKC 모드일 때만 HKC 전용 필터를 보여 주고, 기존 메이커 필터는 숨깁니다. */
+function applyHkcMode() {
+  const on = priceState.maker === HKC_MAKER;
+  if ($('priceHkcSeriesRow')) $('priceHkcSeriesRow').hidden = !on;
+  if ($('priceHkcBasisRow')) $('priceHkcBasisRow').hidden = !on;
+  if (on) {
+    if ($('priceConnRow')) $('priceConnRow').hidden = true;
+    if ($('priceSealRow')) $('priceSealRow').hidden = true;
+    if ($('priceTermsRow')) $('priceTermsRow').hidden = true;
+    if ($('priceOdeSizeRow')) $('priceOdeSizeRow').hidden = true;
+    if ($('priceTierRow')) $('priceTierRow').hidden = true;
+    if ($('priceSearch')) $('priceSearch').placeholder = 'HKC 모델 · 시리즈 검색 (예: APL-X10, HP-100, HQ-008)';
+    if ($('priceNote')) $('priceNote').textContent = 'HKC 대리점 가격표 2026-06-24 Rev.0 기준입니다. 공급가는 대리점가 × 1.15 ~ 1.2로 계산했습니다(원 단위 반올림). 옵션 추가금액은 대리점가 그대로 더하고, 15%·10%·20% up 옵션은 Standard(기본가) 기준으로 계산합니다. 135°·Hydraulic Override 등 표기 방식이 다른 칸은 계산기 안내 문구를 확인해 주세요.';
+  } else {
+    if ($('priceSearch')) $('priceSearch').placeholder = '모델명 · 규격 · 연결방식 · Sealing 검색 (예: PC22, 50A, CV-M)';
+    if ($('priceNote')) $('priceNote').textContent = '적용 단가 = 단가표 기준가 × 재질 배율 × (1 − 할인율)을 10원 단위 올림(100원 단위)한 값입니다. 협가(회색 취소선)는 단가표 기준가에 재질 배율만 적용한 가격입니다. 8A·10A처럼 316L 전용으로 생산되는 품목은 기준가가 이미 316L입니다.';
+  }
+}
+
+function hkcHeadMeta() {
+  return HKC_DATA.docNo + ' · 공급가 = 대리점가 × 1.15~1.2';
+}
+
+function initHkc() {
+  renderHkcChips();
+  bindHkcEvents();
+}
+/* ===== HKC 단가표 끝 ===== */
 
 lockBoot();
 </script>
