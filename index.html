@@ -833,6 +833,24 @@
   .hyo-note{color:#92400e}
   .hyo-sub{font-size:11px;color:var(--muted)}
 
+  /* ---------- 둥스(DUNGS) 단가표 ---------- */
+  .dungs-base{font-size:11px;font-weight:700;color:#94a3b8;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .dungs-base b{color:#64748b;font-weight:800}
+  .dungs-tag{font-size:10.5px;font-weight:800;border-radius:999px;padding:1px 6px;white-space:nowrap;border:1px solid;margin-top:2px;line-height:1.35}
+  .dungs-margin{color:#047857;background:#ecfdf5;border-color:#a7f3d0}
+  .dungs-stop{color:#b91c1c;background:#fef2f2;border-color:#fecaca;white-space:normal;text-align:right;max-width:150px}
+  .dungs-item .price-final.dungs-tbd{font-size:13.5px;color:#b91c1c}
+  .dungs-item .price-btnrow .btn:disabled{opacity:.42;cursor:not-allowed}
+  .dungs-note{color:#92400e}
+  .dungs-sub{font-size:10.5px;color:var(--muted)}
+  .dungs-notice{font-size:11.5px;line-height:1.6;color:#92400e;background:#fffbeb;border:1px solid #fde68a;border-radius:9px;padding:8px 10px;font-weight:700}
+  .dungs-notice b{color:#b45309;font-weight:900;margin-right:5px}
+  #priceDungsCatRow .chips{flex-wrap:wrap;overflow-x:visible;row-gap:3px}
+  @media (max-width:820px){
+    .dungs-stop{max-width:none}
+    .dungs-item .price-price{align-items:flex-end}
+  }
+
   /* ---------- AONE 단가표 ---------- */
   .aone-item .price-final.aone-tbd{font-size:13px;color:#b45309}
   .aone-off{font-size:10.5px;font-weight:800;color:#047857;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:999px;padding:1px 6px;margin-top:2px;white-space:nowrap}
@@ -1387,6 +1405,22 @@
         <span class="pct">%</span>
         <span class="q-hint" id="hyoshinDiscTarget"></span>
       </label>
+    </div>
+    <div class="price-filter" id="priceDungsCatRow" hidden>
+      <span class="flabel">시리즈</span>
+      <div class="chips" id="priceDungsCatChips" role="group" aria-label="둥스(DUNGS) 시리즈 필터"></div>
+    </div>
+
+    <div class="price-terms" id="priceDungsMarginRow" hidden>
+      <label class="price-disc" for="dungsMargin">마진율
+        <input id="dungsMargin" type="number" inputmode="numeric" min="0" max="200" step="1" value="0" aria-label="둥스(DUNGS) 마진율(%)">
+        <span class="pct">%</span>
+        <span class="q-hint" id="dungsMarginTarget">· 공급가 그대로 (마진 없음)</span>
+      </label>
+    </div>
+
+    <div class="dungs-notice" id="priceDungsNotice" hidden>
+      <b>둥스(DUNGS)</b> 26년 공급가격만 표시합니다 · COIL 220V 기준 / 110V는 문의 · HSAV510~HSAV5080은 단종(재고 보유분만 공급 가능)
     </div>
   </div>
 
@@ -7011,7 +7045,7 @@ function priceDiscountMaker() {
 function renderPriceChips() {
   const makerBox = $('priceMakerChips');
   if (makerBox) {
-    makerBox.innerHTML = ['전체'].concat(PRICE_MAKERS, [HKC_MAKER, AONE_MAKER, HYOSHIN_MAKER]).map(function (m) {
+    makerBox.innerHTML = ['전체'].concat(PRICE_MAKERS, [HKC_MAKER, AONE_MAKER, HYOSHIN_MAKER, DUNGS_MAKER]).map(function (m) {
       const on = priceState.maker === m;
       return '<button type="button" class="chip' + (on ? ' is-active' : '') + '" data-maker="' + esc(m) + '" aria-pressed="' + (on ? 'true' : 'false') + '">' + esc(m) + '</button>';
     }).join('');
@@ -7066,6 +7100,7 @@ function renderPriceChips() {
   if (typeof applyHkcMode === 'function') applyHkcMode();
   if (typeof applyAoneMode === 'function') applyAoneMode();
   if (typeof applyHyoshinMode === 'function') applyHyoshinMode();
+  if (typeof applyDungsMode === 'function') applyDungsMode();
 }
 
 function makerHasNoDisc(maker) {
@@ -7149,6 +7184,7 @@ function renderPriceList() {
   if (!box) return;
   if (priceState.maker === AONE_MAKER) { renderAoneList(); return; }
   if (priceState.maker === HYOSHIN_MAKER) { renderHyoshinList(); return; }
+  if (priceState.maker === DUNGS_MAKER) { renderDungsList(); return; }
   if (priceState.maker === HKC_MAKER) { renderHkcList(); return; }
   const tokens = String(priceState.q || '').trim().toLowerCase().split(/\s+/).filter(Boolean);
   const filter = PRICE_CONN_FILTERS.filter(function (f) { return f.label === priceState.conn; })[0];
@@ -7208,9 +7244,11 @@ function resetPriceFilters() {
   hkcState.open = '';
   aoneState.cat = '전체';
   hyoshinState.cat = '전체';
+  dungsState.cat = '전체';
   renderHkcChips();
   renderAoneChips();
   if (typeof renderHyoshinChips === 'function') renderHyoshinChips();
+  if (typeof renderDungsChips === 'function') renderDungsChips();
   savePriceMaterial();
   const s = $('priceSearch');
   if (s) s.value = '';
@@ -7294,6 +7332,10 @@ function bindPriceEvents() {
       hyoshinState.cat = '전체';
       $('priceHeadMeta').textContent = hyoshinHeadMeta();
       $('priceDocBadge').textContent = '효신전기 ' + qWon(HYOSHIN_DATA.items.length) + '개 품목';
+    } else if (priceState.maker === DUNGS_MAKER) {
+      dungsState.cat = '전체';
+      $('priceHeadMeta').textContent = dungsHeadMeta();
+      $('priceDocBadge').textContent = '둥스(DUNGS) ' + qWon(DUNGS_DATA.items.length) + '개 품목';
     } else {
       $('priceHeadMeta').textContent = PRICE_MAKERS.join(' · ') + ' 판체크 단가표 ' + PRICE_DATA.docNo + ' · ' + PRICE_DATA.applyDate + ' 적용';
       $('priceDocBadge').textContent = '총 ' + qWon(PRICE_DATA.items.length) + '개 품목';
@@ -7361,6 +7403,7 @@ function initPrice() {
   initHkc();
   initAone();
   initHyoshin();
+  initDungs();
   renderPriceChips();
   syncPriceDiscountInput();
   bindPriceEvents();
@@ -8816,6 +8859,347 @@ function initHyoshin() {
   bindHyoshinEvents();
 }
 /* ===== 효신전기 단가표 끝 ===== */
+
+/* ===== 둥스(DUNGS) 단가표 시작 (한열사 26년 공급가격표 · 2026-02-01부터 · 58개 품목) =====
+   자료: attachments/2026-11-27/가격(한열사)-2026 (26년2월1일부터).pdf 1쪽 — 좌·우 2단 표 전수.
+   - 표의 26년 공급가격만 씁니다. 25년 공급가격은 넣지 않았습니다.
+   - 마진율(%)을 넣으면 판매가 = 공급가 × (1 + 마진율/100)을 원 단위로 반올림해 계산하고,
+     화면에 공급가와 판매가를 함께 보여 주며, 견적 담기·발주 담기에도 판매가가 그대로 들어갑니다.
+     (원가인 공급가는 화면에만 보이고 견적서·발주서 품명/규격에는 넣지 않습니다.)
+   - HSAV510·515·520·5065·5080은 26년 단가가 '단종으로 재고 보유분만 공급 가능'이라
+     단종으로 표시하고 담기 버튼을 잠급니다.
+   - 하단 비고 'COIL 220V 기준 / 110V 는 문의'는 코일 관련 품목(8/20 PM·10/20 CM·325-3)과
+     둥스 안내문에 함께 적었습니다.
+   - 기존 메이커의 화면·계산은 건드리지 않고, 메이커 '둥스(DUNGS)'를 골랐을 때만
+     둥스 전용 시리즈 필터와 마진율 칸이 나타납니다. */
+const DUNGS_MAKER = '둥스(DUNGS)';
+const DUNGS_STORE_MARGIN = 'orderManager.dungsMargin.v1';
+const DUNGS_COIL_NOTE = 'COIL 220V 기준 · 110V는 문의';
+const DUNGS_NOTE = '둥스(DUNGS)는 한열사 26년 공급가격표(2026-02-01부터) 기준이고, 26년 공급가격만 표시합니다. 판매가 = 공급가 × (1 + 마진율/100)을 원 단위로 반올림한 금액이며, 화면에 보이는 공급가·판매가가 그대로 견적서·발주서에 담깁니다. COIL 220V 기준 · 110V는 문의, HSAV510~HSAV5080은 단종으로 재고 보유분만 공급 가능합니다.';
+const DUNGS_DATA = {
+  docNo: '한열사 공급가격표 26년',
+  applyDate: '2026-02-01',
+  cats: ['MVDLE', 'MVD', 'ZRDLE', 'FRS', 'FRNG', 'DMV', 'GW', 'LGW', 'NR', 'HSAV', '기타'],
+  items: [
+{"s":"MVDLE","m":"MVDLE205","p":195500},
+{"s":"FRS","m":"FRS505","p":121400},
+{"s":"MVDLE","m":"MVDLE207","p":219800},
+{"s":"FRS","m":"FRS507","p":144300},
+{"s":"MVDLE","m":"MVDLE210","p":231100},
+{"s":"FRS","m":"FRS510","p":163500},
+{"s":"MVDLE","m":"MVDLE215","p":332100},
+{"s":"FRS","m":"FRS515","p":240100},
+{"s":"MVDLE","m":"MVDLE220","p":554300},
+{"s":"FRS","m":"FRS520","p":301500},
+{"s":"FRS","m":"FRS5040","p":384400},
+{"s":"FRS","m":"FRS5050","p":470000},
+{"s":"FRS","m":"FRS5065","p":685800},
+{"s":"FRS","m":"FRS5080","p":1404800},
+{"s":"MVD","m":"MVD205","p":161000},
+{"s":"FRS","m":"FRS5100","p":1660100},
+{"s":"MVD","m":"MVD207","p":182600},
+{"s":"MVD","m":"MVD210","p":207000},
+{"s":"FRNG","m":"FRNG505","p":217200},
+{"s":"MVD","m":"MVD215","p":269400},
+{"s":"FRNG","m":"FRNG507","p":217200},
+{"s":"MVD","m":"MVD220","p":324300},
+{"s":"FRNG","m":"FRNG510","p":229800},
+{"s":"MVD","m":"MVD2040","p":863300},
+{"s":"FRNG","m":"FRNG515","p":352500},
+{"s":"MVD","m":"MVD2050","p":637200},
+{"s":"FRNG","m":"FRNG520","p":515800},
+{"s":"DMV","m":"DMVDLE507","p":533200},
+{"s":"DMV","m":"DMVDLE512","p":557900},
+{"s":"DMV","m":"DMVDLE520","p":607800},
+{"s":"MVD","m":"MVD505","p":306500},
+{"s":"MVD","m":"MVD507","p":373000},
+{"s":"MVD","m":"MVD510","p":396000},
+{"s":"DMV","m":"DMV-D512","p":591600},
+{"s":"MVD","m":"MVD515","p":470000},
+{"s":"DMV","m":"DMV-D520","p":701900},
+{"s":"MVD","m":"MVD520","p":775200},
+{"s":"ZRDLE","m":"ZRDLE410","p":489000},
+{"s":"GW","m":"GW3/10/50/150A5","p":35700},
+{"s":"ZRDLE","m":"ZRDLE415","p":567000},
+{"s":"GW","m":"GW3/10/50/150A6","p":35700},
+{"s":"ZRDLE","m":"ZRDLE420","p":607800},
+{"s":"GW","m":"GW500A6/GW500A4","p":43400},
+{"s":"HSAV","m":"HSAV510","p":null,"stop":1},
+{"s":"LGW","m":"LGW 3/10/50A4","p":57500},
+{"s":"HSAV","m":"HSAV515","p":null,"stop":1},
+{"s":"LGW","m":"LGW3/10/50A2P","p":74000},
+{"s":"HSAV","m":"HSAV520","p":null,"stop":1},
+{"s":"LGW","m":"LGW3/10/50A2","p":41000},
+{"s":"HSAV","m":"HSAV5065","p":null,"stop":1},
+{"s":"HSAV","m":"HSAV5080","p":null,"stop":1},
+{"s":"기타","m":"8/20 PM","p":41600,"n":"COIL 220V 기준 · 110V는 문의"},
+{"s":"기타","m":"10/20 CM","p":55400,"n":"COIL 220V 기준 · 110V는 문의"},
+{"s":"NR","m":"NR.100","p":189600},
+{"s":"기타","m":"325-3","p":35700,"n":"COIL 220V 기준 · 110V는 문의"},
+{"s":"NR","m":"NR.200","p":214900},
+{"s":"NR","m":"NR.280","p":251400},
+{"s":"NR","m":"NR.300","p":258400}
+  ]
+};
+const dungsState = { cat: '전체', margin: 0 };
+let DUNGS_DEFAULT_NOTE = '';
+
+function loadDungsSettings() {
+  try {
+    const raw = localStorage.getItem(DUNGS_STORE_MARGIN);
+    if (raw != null) {
+      const n = Number(raw);
+      if (isFinite(n)) dungsState.margin = Math.max(0, Math.min(200, Math.round(n)));
+    }
+  } catch (e) { /* 무시 */ }
+}
+
+function saveDungsMargin() {
+  try { localStorage.setItem(DUNGS_STORE_MARGIN, String(dungsState.margin)); } catch (e) { /* 무시 */ }
+}
+
+function dungsMargin() {
+  const n = Number(dungsState.margin);
+  return isFinite(n) ? Math.max(0, Math.min(200, Math.round(n))) : 0;
+}
+
+/* 표의 26년 공급가격. 단종(단가 없음)이면 null */
+function dungsBase(it) {
+  return typeof it.p === 'number' && isFinite(it.p) ? it.p : null;
+}
+
+/* 화면 표시 판매가 = 공급가 × (1 + 마진율/100), 원 단위 반올림 */
+function dungsSell(it) {
+  const base = dungsBase(it);
+  if (base === null) return null;
+  const m = dungsMargin();
+  if (!m) return base;
+  return Math.round(base * (1 + m / 100));
+}
+
+function dungsSearchHay(it) {
+  return [it.m, it.m.replace(/\s+/g, ''), it.s, it.n, DUNGS_MAKER, 'DUNGS', '둥스', '한열사', '공급가격표']
+    .filter(Boolean).join(' ').toLowerCase();
+}
+
+function dungsVisibleItems() {
+  const tokens = String(priceState.q || '').trim().toLowerCase().split(/\s+/).filter(Boolean);
+  const out = [];
+  for (let i = 0; i < DUNGS_DATA.items.length; i++) {
+    const it = DUNGS_DATA.items[i];
+    if (dungsState.cat !== '전체' && it.s !== dungsState.cat) continue;
+    if (tokens.length) {
+      const hay = dungsSearchHay(it);
+      let miss = false;
+      for (let t = 0; t < tokens.length; t++) {
+        if (hay.indexOf(tokens[t]) < 0) { miss = true; break; }
+      }
+      if (miss) continue;
+    }
+    out.push({ it: it, i: i });
+  }
+  return out;
+}
+
+function dungsRowHTML(it, idx) {
+  const base = dungsBase(it);
+  const sell = dungsSell(it);
+  const m = dungsMargin();
+  const stopped = base === null;
+  let priceHTML;
+  if (stopped) {
+    priceHTML = '<b class="price-final dungs-tbd">단종</b>' +
+      '<span class="dungs-tag dungs-stop">재고 보유분만 공급 가능</span>';
+  } else {
+    priceHTML = '<span class="dungs-base">공급가 <b>' + qWon(base) + '</b></span>' +
+      '<b class="price-final">' + qWon(sell) + '<span class="u">원</span></b>' +
+      (m > 0 ? '<span class="dungs-tag dungs-margin">+' + qWon(m) + '% 마진</span>' : '');
+  }
+  const meta = ['<span>시리즈 <b>' + esc(it.s) + '</b></span>'];
+  if (it.n) meta.push('<span class="dungs-note">비고 <b>' + esc(it.n) + '</b></span>');
+  if (stopped) meta.push('<span class="dungs-note">26년 단가 미확정 · 재고 문의</span>');
+  const dis = stopped ? ' disabled title="단종 품목입니다 · 재고 보유분만 공급 가능"' : '';
+  const label = it.m + (it.s === '기타' ? ' 코일' : ' ' + it.s);
+  return '<div class="price-item dungs-item" data-dg-i="' + idx + '">' +
+    '<div class="price-main">' +
+      '<div class="price-title">' +
+        '<span class="price-model">' + esc(it.m) + '</span>' +
+        '<span class="price-conn">' + esc(it.s) + '</span>' +
+      '</div>' +
+      '<div class="price-meta">' + meta.join('') + '</div>' +
+    '</div>' +
+    '<div class="price-price">' + priceHTML + '</div>' +
+    '<div class="price-btnrow">' +
+      '<button type="button" class="btn btn-primary js-dg-quote" data-i="' + idx + '"' + dis + ' aria-label="' + esc(it.m + ' ' + label + ' 견적서에 담기') + '">📄 견적 담기</button>' +
+      '<button type="button" class="btn btn-ghost js-dg-po" data-i="' + idx + '"' + dis + ' aria-label="' + esc(it.m + ' ' + label + ' 발주서에 담기') + '">📝 발주 담기</button>' +
+    '</div>' +
+  '</div>';
+}
+
+function dungsTermsText() {
+  const m = dungsMargin();
+  const stop = DUNGS_DATA.items.filter(function (x) { return dungsBase(x) === null; }).length;
+  const parts = [DUNGS_MAKER, '26년 공급가 기준'];
+  parts.push(m ? ('마진 ' + qWon(m) + '% · 판매가 = 공급가 × ' + (1 + m / 100).toFixed(2).replace(/0+$/, '').replace(/\.$/, '')) : '마진 0% · 공급가 그대로');
+  if (stop) parts.push('단종 ' + qWon(stop) + '개');
+  return parts.join(' · ');
+}
+
+function renderDungsChips() {
+  const box = $('priceDungsCatChips');
+  if (!box) return;
+  const counts = {};
+  DUNGS_DATA.items.forEach(function (it) { counts[it.s] = (counts[it.s] || 0) + 1; });
+  box.innerHTML = ['전체'].concat(DUNGS_DATA.cats).map(function (label) {
+    const on = dungsState.cat === label;
+    const n = label === '전체' ? DUNGS_DATA.items.length : (counts[label] || 0);
+    const title = label === 'HSAV' ? 'HSAV 5개 · 단종(재고 보유분만 공급 가능)' : qWon(n) + '개';
+    return '<button type="button" class="chip' + (on ? ' is-active' : '') + '" data-dg-cat="' + esc(label) + '" title="' + esc(title) + '" aria-pressed="' + (on ? 'true' : 'false') + '">' + esc(label) + ' <span class="dungs-sub">' + qWon(n) + '</span></button>';
+  }).join('');
+}
+
+function renderDungsList() {
+  const box = $('priceList');
+  if (!box) return;
+  const list = dungsVisibleItems();
+  const html = new Array(list.length);
+  for (let k = 0; k < list.length; k++) html[k] = dungsRowHTML(list[k].it, list[k].i);
+  box.innerHTML = list.length ? html.join('') : '<p class="price-empty">조건에 맞는 둥스(DUNGS) 품목이 없습니다. 시리즈나 검색어를 바꿔 보세요.</p>';
+  $('priceCount').textContent = qWon(list.length) + '개';
+  $('priceTermsSummary').textContent = dungsTermsText();
+}
+
+function dungsAddTo(kind, idx) {
+  const it = DUNGS_DATA.items[idx];
+  if (!it) return;
+  const price = dungsSell(it);
+  if (price === null) {
+    toast(it.m + '은 단종 품목입니다 · 재고 보유분만 공급 가능하니 문의해 주세요.');
+    return;
+  }
+  const isQuote = kind === 'quote';
+  const rec = isQuote ? state.quote : state.po;
+  if (!rec) return;
+  const spec = it.s === '기타' ? 'COIL 220V' : it.s;
+  const payload = { name: '둥스(DUNGS) ' + it.m, spec: spec, qty: '1', price: String(price), note: '' };
+  const norm = isQuote ? normalizeQuoteItem : normalizePoItem;
+  const items = rec.items;
+  const last = items[items.length - 1];
+  const blank = last && !String(last.name || '').trim() && !String(last.spec || '').trim() && !last.qty && !last.price;
+  if (blank) items[items.length - 1] = norm(payload);
+  else items.push(norm(payload));
+  if (isQuote) {
+    renderQuoteItems();
+    refreshQuoteTotals();
+    setQuoteSaveHint();
+  } else {
+    renderPoItems();
+    refreshPoTotals();
+    setPoSaveHint();
+  }
+  setTab(kind);
+  const rows = document.querySelectorAll(isQuote ? '#quoteItems .q-item' : '#poItems .po-item');
+  const row = rows[items.length - 1];
+  if (row) {
+    row.classList.add('just-added');
+    setTimeout(function () { row.classList.remove('just-added'); }, 1800);
+  }
+  const m = dungsMargin();
+  const tag = m ? ('공급가 ' + qWon(dungsBase(it)) + ' + ' + qWon(m) + '% 마진') : '26년 공급가 그대로';
+  toast((isQuote ? '📄 견적서' : '📝 발주서') + '에 둥스(DUNGS) ' + it.m + ' 담았습니다 · ' + qWon(price) + '원 (' + tag + ')');
+}
+
+function dungsMarginHint() {
+  const m = dungsMargin();
+  return m ? ('· 공급가 +' + qWon(m) + '% → 판매가') : '· 공급가 그대로 (마진 없음)';
+}
+
+function onDungsMarginInput() {
+  const el = $('dungsMargin');
+  if (!el) return;
+  const raw = String(el.value).replace(',', '.').replace(/[^0-9.]/g, '');
+  let v = raw === '' ? 0 : Number(raw);
+  if (!isFinite(v)) v = 0;
+  v = Math.round(v);
+  if (v > 200) v = 200;
+  if (v < 0) v = 0;
+  if (el.value !== String(v)) el.value = String(v);
+  dungsState.margin = v;
+  saveDungsMargin();
+  if ($('dungsMarginTarget')) $('dungsMarginTarget').textContent = dungsMarginHint();
+  renderDungsList();
+}
+
+function syncDungsMarginInput() {
+  const el = $('dungsMargin');
+  if (!el) return;
+  el.value = String(dungsMargin());
+  if ($('dungsMarginTarget')) $('dungsMarginTarget').textContent = dungsMarginHint();
+}
+
+/* 둥스(DUNGS) 모드일 때만 둥스 전용 시리즈 필터·마진율 칸·안내문을 보여 주고, 다른 메이커 필터는 숨깁니다. */
+function applyDungsMode() {
+  const on = priceState.maker === DUNGS_MAKER;
+  if ($('priceDungsCatRow')) $('priceDungsCatRow').hidden = !on;
+  if ($('priceDungsMarginRow')) $('priceDungsMarginRow').hidden = !on;
+  if ($('priceDungsNotice')) $('priceDungsNotice').hidden = !on;
+  if (on) {
+    ['priceConnRow', 'priceSealRow', 'priceTermsRow', 'priceOdeSizeRow', 'priceTierRow',
+      'priceHkcSeriesRow', 'priceHkcBasisRow', 'priceAoneCatRow', 'priceAoneDiscRow',
+      'priceHyoshinBasisRow', 'priceHyoshinCatRow', 'priceHyoshinDiscRow'].forEach(function (id) {
+        if ($(id)) $(id).hidden = true;
+      });
+    if ($('priceSearch')) $('priceSearch').placeholder = '둥스(DUNGS) 모델 · 시리즈 검색 (예: MVDLE, FRS5100, GW, NR, HSAV, COIL)';
+    if ($('priceNote')) $('priceNote').textContent = DUNGS_NOTE;
+    renderDungsChips();
+    syncDungsMarginInput();
+    return;
+  }
+  if (priceState.maker !== HYOSHIN_MAKER && priceState.maker !== AONE_MAKER && priceState.maker !== HKC_MAKER && $('priceNote')) {
+    $('priceNote').textContent = DUNGS_DEFAULT_NOTE;
+  }
+}
+
+function dungsHeadMeta() {
+  return '둥스(DUNGS) 한열사 공급가격표 · 26년 공급가격 · ' + DUNGS_DATA.applyDate + '부터 적용';
+}
+
+function bindDungsEvents() {
+  const catBox = $('priceDungsCatChips');
+  if (catBox) {
+    catBox.addEventListener('click', function (e) {
+      const b = e.target.closest('[data-dg-cat]');
+      if (!b) return;
+      dungsState.cat = b.getAttribute('data-dg-cat');
+      renderDungsChips();
+      renderDungsList();
+    });
+  }
+  const mEl = $('dungsMargin');
+  if (mEl) {
+    mEl.addEventListener('input', onDungsMarginInput);
+    mEl.addEventListener('change', onDungsMarginInput);
+    mEl.addEventListener('blur', syncDungsMarginInput);
+  }
+  const list = $('priceList');
+  if (list) {
+    list.addEventListener('click', function (e) {
+      const q = e.target.closest('.js-dg-quote');
+      if (q) { dungsAddTo('quote', Number(q.getAttribute('data-i'))); return; }
+      const p = e.target.closest('.js-dg-po');
+      if (p) dungsAddTo('po', Number(p.getAttribute('data-i')));
+    });
+  }
+}
+
+function initDungs() {
+  DUNGS_DEFAULT_NOTE = $('priceNote') ? $('priceNote').textContent : '';
+  loadDungsSettings();
+  renderDungsChips();
+  syncDungsMarginInput();
+  bindDungsEvents();
+}
+/* ===== 둥스(DUNGS) 단가표 끝 ===== */
 
 lockBoot();
 </script>
