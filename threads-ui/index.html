@@ -862,7 +862,7 @@
         <textarea class="ta" id="mThreads" placeholder="https://www.threads.com/@계정/post/...&#10;https://www.threads.com/share/..." style="min-height:64px"></textarea>
       </div>
       <div style="display:flex;gap:8px;align-items:center">
-        <button class="btn sm" onclick="fakeParse()"><svg><use href="#i-spark"/></svg>정보 가져오기</button>
+        <button class="btn sm" id="mParseBtn" onclick="parseThreadsUrl()"><svg><use href="#i-spark"/></svg>정보 가져오기</button>
         <span style="font-size:10.5px;color:#6f778c">제목·본문·쿠팡 링크 자동 파싱</span>
       </div>
       <div class="field">
@@ -1261,13 +1261,44 @@ function openAddProduct(){ $('#modal').classList.add('open'); setTimeout(()=>$('
 function closeModal(){ $('#modal').classList.remove('open'); }
 $('#modal').addEventListener('click', e=>{ if(e.target===$('#modal')) closeModal(); });
 document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
-function fakeParse(){
-  const url = $('#mThreads').value.trim().split('\n')[0];
+/* 쿠팡 링크로 쓸 수 있는 값인지 — 도메인과 더미 번호(1234567890)를 함께 본다. */
+function isRealCoupangUrl(v){
+  const s = String(v || '').trim();
+  if(!s) return false;
+  if(!/^https?:\/\/(?:[a-z0-9-]+\.)*coupang\.com\//i.test(s)) return false;
+  if(/1234567890/.test(s)) return false;
+  return true;
+}
+/* 정보 가져오기 — 라이브 Apps Script의 parseThread 액션으로 원글 본문·영상·쿠팡 링크를 읽어온다. */
+async function parseThreadsUrl(){
+  const btn = $('#mParseBtn');
+  const url = ($('#mThreads').value || '').trim().split('\n').map(s=>s.trim()).filter(Boolean)[0] || '';
   if(!url) return toast('스레드 링크를 먼저 넣어주세요');
-  if(!$('#mName').value) $('#mName').value = '수축포장 비닐팩 대형 20매';
-  if(!$('#mBody').value) $('#mBody').value = '신발·잡화를 비닐로 감싸 드라이기로 붙이는 수축포장 꿀팁. 먼지 차단 + 수납 절약.';
-  if(!$('#mCoupang').value) $('#mCoupang').value = 'https://www.coupang.com/vp/products/1234567890';
-  toast('원글에서 제목 · 본문 · 쿠팡 링크를 가져왔어요');
+  if(!API.configured() || !API.token) return toast('먼저 [계정] 탭에서 연결 키를 저장해 주세요');
+  const label = btn ? btn.innerHTML : '';
+  if(btn){ btn.disabled = true; btn.textContent = '가져오는 중...'; }
+  try{
+    const res = await API.call('parseThread', { url });
+    const nameEl = $('#mName'), bodyEl = $('#mBody'), coupangEl = $('#mCoupang');
+    const guess = String(res.productNameGuess || '').trim();
+    const cur = nameEl.value.trim();
+    if(guess && (!cur || cur === (nameEl.dataset.autoValue || ''))) nameEl.value = guess;
+    if(guess) nameEl.dataset.autoValue = guess;
+    if(res.caption) bodyEl.value = res.caption;
+    const realCoupang = isRealCoupangUrl(res.coupangUrl);
+    if(realCoupang) coupangEl.value = res.coupangUrl;
+    if(!res.videoUrl){
+      toast('⚠️ 본문은 가져왔지만 영상이 없는 글이에요');
+    } else if(!realCoupang){
+      toast('본문·영상 확인 완료! 쿠팡 링크만 직접 넣어 주세요');
+    } else {
+      toast('원글에서 본문·영상·쿠팡 링크를 가져왔어요');
+    }
+  }catch(err){
+    toast('원글을 불러오지 못했어요: ' + ((err && err.message) || '알 수 없는 오류'));
+  }finally{
+    if(btn){ btn.disabled = false; btn.innerHTML = label; }
+  }
 }
 async function saveProduct(){
   const name = $('#mName').value.trim();
